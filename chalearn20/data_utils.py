@@ -19,8 +19,15 @@ def get_info_labels():
     val.close()
 
 
-def safe_mkdir(dir):
-    if not os.path.exists(dir):
-        os.mkdir(dir)
+def get_batch():
+    # TODO: make pairs
+    # TODO: make for training + validation
+    pass
 
-get_info_labels()
+
+def get_labels():
+    # TODO: one-hot encode based on pair
+    # TODO: make for training + validation
+    pass
+
+

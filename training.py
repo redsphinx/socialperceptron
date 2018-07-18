@@ -2,17 +2,23 @@
 import chainer
 import numpy as np
 from deepimpression2.model import Siamese
-import deepimpression2.chalearn20.constants as C
-from deepimpression2.util import get_batch, get_labels, update_loss
+import deepimpression2.constants as C
+from deepimpression2.chalearn20.data_utils import get_batch, get_labels
 from chainer.functions import sigmoid_cross_entropy
 from chainer.optimizers import Adam
 import h5py as h5
-import deepimpression2.chalearn20.paths as P
+import deepimpression2.paths as P
 
 
 model = Siamese()
 optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
 optimizer.setup(model)
+
+
+def update_loss(total_loss, loss):
+    # TODO: make for training + validation
+    pass
+
 
 # TODO: load data
 training_data = h5.File(P.CHALEARN_FACES_TRAIN_H5)

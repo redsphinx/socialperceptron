@@ -30,7 +30,7 @@ import h5py as h5
 import deepimpression2.chalearn20.paths as P
 import deepimpression2.chalearn20.constants as C
 import os
-from deepimpression2.chalearn20.data_utils import safe_mkdir
+from deepimpression2.util import safe_mkdir
 from scipy import ndimage
 import time
 import pickle as pkl
