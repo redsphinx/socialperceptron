@@ -63,7 +63,10 @@ def get_unique_ids():
     return all_uniques
 
 
-def get_id_split():
+def get_id_split(only_numbers=False):
+    if only_numbers:
+        return [C.NUM_TRAIN, C.NUM_TEST, C.NUM_VAL]
+
     if not os.path.exists(P.CHALEARN_TRAIN_SPLIT):
         # create the data splits
         uids = get_unique_ids()
@@ -101,7 +104,6 @@ def make_labels():
     annotation_train, annotation_val, annotation_test = get_trait_labels()
     geth_dev, geth_test = get_geth_labels()
 
-
     def transform1(annotation):
         annotation_keys = ['openness', 'conscientiousness', 'extraversion', 'agreeableness', 'neuroticism', 'interview']
         names = list(annotation[annotation_keys[0]].keys())
@@ -122,12 +124,13 @@ def make_labels():
 
     all_names_trait = names_train + names_val + names_test
     all_traits = traits_train + traits_val + traits_test
-    del names_train, names_val, names_test, traits_train, traits_val, traits_test
+    dict_traits = dict(zip(all_names_trait, all_traits))
+    del names_train, names_val, names_test, traits_train, traits_val, traits_test, all_traits
 
     def transform2(geth):
         names = []
         all_geth = []
-        for i in geth_test:
+        for i in geth:
             names.append(i[0])
             geth = [float(i[3]), float(i[2])]
             all_geth.append(geth)
@@ -138,17 +141,34 @@ def make_labels():
 
     all_names_geth = names_geth_test + names_geth_dev
     all_geth = traits_geth_test + traits_geth_dev
-    del names_geth_test, names_geth_dev, traits_geth_test, traits_geth_dev
+    dict_geth = dict(zip(all_names_geth, all_geth))
+    del names_geth_test, names_geth_dev, traits_geth_test, traits_geth_dev, all_geth
 
-    def make_h5_label(data_split, annotation, geth, h5_path):
-        # create h5 file
+    def make_h5_label(data_split, annotation, geth, all_names, h5_path):
         action = 'a' if os.path.exists(h5_path) else 'w'
 
-        # with h5.File(h5_path, action) as f:
-        #     for i in data_split:
-        #         for j, v in all_names_trait:
-        #             if i in v:
+        with h5.File(h5_path, action) as f:
+            for i in data_split:
+                names = [all_names[k] for k, v in enumerate(all_names) if i in v]
+                for n in names:
+                    v = annotation[n]
+                    v.extend(geth[n])
+                    f.create_dataset(name=n, data=v)
+
+    make_h5_label(train_split, dict_traits, dict_geth, all_names_trait, P.CHALEARN_TRAIN_LABELS_20)
+    make_h5_label(val_split, dict_traits, dict_geth, all_names_trait, P.CHALEARN_VAL_LABELS_20)
+    make_h5_label(test_split, dict_traits, dict_geth, all_names_trait, P.CHALEARN_TEST_LABELS_20)
 
 
+def get_info_labels():
+    numbers = get_id_split(only_numbers=True)
+    train = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
+    test = h5.File(P.CHALEARN_TEST_LABELS_20, 'r')
+    val = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
 
-# make_labels()
+    print('training videos: %d  unique ID: %d  video per UID: %f' % (len(train.keys()), numbers[0], float(len(train.keys())/float(numbers[0])) ) )
+    print('testing videos: %d  unique ID: %d  video per UID: %f' % (len(test.keys()), numbers[1], float(len(test.keys())/float(numbers[1])) ) )
+    print('validation videos: %d  unique ID: %d  video per UID: %f' % (len(val.keys()), numbers[2], float(len(val.keys())/float(numbers[2])) ) )
+
+
+get_info_labels()
