@@ -170,5 +170,9 @@ def get_info_labels():
     print('testing videos: %d  unique ID: %d  video per UID: %f' % (len(test.keys()), numbers[1], float(len(test.keys())/float(numbers[1])) ) )
     print('validation videos: %d  unique ID: %d  video per UID: %f' % (len(val.keys()), numbers[2], float(len(val.keys())/float(numbers[2])) ) )
 
+    train.close()
+    test.close()
+    val.close()
+
 
 get_info_labels()
