@@ -1,8 +1,7 @@
 import chainer
-from chainer.links import Convolution2D, BatchNormalization, Linear, EmbedID
+from chainer.links import Convolution2D, BatchNormalization, Linear
 from chainer.initializers import HeNormal
 from chainer.functions import relu, average_pooling_2d, max_pooling_2d, concat
-from deepimpression2.constants import ON_GPU, DEVICE
 
 
 ### BLOCK ###

@@ -1,7 +1,7 @@
 # create files to make clean identity split data
 # create labels accordingly
-import deepimpression2.paths as P
-import deepimpression2.constants as C
+import deepimpression2.chalearn20.paths as P
+import deepimpression2.chalearn20.constants as C
 import numpy as np
 import pickle as pkl
 import os
@@ -175,4 +175,7 @@ def get_info_labels():
     val.close()
 
 
-get_info_labels()
+def make_data():
+    # create folder structure
+
+    #

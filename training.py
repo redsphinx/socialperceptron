@@ -2,12 +2,12 @@
 import chainer
 import numpy as np
 from deepimpression2.model import Siamese
-import deepimpression2.constants as C
+import deepimpression2.chalearn20.constants as C
 from deepimpression2.util import get_batch, get_labels, update_loss
-from chainer.functions import sigmoid_cross_entropy, softmax_cross_entropy
+from chainer.functions import sigmoid_cross_entropy
 from chainer.optimizers import Adam
 import h5py as h5
-import deepimpression2.paths as P
+import deepimpression2.chalearn20.paths as P
 
 
 model = Siamese()
