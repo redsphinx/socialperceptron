@@ -160,22 +160,12 @@ def make_labels():
     make_h5_label(test_split, dict_traits, dict_geth, all_names_trait, P.CHALEARN_TEST_LABELS_20)
 
 
-def get_info_labels():
-    numbers = get_id_split(only_numbers=True)
-    train = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
-    test = h5.File(P.CHALEARN_TEST_LABELS_20, 'r')
-    val = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
-
-    print('training videos: %d  unique ID: %d  video per UID: %f' % (len(train.keys()), numbers[0], float(len(train.keys())/float(numbers[0])) ) )
-    print('testing videos: %d  unique ID: %d  video per UID: %f' % (len(test.keys()), numbers[1], float(len(test.keys())/float(numbers[1])) ) )
-    print('validation videos: %d  unique ID: %d  video per UID: %f' % (len(val.keys()), numbers[2], float(len(val.keys())/float(numbers[2])) ) )
-
-    train.close()
-    test.close()
-    val.close()
-
-
 def make_data():
-    # create folder structure
+    # for each ID, get videos
+    # for each video, get face
+    # for each
+    # crop, align
+    # save as h5, key is video name, value is np.array(shape=(frames, side, side, channels))
 
-    #
+
+    pass
