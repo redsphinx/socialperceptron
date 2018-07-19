@@ -16,6 +16,8 @@ CHALEARN_TRAIN_LABELS_20 = '/scratch/users/gabras/data/chalearn20/train_labels.h
 CHALEARN_VAL_LABELS_20 = '/scratch/users/gabras/data/chalearn20/val_labels.h5'
 CHALEARN_TEST_LABELS_20 = '/scratch/users/gabras/data/chalearn20/test_labels.h5'
 
+
+
 # -------------------------------------------------------------------------------------------------
 # dummy data for performance testing
 DUMMY_DATA_JPG = '/scratch/users/gabras/data/trying_out/training80_05'

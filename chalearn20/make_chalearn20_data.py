@@ -6,6 +6,7 @@ import numpy as np
 import pickle as pkl
 import os
 import h5py as h5
+import deepimpression2.paths as P2
 
 
 def get_trait_labels():
@@ -102,20 +103,20 @@ def get_id_split(which='all', only_numbers=False):
         if which == 'all':
             train_split = list(np.genfromtxt(P.CHALEARN_TRAIN_SPLIT, str))
             val_split = list(np.genfromtxt(P.CHALEARN_VAL_SPLIT, str))
-            test_split = np.genfromtxt(P.CHALEARN_TEST_SPLIT, str)
+            test_split = list(np.genfromtxt(P.CHALEARN_TEST_SPLIT, str))
             return train_split, val_split, test_split
         elif which == 'train':
             train_split = list(np.genfromtxt(P.CHALEARN_TRAIN_SPLIT, str))
             return train_split
         elif which == 'test':
-            test_split = np.genfromtxt(P.CHALEARN_TEST_SPLIT, str)
+            test_split = list(np.genfromtxt(P.CHALEARN_TEST_SPLIT, str))
             return test_split
         elif which == 'val':
             val_split = list(np.genfromtxt(P.CHALEARN_VAL_SPLIT, str))
             return val_split
 
 
-def make_labels():
+def create_labels_data():
     train_split, val_split, test_split = get_id_split()
 
     annotation_train, annotation_val, annotation_test = get_trait_labels()
@@ -172,12 +173,48 @@ def make_labels():
                     v.extend(geth[n])
                     f.create_dataset(name=n, data=v)
 
-    make_h5_label(train_split, dict_traits, dict_geth, all_names_trait, P.CHALEARN_TRAIN_LABELS_20)
-    make_h5_label(val_split, dict_traits, dict_geth, all_names_trait, P.CHALEARN_VAL_LABELS_20)
-    make_h5_label(test_split, dict_traits, dict_geth, all_names_trait, P.CHALEARN_TEST_LABELS_20)
+    # make_h5_label(train_split, dict_traits, dict_geth, all_names_trait, 'thing.h5')
+
+    # make_h5_label(train_split, dict_traits, dict_geth, all_names_trait, P.CHALEARN_TRAIN_LABELS_20)
+    # make_h5_label(val_split, dict_traits, dict_geth, all_names_trait, P.CHALEARN_VAL_LABELS_20)
+    # make_h5_label(test_split, dict_traits, dict_geth, all_names_trait, P.CHALEARN_TEST_LABELS_20)
+
+# create_labels_data()
+
+def create_uid_keys_mapping():
+    trl = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
+    tel = h5.File(P.CHALEARN_TEST_LABELS_20, 'r')
+    vl = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
+
+    trs, vs, tes = get_id_split()
+
+    def make_map(l, sp, h5p):
+
+        ke = list(l.keys())
+        with h5.File(h5p, 'w') as f:
+            for s in sp:
+                ks_tmp = []
+                for k in ke:
+                    if s in k:
+                        ks_tmp.append(k)
+
+                ks_tmp = np.array(ks_tmp, dtype='S')
+                if ks_tmp.shape[0] == 0:
+                    print('asdf')
+                f.create_dataset(name=s, data=ks_tmp)
+
+    make_map(trl, trs, P2.TRAIN_UID_KEYS_MAPPING)
+    make_map(tel, tes, P2.TEST_UID_KEYS_MAPPING)
+    make_map(vl, vs, P2.VAL_UID_KEYS_MAPPING)
+
+    trl.close()
+    tel.close()
+    vl.close()
 
 
-def make_data():
+#
+
+def create_chalearn_data(which):
     # for each ID, get videos
     # for each video, get face
     # for each

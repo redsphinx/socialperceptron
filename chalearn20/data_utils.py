@@ -7,6 +7,7 @@ import deepimpression2.chalearn20.constants as C2
 from deepimpression2.chalearn20 import poisson_disc
 from PIL import Image
 import numpy as np
+from random import randint
 
 
 def visualize_grid(grid, points):
@@ -39,23 +40,35 @@ def get_info_labels():
     val.close()
 
 
-def get_train_batch_uid():
-    batch_size = C1.TRAIN_BATCH_SIZE
-    grid = C2.NUM_TRAIN
+def get_batch_uid(which):
+    # r is empirically selected for grid size and batch size
+    # TODO: figure out relationship between r and grid and batch size
+    assert(which in ['train', 'test', 'val'])
 
-    points = poisson_disc.poisson_disc_samples(grid, grid, r=290, k=batch_size)
+    if which == 'train':
+        batch_size = C1.TRAIN_BATCH_SIZE
+        grid = C2.NUM_TRAIN
+        r = 290
+    elif which == 'test':
+        batch_size = C1.TEST_BATCH_SIZE
+        grid = C2.NUM_TEST
+        r = 70
+    elif which == 'val':
+        batch_size = C1.VAL_BATCH_SIZE
+        grid = C2.NUM_VAL
+        r = 70
+
+    points = poisson_disc.poisson_disc_samples(grid, grid, r=r, k=batch_size)
     # print(len(points))
 
     if len(points) < batch_size:
-        get_train_batch_uid()
-    elif len(points) > batch_size:
-        points = points[0:batch_size]
+        get_batch_uid(which)
     else:
-        pass
+        points = points[0:batch_size]
 
     # visualize_grid(grid, points)
 
-    keys = get_id_split(which='train')
+    keys = get_id_split(which=which)
     x = [i[0] for i in points]
     y = [i[1] for i in points]
 
@@ -65,14 +78,39 @@ def get_train_batch_uid():
     return uids_left, uids_right
 
 
-get_train_batch_uid()
+def get_keys(left_uids, right_uids, uid_keys_map):
+    left_keys = []
+    right_keys = []
+
+    for l in left_uids:
+        k = uid_keys_map[l][:]
+        i = randint(0, len(k)-1)
+        k = k[i].astype('str')
+        left_keys.append(k)
+    
+    for r in right_uids:
+        k = uid_keys_map[r][:]
+        i = randint(0, len(k)-1)
+        k = k[i].astype('str')
+        right_keys.append(k)
+
+    return left_keys, right_keys
 
 
-
-
-def get_labels():
+def get_labels(which, left_keys, right_keys):
     # TODO: one-hot encode based on pair
-    # TODO: make for training + validation
+    
+
     pass
 
 
+def get_data(which, left_keys, right_keys):
+    pass
+
+
+def load_data(which, uid_keys_map):
+    left_uids, right_uids = get_batch_uid(which)
+    left_keys, right_keys = get_keys(left_uids, right_uids, uid_keys_map)
+    # labels = get_labels(which, left_keys, right_keys)
+    # left_data, right_data = get_data(which, left_keys, right_keys)
+    # return labels, left_data, right_data

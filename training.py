@@ -3,11 +3,11 @@ import chainer
 import numpy as np
 from deepimpression2.model import Siamese
 import deepimpression2.constants as C
-from deepimpression2.chalearn20.data_utils import get_batch, get_labels
 from chainer.functions import sigmoid_cross_entropy
 from chainer.optimizers import Adam
 import h5py as h5
 import deepimpression2.paths as P
+import deepimpression2.chalearn20.data_utils as D
 
 
 model = Siamese()
@@ -20,15 +20,20 @@ def update_loss(total_loss, loss):
     pass
 
 
+
 # TODO: load data
-training_data = h5.File(P.CHALEARN_FACES_TRAIN_H5)
-training_labels = []
-training_loss = []
-val_data = h5.File(P.CHALEARN_FACES_VAL_H5)
-val_labels = []
+train_data = ''
+train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
+train_loss = []
+
+val_data = ''
+val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
 val_loss = []
 
-training_steps = len(training_data) / C.TRAIN_BATCH_SIZE
+train_uid_keys_map = h5.File(P.TRAIN_UID_KEYS_MAPPING, 'r')
+val_uid_keys_map = h5.File(P.VAL_UID_KEYS_MAPPING, 'r')
+
+training_steps = 1 # len(train_data) / C.TRAIN_BATCH_SIZE
 val_steps = len(val_data) / C.VAL_BATCH_SIZE
 
 for e in range(C.EPOCHS):
@@ -36,27 +41,19 @@ for e in range(C.EPOCHS):
 
     for s in range(training_steps):
         # TODO: get the batch
-        batch = get_batch()
-        batch_label = get_labels()
+        labels, left_data, right_data = D.load_data('train', train_uid_keys_map)
 
         # training
         with chainer.using_config('train', True):
             model.cleargrads()
 
-            prediction = model(batch[0], batch[1])
-            loss = sigmoid_cross_entropy(prediction, batch_label)
+            prediction = model(left_data, right_data)
+            loss = sigmoid_cross_entropy(prediction, labels)
 
             loss.backward()
             optimizer.update()
 
-    training_loss = update_loss(training_loss, np.mean(loss_tmp))
+    training_loss = update_loss(train_loss, np.mean(loss_tmp))
 
     # implement validation
-    batch = get_batch()
-    batch_label = get_labels()
-
-    with chainer.using_config('train', False):
-        prediction = model(batch[0], batch[1])
-        loss = sigmoid_cross_entropy(prediction, batch_label)
-        val_loss = update_loss(val_loss, loss)
 
