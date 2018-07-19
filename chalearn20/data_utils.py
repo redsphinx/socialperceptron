@@ -1,7 +1,6 @@
 import h5py as h5
 from deepimpression2.chalearn20.make_chalearn20_data import get_id_split
 import deepimpression2.chalearn20.paths as P
-import os
 import deepimpression2.constants as C1
 import deepimpression2.chalearn20.constants as C2
 from deepimpression2.chalearn20 import poisson_disc
@@ -97,20 +96,43 @@ def get_keys(left_uids, right_uids, uid_keys_map):
     return left_keys, right_keys
 
 
-def get_labels(which, left_keys, right_keys):
-    # TODO: one-hot encode based on pair
-    
+def get_labels(labels_h5, left_keys, right_keys):
+    # for each trait (left, right). example label: [0, 1, 1, 0, 0, 1, 1, 0, 1, 0] for OCEAS traits
+    # (1, 0) = left
+    # (0, 1) = right
+    assert len(left_keys) == len(right_keys)
+    tot = len(left_keys)
 
-    pass
+    all_one_hot_labels = np.zeros((tot, 10), dtype=np.uint8)
+
+    def which_side(l, r):
+        if l > r:
+            return (1, 0)
+        else:
+            return (0, 1)
+
+    for i in range(tot):
+        left_label = labels_h5[left_keys[i]][:]
+        right_label = labels_h5[right_keys[i]][:]
+        one_hot_label = []
+        for j in range(5):
+            side = which_side(left_label[j], right_label[j])
+            one_hot_label.append(side[0])
+            one_hot_label.append(side[1])
+
+        all_one_hot_labels[i] = one_hot_label
+
+    return all_one_hot_labels
 
 
-def get_data(which, left_keys, right_keys):
-    pass
+def get_data(which, left_keys, right_keys, data):
+
+    return [], []
 
 
-def load_data(which, uid_keys_map):
+def load_data(which, uid_keys_map, labs, data):
     left_uids, right_uids = get_batch_uid(which)
     left_keys, right_keys = get_keys(left_uids, right_uids, uid_keys_map)
-    # labels = get_labels(which, left_keys, right_keys)
-    # left_data, right_data = get_data(which, left_keys, right_keys)
+    labels = get_labels(labs, left_keys, right_keys)
+    left_data, right_data = get_data(which, left_keys, right_keys, data)
     # return labels, left_data, right_data

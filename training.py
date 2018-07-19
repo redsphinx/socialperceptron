@@ -40,8 +40,7 @@ for e in range(C.EPOCHS):
     loss_tmp = []
 
     for s in range(training_steps):
-        # TODO: get the batch
-        labels, left_data, right_data = D.load_data('train', train_uid_keys_map)
+        labels, left_data, right_data = D.load_data('train', train_uid_keys_map, train_labels, train_data)
 
         # training
         with chainer.using_config('train', True):
