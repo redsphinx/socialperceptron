@@ -1,6 +1,7 @@
 # create files to make clean identity split data
 # create labels accordingly
 import deepimpression2.chalearn20.paths as P
+import deepimpression2.paths as P2
 import deepimpression2.chalearn20.constants as C
 import numpy as np
 import pickle as pkl
@@ -181,6 +182,7 @@ def create_labels_data():
 
 # create_labels_data()
 
+
 def create_uid_keys_mapping():
     trl = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
     tel = h5.File(P.CHALEARN_TEST_LABELS_20, 'r')
@@ -212,14 +214,53 @@ def create_uid_keys_mapping():
     vl.close()
 
 
-#
+def create_chalearn_data():
+    # fix stefan data
+    train_h5 = h5.File(P.CHALEARN_TRAIN_DATA_20, 'w')
+    # train_h5.close()
+    val_h5 = h5.File(P.CHALEARN_VAL_DATA_20, 'w')
+    # val_h5.close()
+    test_h5 = h5.File(P.CHALEARN_TEST_DATA_20, 'w')
+    # test_h5.close()
 
-def create_chalearn_data(which):
+    train_labels = h5.File(P2.CHALEARN_TRAIN_LABELS_20, 'r')
+    test_labels = h5.File(P2.CHALEARN_TEST_LABELS_20, 'r')
+    val_labels = h5.File(P2.CHALEARN_VAL_LABELS_20, 'r')
+
+    train = os.listdir(P2.CHALEARN_FACES_TRAIN_H5)
+    train.sort()
+    train.pop() # remove empty validation folder
+    for f1 in train:
+        f1_path = os.path.join(P2.CHALEARN_FACES_TRAIN_H5, f1)
+        divs = os.listdir(f1_path)
+        for f2 in divs:
+            f2_path = os.path.join(f1_path, f2)
+            videos = os.listdir(f2_path)
+            for v in videos:
+                v_path = os.path.join(f2_path, v)
+                h5_file = h5.File(v_path, 'r')
+                # keys: metadata, video, audio
+                # TODO: fix. why is it str??
+                h5_file_video = h5_file['video'][:]
+                
+                # is v in the split
+                if v in list(train_labels.keys()):
+                    train_h5.create_dataset(name=v, data=h5_file_video)
+
+
+
+
+
+
+
+
+
+
     # for each ID, get videos
     # for each video, get face
     # for each
     # crop, align
     # save as h5, key is video name, value is np.array(shape=(frames, side, side, channels))
-
-
     pass
+
+create_chalearn_data()
