@@ -63,9 +63,16 @@ def get_unique_ids():
     return all_uniques
 
 
-def get_id_split(only_numbers=False):
+def get_id_split(which='all', only_numbers=False):
     if only_numbers:
-        return [C.NUM_TRAIN, C.NUM_TEST, C.NUM_VAL]
+        if 'all':
+            return [C.NUM_TRAIN, C.NUM_TEST, C.NUM_VAL]
+        elif 'train':
+            return C.NUM_TRAIN
+        elif 'test':
+            return C.NUM_TEST
+        elif 'val':
+            return C.NUM_VAL
 
     if not os.path.exists(P.CHALEARN_TRAIN_SPLIT):
         # create the data splits
@@ -92,10 +99,20 @@ def get_id_split(only_numbers=False):
 
         get_id_split()
     else:
-        train_split = list(np.genfromtxt(P.CHALEARN_TRAIN_SPLIT, str))
-        val_split = list(np.genfromtxt(P.CHALEARN_VAL_SPLIT, str))
-        test_split = np.genfromtxt(P.CHALEARN_TEST_SPLIT, str)
-        return train_split, val_split, test_split
+        if which == 'all':
+            train_split = list(np.genfromtxt(P.CHALEARN_TRAIN_SPLIT, str))
+            val_split = list(np.genfromtxt(P.CHALEARN_VAL_SPLIT, str))
+            test_split = np.genfromtxt(P.CHALEARN_TEST_SPLIT, str)
+            return train_split, val_split, test_split
+        elif which == 'train':
+            train_split = list(np.genfromtxt(P.CHALEARN_TRAIN_SPLIT, str))
+            return train_split
+        elif which == 'test':
+            test_split = np.genfromtxt(P.CHALEARN_TEST_SPLIT, str)
+            return test_split
+        elif which == 'val':
+            val_split = list(np.genfromtxt(P.CHALEARN_VAL_SPLIT, str))
+            return val_split
 
 
 def make_labels():

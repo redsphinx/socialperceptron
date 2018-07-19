@@ -1,3 +1,4 @@
+UIDS = 3060
 
 # data splits
 NUM_TRAIN = 2060
