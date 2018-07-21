@@ -6,4 +6,4 @@ NUM_VAL = 500
 NUM_TEST = 500
 
 # data size
-SIDE = 300
+SIDE = 208

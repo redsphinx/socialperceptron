@@ -278,6 +278,3 @@ def create_chalearn_data(which):
 
     print('done with %s' % which)
 
-
-create_chalearn_data('train')
-create_chalearn_data('val')

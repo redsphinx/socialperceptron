@@ -7,6 +7,7 @@ from chainer.functions import sigmoid_cross_entropy
 from chainer.optimizers import Adam
 import h5py as h5
 import deepimpression2.paths as P
+import deepimpression2.chalearn20.paths as P2
 import deepimpression2.chalearn20.data_utils as D
 
 
@@ -20,20 +21,18 @@ def update_loss(total_loss, loss):
     pass
 
 
-
-# TODO: load data
-train_data = ''
+train_data = h5.File(P2.CHALEARN_TRAIN_DATA_20, 'r')
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 train_loss = []
 
-val_data = ''
+val_data = h5.File(P2.CHALEARN_VAL_DATA_20, 'r')
 val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
 val_loss = []
 
 train_uid_keys_map = h5.File(P.TRAIN_UID_KEYS_MAPPING, 'r')
 val_uid_keys_map = h5.File(P.VAL_UID_KEYS_MAPPING, 'r')
 
-training_steps = 1 # len(train_data) / C.TRAIN_BATCH_SIZE
+training_steps = 1  # len(train_data) / C.TRAIN_BATCH_SIZE
 val_steps = len(val_data) / C.VAL_BATCH_SIZE
 
 for e in range(C.EPOCHS):

@@ -107,9 +107,9 @@ def get_labels(labels_h5, left_keys, right_keys):
 
     def which_side(l, r):
         if l > r:
-            return (1, 0)
+            return 1, 0
         else:
-            return (0, 1)
+            return 0, 1
 
     for i in range(tot):
         left_label = labels_h5[left_keys[i]][:]
@@ -125,9 +125,22 @@ def get_labels(labels_h5, left_keys, right_keys):
     return all_one_hot_labels
 
 
-def get_data(which, left_keys, right_keys, data):
+def get_frame(num_frames):
+    num = randint(0, num_frames - 1)
+    return num
 
-    return [], []
+
+def get_data(which, left_keys, right_keys, data):
+    left = np.zeros((len(left_keys), 1, 3, C2.SIDE, C2.SIDE), dtype=np.float32)
+    right = np.zeros((len(right_keys), 1, 3, C2.SIDE, C2.SIDE), dtype=np.float32)
+
+    if which == 'train':
+        for i, k in enumerate(left_keys):
+            left[i] = data[k][:][0][get_frame(len(data[k][:][0]))]
+        for i, k in enumerate(right_keys):
+            right[i] = data[k][:][0][get_frame(len(data[k][:][0]))]
+
+    return left, right
 
 
 def load_data(which, uid_keys_map, labs, data):
@@ -135,4 +148,4 @@ def load_data(which, uid_keys_map, labs, data):
     left_keys, right_keys = get_keys(left_uids, right_uids, uid_keys_map)
     labels = get_labels(labs, left_keys, right_keys)
     left_data, right_data = get_data(which, left_keys, right_keys, data)
-    # return labels, left_data, right_data
+    return labels, left_data, right_data
