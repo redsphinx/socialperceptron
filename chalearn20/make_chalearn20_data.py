@@ -7,7 +7,7 @@ import numpy as np
 import pickle as pkl
 import os
 import h5py as h5
-import deepimpression2.paths as P2
+from tqdm import tqdm
 
 
 def get_trait_labels():
@@ -214,53 +214,70 @@ def create_uid_keys_mapping():
     vl.close()
 
 
-def create_chalearn_data():
+def create_chalearn_data(which):
     # fix stefan data
-    train_h5 = h5.File(P.CHALEARN_TRAIN_DATA_20, 'w')
+    if not os.path.exists(P.CHALEARN_TRAIN_DATA_20):
+        action = 'w'
+    else:
+        action = 'a'
+
+    train_h5 = h5.File(P.CHALEARN_TRAIN_DATA_20, action)
     # train_h5.close()
-    val_h5 = h5.File(P.CHALEARN_VAL_DATA_20, 'w')
+    val_h5 = h5.File(P.CHALEARN_VAL_DATA_20, action)
     # val_h5.close()
-    test_h5 = h5.File(P.CHALEARN_TEST_DATA_20, 'w')
+    test_h5 = h5.File(P.CHALEARN_TEST_DATA_20, action)
     # test_h5.close()
 
     train_labels = h5.File(P2.CHALEARN_TRAIN_LABELS_20, 'r')
     test_labels = h5.File(P2.CHALEARN_TEST_LABELS_20, 'r')
     val_labels = h5.File(P2.CHALEARN_VAL_LABELS_20, 'r')
 
-    train = os.listdir(P2.CHALEARN_FACES_TRAIN_H5)
-    train.sort()
-    train.pop() # remove empty validation folder
-    for f1 in train:
-        f1_path = os.path.join(P2.CHALEARN_FACES_TRAIN_H5, f1)
-        divs = os.listdir(f1_path)
-        for f2 in divs:
-            f2_path = os.path.join(f1_path, f2)
-            videos = os.listdir(f2_path)
-            for v in videos:
-                v_path = os.path.join(f2_path, v)
-                h5_file = h5.File(v_path, 'r')
-                # keys: metadata, video, audio
-                # TODO: fix. why is it str??
-                h5_file_video = h5_file['video'][:]
-                
-                # is v in the split
-                if v in list(train_labels.keys()):
-                    train_h5.create_dataset(name=v, data=h5_file_video)
+    # --
+
+    def check(i, f2p, labels, h5_data):
+        # keys with .mp4
+        imp4 = i + '.mp4'
+        if imp4 in list(labels.keys()):
+            v_path = os.path.join(f2p, i + '.h5')
+            h5_file = h5.File(v_path, 'r')
+            # keys: metadata, video, audio
+            h5_file_video = h5_file['video'][:]
+            h5_data.create_dataset(name=imp4, data=h5_file_video)
+            # print('allocated')
+
+    # TODO: get test
+
+    if which == 'train':
+        train = os.listdir(P2.CHALEARN_FACES_TRAIN_H5)
+        train.sort()
+        train.pop()  # remove empty validation folder
+        for f1 in train:
+            f1_path = os.path.join(P2.CHALEARN_FACES_TRAIN_H5, f1)
+            divs = os.listdir(f1_path)
+            for f2 in divs:
+                f2_path = os.path.join(f1_path, f2)
+                videos = os.listdir(f2_path)
+                for v in videos:
+                    # is v in the split
+                    v = v.split('.h5')[0]
+                    # print(v)
+                    check(v, f2_path, train_labels, train_h5)
+                    check(v, f2_path, test_labels, test_h5)
+                    check(v, f2_path, val_labels, val_h5)
+
+    elif which == 'val':
+        val = os.listdir(P2.CHALEARN_FACES_VAL_H5)
+        val.sort()
+        val.pop()
+        for v in val:
+            v = v.split('.h5')[0]
+            print(v)
+            check(v, P2.CHALEARN_FACES_VAL_H5, train_labels, train_h5)
+            check(v, P2.CHALEARN_FACES_VAL_H5, test_labels, test_h5)
+            check(v, P2.CHALEARN_FACES_VAL_H5, val_labels, val_h5)
+
+    print('done with %s' % which)
 
 
-
-
-
-
-
-
-
-
-    # for each ID, get videos
-    # for each video, get face
-    # for each
-    # crop, align
-    # save as h5, key is video name, value is np.array(shape=(frames, side, side, channels))
-    pass
-
-create_chalearn_data()
+create_chalearn_data('train')
+create_chalearn_data('val')
