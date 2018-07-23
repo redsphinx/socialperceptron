@@ -1,12 +1,14 @@
 import h5py as h5
 from deepimpression2.chalearn20.make_chalearn20_data import get_id_split
 import deepimpression2.chalearn20.paths as P
+import deepimpression2.paths as P2
 import deepimpression2.constants as C1
 import deepimpression2.chalearn20.constants as C2
 from deepimpression2.chalearn20 import poisson_disc
 from PIL import Image
 import numpy as np
 from random import randint
+import os
 
 
 def visualize_grid(grid, points):
@@ -149,3 +151,42 @@ def load_data(which, uid_keys_map, labs, data):
     labels = get_labels(labs, left_keys, right_keys)
     left_data, right_data = get_data(which, left_keys, right_keys, data)
     return labels, left_data, right_data
+
+
+def get_info_stefan_data():
+    train_base = P2.CHALEARN_FACES_TRAIN_H5
+    val_base = P2.CHALEARN_FACES_VAL_H5
+
+    tot_train = 0
+
+    f1 = os.listdir(train_base)
+    for i in f1:
+        f1_path = os.path.join(train_base, i)
+        f2 = os.listdir(f1_path)
+        for j in f2:
+            f2_path = os.path.join(f1_path, j)
+            f3 = os.listdir(f2_path)
+            tot_train += len(f3)
+
+    print('total train: %d' % tot_train)
+
+    v = os.listdir(val_base)
+    tot_val = len(v)
+    print('total val: %d' % tot_val)
+
+
+def get_info_chalearn20_data():
+    train = h5.File(P.CHALEARN_TRAIN_DATA_20, 'r')
+    test = h5.File(P.CHALEARN_TEST_DATA_20, 'r')
+    val = h5.File(P.CHALEARN_VAL_DATA_20, 'r')
+
+    print(len(train.keys()))
+    print(len(test.keys()))
+    print(len(val.keys()))
+
+    print(len(train.keys()) + len(test.keys()) + len(val.keys()))
+
+    train.close()
+    test.close()
+    val.close()
+

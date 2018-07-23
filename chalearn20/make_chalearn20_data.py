@@ -221,6 +221,8 @@ def create_chalearn_data(which):
     else:
         action = 'a'
 
+    # action = 'r'  # for debugging
+
     train_h5 = h5.File(P.CHALEARN_TRAIN_DATA_20, action)
     # train_h5.close()
     val_h5 = h5.File(P.CHALEARN_VAL_DATA_20, action)
@@ -238,12 +240,18 @@ def create_chalearn_data(which):
         # keys with .mp4
         imp4 = i + '.mp4'
         if imp4 in list(labels.keys()):
-            v_path = os.path.join(f2p, i + '.h5')
-            h5_file = h5.File(v_path, 'r')
-            # keys: metadata, video, audio
-            h5_file_video = h5_file['video'][:]
-            h5_data.create_dataset(name=imp4, data=h5_file_video)
-            # print('allocated')
+            if imp4 not in list(h5_data.keys()):
+                v_path = os.path.join(f2p, i + '.h5')
+                h5_file = h5.File(v_path, 'r')
+                # keys: metadata, video, audio
+                h5_file_video = h5_file['video'][:]
+                h5_data.create_dataset(name=imp4, data=h5_file_video)
+                # print('allocated')
+                return True
+            else:
+                return False
+        else:
+            return False
 
     # TODO: get test
 
@@ -268,13 +276,23 @@ def create_chalearn_data(which):
     elif which == 'val':
         val = os.listdir(P2.CHALEARN_FACES_VAL_H5)
         val.sort()
-        val.pop()
+        # val = [val[-1]]  # for adding the one we popped
         for v in val:
             v = v.split('.h5')[0]
-            print(v)
-            check(v, P2.CHALEARN_FACES_VAL_H5, train_labels, train_h5)
-            check(v, P2.CHALEARN_FACES_VAL_H5, test_labels, test_h5)
-            check(v, P2.CHALEARN_FACES_VAL_H5, val_labels, val_h5)
+            allocated1 = check(v, P2.CHALEARN_FACES_VAL_H5, train_labels, train_h5)
+            allocated2 = check(v, P2.CHALEARN_FACES_VAL_H5, test_labels, test_h5)
+            allocated3 = check(v, P2.CHALEARN_FACES_VAL_H5, val_labels, val_h5)
+            if (int(allocated1) + int(allocated2) + int(allocated3)) == 0:
+                print('not allocated: %s' % v)
+
+    train_h5.close()
+    test_h5.close()
+    val_h5.close()
+    train_labels.close()
+    test_labels.close()
+    val_labels.close()
 
     print('done with %s' % which)
 
+
+# create_chalearn_data('val')
