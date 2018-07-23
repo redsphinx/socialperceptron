@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 import os
 import math
 # from training_util import hdf5ToNp
+import deepimpression2.chalearn20.paths as P
+from deepimpression2.chalearn10 import align_crop as AC
 
 
 FS = 16000.0
@@ -116,4 +118,37 @@ def preprocess_val_data():
         print(report)
 
 
-        # preprocess_val_data()
+def crop_align_test():
+    f1 = os.listdir(P.CHALEARN_TEST_ORIGINAL)
+    for i in f1:
+        f1_path = os.path.join(P.CHALEARN_TEST_ORIGINAL, f1)
+        f2 = os.listdir(f1_path)
+        for j in f2:
+            f2_path = os.path.join(f1_path, j)
+            videos = os.listdir(f2_path)
+            for v in videos:
+                video_path = os.path.join(f2_path, v)
+                AC.align_faces_in_video(video_path, save_location=P.CHALEARN_FACES_TEST_TIGHT)
+
+
+# def mod_hdf5_from_dir(mp4, h5_path):
+#     new_name = mp4.split('.mp4')[0]
+#     new_name += '.h5'
+#     destination_path = os.path.join(h5_path, new_name)
+#     mp4_to_h5(mp4, destination_path)
+#
+#
+# def preprocess_test_data():
+#     from_data = P.CHALEARN_TEST_ORIGINAL
+#     to_data = P.CHALEARN_FACES_TEST_H5
+#
+#     f1 = os.listdir(from_data)
+#     for i in f1:
+#         f1_path = os.path.join(from_data, f1)
+#         f2 = os.listdir(f1_path)
+#         for j in f2:
+#             f2_path = os.path.join(f1_path, j)
+#             videos = os.listdir(f2_path)
+#             for v in videos:
+#                 video_path = os.path.join(f2_path, v)
+#                 mod_hdf5_from_dir(video_path, to_data)

@@ -20,6 +20,9 @@ CHALEARN_TRAIN_DATA_20 = '/scratch/users/gabras/data/chalearn20/train_data.h5'
 CHALEARN_VAL_DATA_20 = '/scratch/users/gabras/data/chalearn20/val_data.h5'
 CHALEARN_TEST_DATA_20 = '/scratch/users/gabras/data/chalearn20/test_data.h5'
 
+CHALEARN_TEST_ORIGINAL = '/scratch/users/gabras/data/chalearn10/original_test'
+CHALEARN_FACES_TEST_TIGHT = '/scratch/users/gabras/data/chalearn10/test_face_tight_crop'
+
 # -------------------------------------------------------------------------------------------------
 # dummy data for performance testing
 DUMMY_DATA_JPG = '/scratch/users/gabras/data/trying_out/training80_05'
