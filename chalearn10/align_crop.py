@@ -10,6 +10,8 @@ import skvideo.io
 import imageio
 import time
 import subprocess
+from multiprocessing import Pool
+from deepimpression2.chalearn20 import paths as P
 
 
 def add_audio(vid_name, name_audio, avi_vid_name):
@@ -100,13 +102,16 @@ def align_face(image, xp):
     face_rectangles = detector(gray, 2)
     if len(face_rectangles) == 0:
         print('no face detected in the generated image')
-        return xp.zeros((image.shape), dtype=xp.uint8)
+        return None
+        # return xp.zeros((image.shape), dtype=xp.uint8)
     largest_face_rectangle = find_largest_face(face_rectangles)
     face_aligned = fa.align_to_template_similarity(image, gray, largest_face_rectangle)
     return face_aligned.astype(xp.uint8)
 
 
-def align_faces_in_video(data_path, save_location, frames=None, audio=True, side=196, mode='similarity'):
+def align_faces_in_video(data_path, frames=None, audio=True, side=196):
+
+    save_location = P.CHALEARN_FACES_TEST_TIGHT
 
     if os.path.exists(data_path):
         video_capture = skvideo.io.vread(data_path)
@@ -130,17 +135,22 @@ def align_faces_in_video(data_path, save_location, frames=None, audio=True, side
 
         channels = 3
 
+        # new_video_array = np.zeros((20, side, side, channels), dtype='uint8')
         new_video_array = np.zeros((frames, side, side, channels), dtype='uint8')
 
+        # for i in range(20):
         for i in range(frames):
             if i % 20 == 0:
                 print('%s: %s of %s' % (name_video, i, frames))
             frame = video_capture[i]
-            new_frame, radius = align_face(frame, xp=np)
+            new_frame = align_face(frame, xp=np)
 
             # if no face detected, copy face from previous frame
             if new_frame is None:
-                new_frame = new_video_array[i - 1]
+                if (i - 1) == -1:
+                    new_frame = np.zeros((side, side, channels))
+                else:
+                    new_frame = new_video_array[i - 1]
 
             new_frame = np.array(new_frame, dtype='uint8')
             new_video_array[i] = new_frame
@@ -168,3 +178,26 @@ def align_faces_in_video(data_path, save_location, frames=None, audio=True, side
             remove_file(avi_vid_name)
     else:
         print('Error: data_path does not exist')
+
+
+def parallel_align(b, e, func, number_processes=10):
+    print(b, e)
+    all_test_paths = []
+    f1 = os.listdir(P.CHALEARN_TEST_ORIGINAL)
+    for i in f1:
+        f1_path = os.path.join(P.CHALEARN_TEST_ORIGINAL, i)
+        f2 = os.listdir(f1_path)
+        for j in f2:
+            f2_path = os.path.join(f1_path, j)
+            videos = os.listdir(f2_path)
+            for v in videos:
+                video_path = os.path.join(f2_path, v)
+                all_test_paths.append(video_path)
+    # func has to be align_faces_in_video
+    pool = Pool(processes=number_processes)
+    list_path_all_videos = all_test_paths[b:e]
+    # make folder in sa
+    pool.apply_async(func)
+    pool.map(func, list_path_all_videos)
+
+

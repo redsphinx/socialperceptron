@@ -85,8 +85,8 @@ def du(path):
 
 
 def preprocess_training_data():
-    from_data = pp.training_data
-    to_data = pp.hdf5_data
+    from_data = '' # pp.training_data
+    to_data = '' # pp.hdf5_data
     dirs = os.listdir(from_data)
     for d in dirs:
         dir1 = os.path.join(from_data, d)
@@ -105,8 +105,8 @@ def preprocess_training_data():
 
 
 def preprocess_val_data():
-    from_data = pp.validation_data
-    to_data = pp.hdf5_val_data
+    from_data = '' # pp.validation_data
+    to_data = '' # pp.hdf5_val_data
     dirs = os.listdir(from_data)
     for d in dirs:
         val_dir = os.path.join(from_data, d)
@@ -118,17 +118,43 @@ def preprocess_val_data():
         print(report)
 
 
-def crop_align_test():
+def crop_align_test(b, e):
+    # testing 1 specific video
+    # video_path = '/scratch/users/gabras/data/chalearn10/original_test/test-2/test80_22/ApPnsnIZozw.000.mp4'
+    # AC.align_faces_in_video(video_path, save_location=P.CHALEARN_FACES_TEST_TIGHT)
+
+    print(b, e)
+    all_test_paths = []
+    # total len = 2000
+
     f1 = os.listdir(P.CHALEARN_TEST_ORIGINAL)
     for i in f1:
-        f1_path = os.path.join(P.CHALEARN_TEST_ORIGINAL, f1)
+        f1_path = os.path.join(P.CHALEARN_TEST_ORIGINAL, i)
         f2 = os.listdir(f1_path)
         for j in f2:
             f2_path = os.path.join(f1_path, j)
             videos = os.listdir(f2_path)
             for v in videos:
                 video_path = os.path.join(f2_path, v)
-                AC.align_faces_in_video(video_path, save_location=P.CHALEARN_FACES_TEST_TIGHT)
+                all_test_paths.append(video_path)
+
+    for v in all_test_paths[b:e]:
+        AC.align_faces_in_video(v)
+
+
+# AC.parallel_align(0, 200, AC.align_faces_in_video)        done
+# AC.parallel_align(200, 400, AC.align_faces_in_video)      done
+# AC.parallel_align(400, 600, AC.align_faces_in_video) # hinton done
+
+# AC.parallel_align(600, 800, AC.align_faces_in_video)
+# AC.parallel_align(800, 1000, AC.align_faces_in_video)
+# AC.parallel_align(1000, 1200, AC.align_faces_in_video) # hinton
+# AC.parallel_align(1200, 1400, AC.align_faces_in_video) # hinton
+# AC.parallel_align(1400, 1600, AC.align_faces_in_video) # archimedes
+# AC.parallel_align(1600, 1800, AC.align_faces_in_video) # turing
+# AC.parallel_align(1800, 2000, AC.align_faces_in_video) # charcot
+
+
 
 
 # def mod_hdf5_from_dir(mp4, h5_path):
