@@ -142,17 +142,49 @@ def crop_align_test(b, e):
         AC.align_faces_in_video(v)
 
 
-# AC.parallel_align(0, 200, AC.align_faces_in_video)        done
-# AC.parallel_align(200, 400, AC.align_faces_in_video)      done
-# AC.parallel_align(400, 600, AC.align_faces_in_video) # hinton done
+def check_test_mp4():
+    p1 = '/scratch/users/gabras/data/chalearn10/test_cropped_backup'
+    p2 = '/scratch/users/gabras/data/chalearn10/server_1200'
 
-# AC.parallel_align(600, 800, AC.align_faces_in_video)
-# AC.parallel_align(800, 1000, AC.align_faces_in_video)
+    all_test_paths = []
+    f1 = os.listdir(P.CHALEARN_TEST_ORIGINAL)
+    print(f1)
+    for i in f1:
+        f1_path = os.path.join(P.CHALEARN_TEST_ORIGINAL, i)
+        f2 = os.listdir(f1_path)
+        print(f2)
+        for j in f2:
+            f2_path = os.path.join(f1_path, j)
+            videos = os.listdir(f2_path)
+            for v in videos:
+                # video_path = os.path.join(f2_path, v)
+                all_test_paths.append(v)
+
+    server_list = np.genfromtxt('/scratch/users/gabras/data/chalearn10/test_list_file.txt', 'str')
+
+    print('asdf')
+
+
+check_test_mp4()
+
+
+# AC.parallel_align(0, 200, AC.align_faces_in_video)        done, fucked
+# AC.parallel_align(200, 400, AC.align_faces_in_video)      done, fucked
+# AC.parallel_align(400, 600, AC.align_faces_in_video) # hinton done
+# AC.parallel_align(600, 800, AC.align_faces_in_video)      done, fucked
+# AC.parallel_align(800, 1000, AC.align_faces_in_video)     done, fucked
+
 # AC.parallel_align(1000, 1200, AC.align_faces_in_video) # hinton
 # AC.parallel_align(1200, 1400, AC.align_faces_in_video) # hinton
 # AC.parallel_align(1400, 1600, AC.align_faces_in_video) # archimedes
 # AC.parallel_align(1600, 1800, AC.align_faces_in_video) # turing
 # AC.parallel_align(1800, 2000, AC.align_faces_in_video) # charcot
+
+# fixing mistakes
+# AC.parallel_align(0, 200, AC.align_faces_in_video)        hinton
+# AC.parallel_align(200, 400, AC.align_faces_in_video)      turing
+# AC.parallel_align(600, 800, AC.align_faces_in_video)      archimedes
+# AC.parallel_align(800, 1000, AC.align_faces_in_video)     charcot
 
 
 
