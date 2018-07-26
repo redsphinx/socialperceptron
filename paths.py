@@ -1,6 +1,7 @@
 # training on chalearn with cropped image faces
 CHALEARN_FACES_TRAIN_H5 = '/scratch/users/steiac/steiac/deployed-3d/3DDIdata/data_preprocessed/'
 CHALEARN_FACES_VAL_H5 = '/scratch/users/steiac/steiac/deployed-3d/3DDIdata/val_preprocessed/'
+CHALEARN_FACES_TEST_H5 = '/scratch/users/gabras/data/chalearn10/test_preprocessed'
 
 CHALEARN_TRAIN_LABELS_20 = '/scratch/users/gabras/data/chalearn20/train_labels.h5'
 CHALEARN_VAL_LABELS_20 = '/scratch/users/gabras/data/chalearn20/val_labels.h5'

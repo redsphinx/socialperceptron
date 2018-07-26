@@ -16,6 +16,7 @@ import math
 # from training_util import hdf5ToNp
 import deepimpression2.chalearn20.paths as P
 from deepimpression2.chalearn10 import align_crop as AC
+import deepimpression2.paths as P2
 
 
 FS = 16000.0
@@ -23,7 +24,6 @@ FS = 16000.0
 
 def mp4_to_arr(video_path):
     vid = skvideo.io.vread(video_path)
-    # vid = skvideo.io.vread(video_path)
     vid = np.transpose(vid, [0, 3, 1, 2])
     vid = np.expand_dims(vid, 0)
     aud = librosa.load(video_path, FS)[0][None, None, None, :]
@@ -49,23 +49,14 @@ def mp4_to_meta(video_path):
 
 
 def mp4_to_h5(video_path, destination_path):
-    # read data
     vid, aud = mp4_to_arr(video_path)
-    # read metadata
     metadata = mp4_to_meta(video_path)
-    # saving data
     with h5py.File(destination_path, 'a') as my_file:
+        # print('asdf')
         my_file.create_dataset(name='video', data=vid)
         my_file.create_dataset(name='audio', data=aud)
         my_file.create_dataset(name='metadata', data=metadata)
-        # read data
-        # with h5py.File(destination_path, 'r') as my_file:
-        #     vid = my_file['video'][:]
-        #     aud = my_file['audio'][:]
-        #     metadata = my_file['metadata'][:]
-        #     print(vid.shape)
-        #     print(aud.shape)
-        #     print(metadata)
+    print('done: %s' % video_path)
 
 
 def extract_hdf5_from_dir(from_folder, to_folder):
@@ -165,48 +156,17 @@ def check_test_mp4():
     print('asdf')
 
 
-# check_test_mp4()
+def mod_hdf5_from_dir(mp4, h5_path):
+    new_name = mp4.split('/')[-1].split('.mp4')[0] + '.h5'
+    destination_path = os.path.join(h5_path, new_name)
+    mp4_to_h5(mp4, destination_path)
 
 
-# AC.parallel_align(0, 200, AC.align_faces_in_video)        done, fucked
-# AC.parallel_align(200, 400, AC.align_faces_in_video)      done, fucked
-# AC.parallel_align(400, 600, AC.align_faces_in_video) # hinton done
-# AC.parallel_align(600, 800, AC.align_faces_in_video)      done, fucked
-# AC.parallel_align(800, 1000, AC.align_faces_in_video)     done, fucked
-
-# AC.parallel_align(1000, 1200, AC.align_faces_in_video) # hinton
-# AC.parallel_align(1200, 1400, AC.align_faces_in_video) # hinton
-# AC.parallel_align(1400, 1600, AC.align_faces_in_video) # archimedes
-# AC.parallel_align(1600, 1800, AC.align_faces_in_video) # turing
-# AC.parallel_align(1800, 2000, AC.align_faces_in_video) # charcot
-
-# fixing mistakes
-# AC.parallel_align(0, 200, AC.align_faces_in_video)        hinton
-# AC.parallel_align(200, 400, AC.align_faces_in_video)      turing
-# AC.parallel_align(600, 800, AC.align_faces_in_video)      archimedes  # 89 missing due to memory allocation error
-# AC.parallel_align(800, 1000, AC.align_faces_in_video)     charcot
+def preprocess_test_data():
+    videos = os.listdir(P.CHALEARN_FACES_TEST_TIGHT)
+    for v in videos:
+        v_path = os.path.join(P.CHALEARN_FACES_TEST_TIGHT, v)
+        mod_hdf5_from_dir(v_path, P2.CHALEARN_FACES_TEST_H5)
 
 
-
-
-# def mod_hdf5_from_dir(mp4, h5_path):
-#     new_name = mp4.split('.mp4')[0]
-#     new_name += '.h5'
-#     destination_path = os.path.join(h5_path, new_name)
-#     mp4_to_h5(mp4, destination_path)
-#
-#
-# def preprocess_test_data():
-#     from_data = P.CHALEARN_TEST_ORIGINAL
-#     to_data = P.CHALEARN_FACES_TEST_H5
-#
-#     f1 = os.listdir(from_data)
-#     for i in f1:
-#         f1_path = os.path.join(from_data, f1)
-#         f2 = os.listdir(f1_path)
-#         for j in f2:
-#             f2_path = os.path.join(f1_path, j)
-#             videos = os.listdir(f2_path)
-#             for v in videos:
-#                 video_path = os.path.join(f2_path, v)
-#                 mod_hdf5_from_dir(video_path, to_data)
+preprocess_test_data()
