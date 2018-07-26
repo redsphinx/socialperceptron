@@ -3,7 +3,6 @@ from skimage import transform
 from skimage import img_as_ubyte
 import paths
 import os
-from scipy import ndimage
 import dlib
 import cv2
 import skvideo.io
@@ -11,7 +10,7 @@ import imageio
 import time
 import subprocess
 from multiprocessing import Pool
-from deepimpression2.chalearn20 import paths as P
+from deepimpression2 import paths as P
 
 
 def add_audio(vid_name, name_audio, avi_vid_name):
@@ -111,6 +110,7 @@ def align_face(image, xp):
 
 def align_faces_in_video(data_path, frames=None, audio=True, side=196):
 
+    # normal case use this
     # save_location = P.CHALEARN_FACES_TEST_TIGHT
 
     # only for fixing missing 89

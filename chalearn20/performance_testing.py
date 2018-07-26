@@ -27,8 +27,7 @@
 
 import numpy as np
 import h5py as h5
-import deepimpression2.chalearn20.paths as P
-import deepimpression2.chalearn20.constants as C
+import deepimpression2.paths as P
 import os
 from deepimpression2.util import safe_mkdir
 from scipy import ndimage
@@ -110,10 +109,6 @@ def make_setup4():
 
     with open(pkl_name, 'wb') as my_pkl:
         pkl.dump(all_frames_dict, my_pkl)
-
-
-# make_setup4()
-
 
 
 def reading_test():
@@ -199,9 +194,6 @@ for i in range(num):
 
 print(t)
 print(t.mean(axis=0))
-
-
-
 
 '''
 space on disk

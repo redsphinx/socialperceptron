@@ -1,13 +1,11 @@
 # create files to make clean identity split data
 # create labels accordingly
-import deepimpression2.chalearn20.paths as P
-import deepimpression2.paths as P2
+import deepimpression2.paths as P
 import deepimpression2.chalearn20.constants as C
 import numpy as np
 import pickle as pkl
 import os
 import h5py as h5
-from tqdm import tqdm
 
 
 def get_trait_labels():
@@ -205,9 +203,9 @@ def create_uid_keys_mapping():
                     print('asdf')
                 f.create_dataset(name=s, data=ks_tmp)
 
-    make_map(trl, trs, P2.TRAIN_UID_KEYS_MAPPING)
-    make_map(tel, tes, P2.TEST_UID_KEYS_MAPPING)
-    make_map(vl, vs, P2.VAL_UID_KEYS_MAPPING)
+    make_map(trl, trs, P.TRAIN_UID_KEYS_MAPPING)
+    make_map(tel, tes, P.TEST_UID_KEYS_MAPPING)
+    make_map(vl, vs, P.VAL_UID_KEYS_MAPPING)
 
     trl.close()
     tel.close()
@@ -230,9 +228,9 @@ def create_chalearn_data(which):
     test_h5 = h5.File(P.CHALEARN_TEST_DATA_20, action)
     # test_h5.close()
 
-    train_labels = h5.File(P2.CHALEARN_TRAIN_LABELS_20, 'r')
-    test_labels = h5.File(P2.CHALEARN_TEST_LABELS_20, 'r')
-    val_labels = h5.File(P2.CHALEARN_VAL_LABELS_20, 'r')
+    train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
+    test_labels = h5.File(P.CHALEARN_TEST_LABELS_20, 'r')
+    val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
 
     # --
 
@@ -254,11 +252,11 @@ def create_chalearn_data(which):
             return False
 
     if which == 'train':
-        train = os.listdir(P2.CHALEARN_FACES_TRAIN_H5)
+        train = os.listdir(P.CHALEARN_FACES_TRAIN_H5)
         train.sort()
         train.pop()  # remove empty validation folder
         for f1 in train:
-            f1_path = os.path.join(P2.CHALEARN_FACES_TRAIN_H5, f1)
+            f1_path = os.path.join(P.CHALEARN_FACES_TRAIN_H5, f1)
             divs = os.listdir(f1_path)
             for f2 in divs:
                 f2_path = os.path.join(f1_path, f2)
@@ -272,25 +270,25 @@ def create_chalearn_data(which):
                     check(v, f2_path, val_labels, val_h5)
 
     elif which == 'val':
-        val = os.listdir(P2.CHALEARN_FACES_VAL_H5)
+        val = os.listdir(P.CHALEARN_FACES_VAL_H5)
         val.sort()
         # val = [val[-1]]  # for adding the one we popped
         for v in val:
             v = v.split('.h5')[0]
-            allocated1 = check(v, P2.CHALEARN_FACES_VAL_H5, train_labels, train_h5)
-            allocated2 = check(v, P2.CHALEARN_FACES_VAL_H5, test_labels, test_h5)
-            allocated3 = check(v, P2.CHALEARN_FACES_VAL_H5, val_labels, val_h5)
+            allocated1 = check(v, P.CHALEARN_FACES_VAL_H5, train_labels, train_h5)
+            allocated2 = check(v, P.CHALEARN_FACES_VAL_H5, test_labels, test_h5)
+            allocated3 = check(v, P.CHALEARN_FACES_VAL_H5, val_labels, val_h5)
             if (int(allocated1) + int(allocated2) + int(allocated3)) == 0:
                 print('not allocated: %s' % v)
 
     elif which == 'test':
-        test = os.listdir(P2.CHALEARN_FACES_TEST_H5)
+        test = os.listdir(P.CHALEARN_FACES_TEST_H5)
         test.sort()
         for v in test:
             v = v.split('.h5')[0]
-            allocated1 = check(v, P2.CHALEARN_FACES_TEST_H5, train_labels, train_h5)
-            allocated2 = check(v, P2.CHALEARN_FACES_TEST_H5, test_labels, test_h5)
-            allocated3 = check(v, P2.CHALEARN_FACES_TEST_H5, val_labels, val_h5)
+            allocated1 = check(v, P.CHALEARN_FACES_TEST_H5, train_labels, train_h5)
+            allocated2 = check(v, P.CHALEARN_FACES_TEST_H5, test_labels, test_h5)
+            allocated3 = check(v, P.CHALEARN_FACES_TEST_H5, val_labels, val_h5)
             if (int(allocated1) + int(allocated2) + int(allocated3)) == 0:
                 print('not allocated: %s' % v)
 

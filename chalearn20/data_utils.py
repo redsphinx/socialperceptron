@@ -1,7 +1,6 @@
 import h5py as h5
 from deepimpression2.chalearn20.make_chalearn20_data import get_id_split
-import deepimpression2.chalearn20.paths as P
-import deepimpression2.paths as P2
+import deepimpression2.paths as P
 import deepimpression2.constants as C1
 import deepimpression2.chalearn20.constants as C2
 from deepimpression2.chalearn20 import poisson_disc
@@ -154,8 +153,8 @@ def load_data(which, uid_keys_map, labs, data):
 
 
 def get_info_stefan_data():
-    train_base = P2.CHALEARN_FACES_TRAIN_H5
-    val_base = P2.CHALEARN_FACES_VAL_H5
+    train_base = P.CHALEARN_FACES_TRAIN_H5
+    val_base = P.CHALEARN_FACES_VAL_H5
 
     tot_train = 0
 
@@ -189,5 +188,3 @@ def get_info_chalearn20_data():
     train.close()
     test.close()
     val.close()
-
-# get_info_chalearn20_data()

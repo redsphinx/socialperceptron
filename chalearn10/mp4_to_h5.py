@@ -2,21 +2,14 @@
 # created by https://gitlab.socsci.ru.nl/S.Iacob/3DDeepImpression/
 # ----------------------------------------------------------------
 import numpy as np
-# import constants as pc
-# import training_util
-# import paths as pp
 import skvideo.io
 import subprocess
 import h5py
 import time
 import librosa
-import matplotlib.pyplot as plt
 import os
-import math
-# from training_util import hdf5ToNp
-import deepimpression2.chalearn20.paths as P
 from deepimpression2.chalearn10 import align_crop as AC
-import deepimpression2.paths as P2
+import deepimpression2.paths as P
 
 
 FS = 16000.0
@@ -166,7 +159,4 @@ def preprocess_test_data():
     videos = os.listdir(P.CHALEARN_FACES_TEST_TIGHT)
     for v in videos:
         v_path = os.path.join(P.CHALEARN_FACES_TEST_TIGHT, v)
-        mod_hdf5_from_dir(v_path, P2.CHALEARN_FACES_TEST_H5)
-
-
-# preprocess_test_data()
+        mod_hdf5_from_dir(v_path, P.CHALEARN_FACES_TEST_H5)
