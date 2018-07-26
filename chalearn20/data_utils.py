@@ -190,3 +190,4 @@ def get_info_chalearn20_data():
     test.close()
     val.close()
 
+# get_info_chalearn20_data()

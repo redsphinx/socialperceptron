@@ -253,8 +253,6 @@ def create_chalearn_data(which):
         else:
             return False
 
-    # TODO: get test
-
     if which == 'train':
         train = os.listdir(P2.CHALEARN_FACES_TRAIN_H5)
         train.sort()
@@ -288,12 +286,11 @@ def create_chalearn_data(which):
     elif which == 'test':
         test = os.listdir(P2.CHALEARN_FACES_TEST_H5)
         test.sort()
-        # val = [val[-1]]  # for adding the one we popped
         for v in test:
             v = v.split('.h5')[0]
-            allocated1 = check(v, P2.CHALEARN_FACES_VAL_H5, train_labels, train_h5)
-            allocated2 = check(v, P2.CHALEARN_FACES_VAL_H5, test_labels, test_h5)
-            allocated3 = check(v, P2.CHALEARN_FACES_VAL_H5, val_labels, val_h5)
+            allocated1 = check(v, P2.CHALEARN_FACES_TEST_H5, train_labels, train_h5)
+            allocated2 = check(v, P2.CHALEARN_FACES_TEST_H5, test_labels, test_h5)
+            allocated3 = check(v, P2.CHALEARN_FACES_TEST_H5, val_labels, val_h5)
             if (int(allocated1) + int(allocated2) + int(allocated3)) == 0:
                 print('not allocated: %s' % v)
 
@@ -307,4 +304,4 @@ def create_chalearn_data(which):
     print('done with %s' % which)
 
 
-# create_chalearn_data('val')
+# create_chalearn_data('test')

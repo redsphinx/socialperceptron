@@ -169,4 +169,4 @@ def preprocess_test_data():
         mod_hdf5_from_dir(v_path, P2.CHALEARN_FACES_TEST_H5)
 
 
-preprocess_test_data()
+# preprocess_test_data()
