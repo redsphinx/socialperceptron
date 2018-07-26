@@ -111,7 +111,10 @@ def align_face(image, xp):
 
 def align_faces_in_video(data_path, frames=None, audio=True, side=196):
 
-    save_location = P.CHALEARN_FACES_TEST_TIGHT
+    # save_location = P.CHALEARN_FACES_TEST_TIGHT
+
+    # only for fixing missing 89
+    save_location = '/scratch/users/gabras/data/chalearn10/server_1911'
 
     if os.path.exists(data_path):
         video_capture = skvideo.io.vread(data_path)
@@ -181,6 +184,7 @@ def align_faces_in_video(data_path, frames=None, audio=True, side=196):
 
 
 def parallel_align(b, e, func, number_processes=10):
+    # usage in mp4_to_h5.py: AC.parallel_align(0, 200, AC.align_faces_in_video)
     print(b, e)
     all_test_paths = []
     f1 = os.listdir(P.CHALEARN_TEST_ORIGINAL)
@@ -200,4 +204,36 @@ def parallel_align(b, e, func, number_processes=10):
     pool.apply_async(func)
     pool.map(func, list_path_all_videos)
 
+
+def fix_missing_89_parallel(func, number_processes=10):
+    # fix_missing_89_parallel(align_faces_in_video, number_processes=20)
+    all_test_paths = []
+    f1 = os.listdir(P.CHALEARN_TEST_ORIGINAL)
+    for i in f1:
+        f1_path = os.path.join(P.CHALEARN_TEST_ORIGINAL, i)
+        f2 = os.listdir(f1_path)
+        for j in f2:
+            f2_path = os.path.join(f1_path, j)
+            videos = os.listdir(f2_path)
+            for v in videos:
+                video_path = os.path.join(f2_path, v)
+                all_test_paths.append(video_path)
+
+    all_test_names = [i.split('/')[-1] for i in all_test_paths]
+
+    loc = '/scratch/users/gabras/data/chalearn10/server_1911'
+    processed = os.listdir(loc)
+
+    todo = list(set(all_test_names) - set(processed))
+
+    todo_location = []
+
+    for i in todo:
+        for j in all_test_paths:
+            if j.split('/')[-1] == i:
+                todo_location.append(j)
+
+    pool = Pool(processes=number_processes)
+    pool.apply_async(func)
+    pool.map(func, todo_location)
 

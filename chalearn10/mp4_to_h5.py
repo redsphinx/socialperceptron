@@ -165,7 +165,7 @@ def check_test_mp4():
     print('asdf')
 
 
-check_test_mp4()
+# check_test_mp4()
 
 
 # AC.parallel_align(0, 200, AC.align_faces_in_video)        done, fucked
@@ -183,7 +183,7 @@ check_test_mp4()
 # fixing mistakes
 # AC.parallel_align(0, 200, AC.align_faces_in_video)        hinton
 # AC.parallel_align(200, 400, AC.align_faces_in_video)      turing
-# AC.parallel_align(600, 800, AC.align_faces_in_video)      archimedes
+# AC.parallel_align(600, 800, AC.align_faces_in_video)      archimedes  # 89 missing due to memory allocation error
 # AC.parallel_align(800, 1000, AC.align_faces_in_video)     charcot
 
 
