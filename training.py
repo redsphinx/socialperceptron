@@ -21,8 +21,8 @@ def update_loss(total_loss, l):
     return total_loss
 
 print('Initializing')
-train_data = h5.File(P.CHALEARN_TRAIN_DATA_20, 'r')
-val_data = h5.File(P.CHALEARN_VAL_DATA_20, 'r')
+# train_data = h5.File(P.CHALEARN_TRAIN_DATA_20, 'r')
+# val_data = h5.File(P.CHALEARN_VAL_DATA_20, 'r')
 
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
@@ -33,8 +33,8 @@ val_loss = []
 train_uid_keys_map = h5.File(P.TRAIN_UID_KEYS_MAPPING, 'r')
 val_uid_keys_map = h5.File(P.VAL_UID_KEYS_MAPPING, 'r')
 
-training_steps = len(train_data) // C.TRAIN_BATCH_SIZE
-val_steps = len(val_data) // C.VAL_BATCH_SIZE
+training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
+val_steps = len(val_labels) // C.VAL_BATCH_SIZE
 
 
 # TODO: use GPU for doing things
@@ -47,7 +47,7 @@ for e in range(C.EPOCHS):
 
     for s in range(training_steps):
         # ts = time.time()
-        labels, left_data, right_data = D.load_data('val', val_uid_keys_map, val_labels, val_data)
+        labels, left_data, right_data = D.load_data('val', val_uid_keys_map, val_labels)
         # labels, left_data, right_data = D.load_data('train', train_uid_keys_map, train_labels, train_data)
         # print((time.time() - ts))
         # training

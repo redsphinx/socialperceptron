@@ -138,7 +138,9 @@ def reading_test():
         keys = h5_file.keys()
         for k in keys:
             # print(k)
+            # ts = time.time()
             img = h5_file[k][:]
+            # print(time.time() - ts)
         h5_file.close()
 
     time_setup1 = (time.time() - time_start)

@@ -132,18 +132,46 @@ def get_frame(num_frames):
     return num
 
 
-def get_data(which, left_keys, right_keys, data):
-    left = np.zeros((len(left_keys), 1, 3, C2.SIDE, C2.SIDE), dtype=np.float32)
+def reading_test():
+    video_names = os.listdir(P.DUMMY_DATA_JPG)
+
+    time_start = time.time()
+    for n in video_names:
+        name_h5 = os.path.join(P.SETUP1, '%s.h5' % (n))
+        h5_file = h5.File(name_h5, 'r')
+        keys = h5_file.keys()
+        for k in keys:
+            # print(k)
+            # ts = time.time()
+            img = h5_file[k][:]
+            # print(time.time() - ts)
+        h5_file.close()
+
+    time_setup1 = (time.time() - time_start)
+    print('time setup1: %s' % str(time_setup1))
+
+
+
+def get_data(left_keys, right_keys):
+    left = np.zeros((len(left_keys), 3, C2.SIDE, C2.SIDE), dtype=np.float32)
     right = np.zeros((len(right_keys), 1, 3, C2.SIDE, C2.SIDE), dtype=np.float32)
 
-    # TODO: do i need this?
-    # if which == 'train':
     for i, k in enumerate(left_keys):
+        k = k.split('.mp4')[0]
+        h5_path = os.path.join(P.CHALEARN_ALL_DATA_20, '%s.h5' % k)
+
         ts = time.time()
-        a = data[k]
+        v = h5.File(h5_path, 'r')['video']
+        print(time.time() - ts)
+        ts = time.time()
+        left[i] = v[:][0][get_frame(v[:][0].shape[0])]
+        print(left[i].shape)
+        print(time.time() - ts)
+
+        # a = data[k]
         # print('a', time.time() - ts)
         # # ts = time.time()
-        b = a[:]
+        # b = a[:]
         # # print('b', time.time() - ts)
         # ts = time.time()
         # c = a[0]
@@ -157,22 +185,19 @@ def get_data(which, left_keys, right_keys, data):
         # left[i] = data[k][0][1]
         # left[i] = data[k][:][0][get_frame(len(data[k][:][0]))]
 
-        print('ass', time.time() - ts)
     # for i, k in enumerate(right_keys):
     #     right[i] = data[k][:][0][get_frame(len(data[k][:][0]))]
 
     return left, right
 
 
-def load_data(which, uid_keys_map, labs, data):
+def load_data(which, uid_keys_map, labs):
     print('----------')
     left_uids, right_uids = get_batch_uid(which)
-
     left_keys, right_keys = get_keys(left_uids, right_uids, uid_keys_map)
-
     labels = get_labels(labs, left_keys, right_keys)
 
-    left_data, right_data = get_data(which, left_keys, right_keys, data)
+    left_data, right_data = get_data(left_keys, right_keys)
 
     return labels, left_data, right_data
 

@@ -22,8 +22,8 @@ CHALEARN_TRAIN_LABELS_20 = '/scratch/users/gabras/data/chalearn20/train_labels.h
 CHALEARN_VAL_LABELS_20 = '/scratch/users/gabras/data/chalearn20/val_labels.h5'
 CHALEARN_TEST_LABELS_20 = '/scratch/users/gabras/data/chalearn20/test_labels.h5'
 
-# TODO
 CHALEARN_ALL_DATA_20 = '/scratch/users/gabras/data/chalearn20/all_data'
+CHALEARN_ALL_DATA_20_2 = '/scratch/users/gabras/data/chalearn20/all_data_2'
 
 CHALEARN_TRAIN_DATA_20 = '/scratch/users/gabras/data/chalearn20/train_data.h5'
 CHALEARN_VAL_DATA_20 = '/scratch/users/gabras/data/chalearn20/val_data.h5'

@@ -306,18 +306,18 @@ def create_chalearn_data(which):
 
 def put_all_h5_in_one_folder():
     # train
-    # train = os.listdir(P.CHALEARN_FACES_TRAIN_H5)
-    # train.sort()
-    # train.pop()  # remove empty validation folder
-    # for f1 in train:
-    #     f1_path = os.path.join(P.CHALEARN_FACES_TRAIN_H5, f1)
-    #     divs = os.listdir(f1_path)
-    #     for f2 in divs:
-    #         f2_path = os.path.join(f1_path, f2)
-    #         videos = os.listdir(f2_path)
-    #         for v in videos:
-    #             v_path = os.path.join(f2_path, v)
-    #             shutil.copy(v_path, P.CHALEARN_ALL_DATA_20)
+    train = os.listdir(P.CHALEARN_FACES_TRAIN_H5)
+    train.sort()
+    train.pop()  # remove empty validation folder
+    for f1 in train:
+        f1_path = os.path.join(P.CHALEARN_FACES_TRAIN_H5, f1)
+        divs = os.listdir(f1_path)
+        for f2 in divs:
+            f2_path = os.path.join(f1_path, f2)
+            videos = os.listdir(f2_path)
+            for v in videos:
+                v_path = os.path.join(f2_path, v)
+                shutil.copy(v_path, P.CHALEARN_ALL_DATA_20)
 
     # test
     test = os.listdir(P.CHALEARN_FACES_TEST_H5)
@@ -331,3 +331,60 @@ def put_all_h5_in_one_folder():
         v_path = os.path.join(P.CHALEARN_FACES_VAL_H5, v)
         shutil.copy(v_path, P.CHALEARN_ALL_DATA_20)
 
+
+def array_for_each_frame(b, e):
+    # fml
+    print(b, e)
+    videos = os.listdir(P.CHALEARN_ALL_DATA_20)
+    videos = videos[b:e]
+    for v in videos:
+        v_path = os.path.join(P.CHALEARN_ALL_DATA_20, v)
+        video_arr = h5.File(v_path, 'r')['video'][0]
+        new_h5 = os.path.join(P.CHALEARN_ALL_DATA_20_2, v)
+        with h5.File(new_h5, 'w') as new_h5:
+            for f in range(video_arr.shape[0]):
+                d = video_arr[f]
+                new_h5.create_dataset(name=str(f), data=d)
+
+
+# array_for_each_frame(0, 1000)
+# array_for_each_frame(1000, 2000) # issue
+# array_for_each_frame(2000, 3000)
+# array_for_each_frame(3000, 4000)
+# array_for_each_frame(4000, 5000) # issue
+# array_for_each_frame(5000, 6000)
+# array_for_each_frame(6000, 7000)
+# array_for_each_frame(7000, 8000)
+# array_for_each_frame(8000, 9000)
+# array_for_each_frame(9000, 10000)
+
+# issues:
+# 1000 2000
+# Traceback (most recent call last):
+#   File "/home/gabras/deployed/deepimpression2/chalearn20/make_chalearn20_data.py", line 351, in <module>
+#     # array_for_each_frame(1000, 2000)
+#   File "/home/gabras/deployed/deepimpression2/chalearn20/make_chalearn20_data.py", line 342, in array_for_each_frame
+#     video_arr = h5.File(v_path, 'r')['video'][0]
+#   File "/home/gabras/miniconda3/envs/python3-TF/lib/python3.6/site-packages/h5py/_hl/files.py", line 269, in __init__
+#     fid = make_fid(name, mode, userblock_size, fapl, swmr=swmr)
+#   File "/home/gabras/miniconda3/envs/python3-TF/lib/python3.6/site-packages/h5py/_hl/files.py", line 99, in make_fid
+#     fid = h5f.open(name, flags, fapl=fapl)
+#   File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper
+#   File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper
+#   File "h5py/h5f.pyx", line 78, in h5py.h5f.open
+# OSError: Unable to open file (file signature not found)
+
+# 4000 5000
+# Traceback (most recent call last):
+#   File "/home/gabras/deployed/deepimpression2/chalearn20/make_chalearn20_data.py", line 354, in <module>
+#     # array_for_each_frame(4000, 5000)
+#   File "/home/gabras/deployed/deepimpression2/chalearn20/make_chalearn20_data.py", line 342, in array_for_each_frame
+#     video_arr = h5.File(v_path, 'r')['video'][0]
+#   File "/home/gabras/miniconda3/envs/python3-TF/lib/python3.6/site-packages/h5py/_hl/files.py", line 269, in __init__
+#     fid = make_fid(name, mode, userblock_size, fapl, swmr=swmr)
+#   File "/home/gabras/miniconda3/envs/python3-TF/lib/python3.6/site-packages/h5py/_hl/files.py", line 99, in make_fid
+#     fid = h5f.open(name, flags, fapl=fapl)
+#   File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper
+#   File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper
+#   File "h5py/h5f.pyx", line 78, in h5py.h5f.open
+# OSError: Unable to open file (truncated file: eof = 39288832, sblock->base_addr = 0, stored_eof = 60811132)
