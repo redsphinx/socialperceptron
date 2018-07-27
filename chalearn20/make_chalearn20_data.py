@@ -1,6 +1,7 @@
 # create files to make clean identity split data
 # create labels accordingly
-import deepimpression2.paths as P
+from deepimpression2 import paths as P
+# import deepimpression2.paths as P
 import deepimpression2.chalearn20.constants as C
 import numpy as np
 import pickle as pkl
@@ -304,19 +305,29 @@ def create_chalearn_data(which):
 
 
 def put_all_h5_in_one_folder():
-    train = os.listdir(P.CHALEARN_FACES_TRAIN_H5)
-    train.sort()
-    train.pop()  # remove empty validation folder
-    for f1 in train:
-        f1_path = os.path.join(P.CHALEARN_FACES_TRAIN_H5, f1)
-        divs = os.listdir(f1_path)
-        for f2 in divs:
-            f2_path = os.path.join(f1_path, f2)
-            videos = os.listdir(f2_path)
-            for v in videos:
-                v_path = os.path.join(f2_path, v)
-                # copy v_path file to CHALEARN_ALL_DATA_20
-                shutil.copy(v_path, P.CHALEARN_ALL_DATA_20)
+    # train
+    # train = os.listdir(P.CHALEARN_FACES_TRAIN_H5)
+    # train.sort()
+    # train.pop()  # remove empty validation folder
+    # for f1 in train:
+    #     f1_path = os.path.join(P.CHALEARN_FACES_TRAIN_H5, f1)
+    #     divs = os.listdir(f1_path)
+    #     for f2 in divs:
+    #         f2_path = os.path.join(f1_path, f2)
+    #         videos = os.listdir(f2_path)
+    #         for v in videos:
+    #             v_path = os.path.join(f2_path, v)
+    #             shutil.copy(v_path, P.CHALEARN_ALL_DATA_20)
 
+    # test
+    test = os.listdir(P.CHALEARN_FACES_TEST_H5)
+    for v in test:
+        v_path = os.path.join(P.CHALEARN_FACES_TEST_H5, v)
+        shutil.copy(v_path, P.CHALEARN_ALL_DATA_20)
 
-put_all_h5_in_one_folder()
+    # val
+    val = os.listdir(P.CHALEARN_FACES_VAL_H5)
+    for v in val:
+        v_path = os.path.join(P.CHALEARN_FACES_VAL_H5, v)
+        shutil.copy(v_path, P.CHALEARN_ALL_DATA_20)
+
