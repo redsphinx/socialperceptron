@@ -116,43 +116,44 @@ def reading_test():
     total_f = 0
     total_n = len(video_names)
 
-    time_start = time.time()
-    for n in video_names:
-        p = os.path.join(P.DUMMY_DATA_JPG, n)
-        frames = os.listdir(p)
-        frames.sort()  # order of frames matter
-        frames.pop()  # rm wav
-        total_f += len(frames)
-        for f in frames:
-            fp = os.path.join(p, f)
-            tmp = ndimage.imread(fp)
-
-    time_jpg = (time.time() - time_start)
-    print(total_f, total_n)
-    # print('time jpg: %s' % str(time_jpg))
-    #
     # time_start = time.time()
     # for n in video_names:
-    #     name_h5 = os.path.join(P.SETUP1, '%s.h5' % (n))
-    #     h5_file = h5.File(name_h5, 'r')
-    #     keys = h5_file.keys()
-    #     for k in keys:
-    #         img = h5_file[k][:]
-    #     h5_file.close()
+    #     p = os.path.join(P.DUMMY_DATA_JPG, n)
+    #     frames = os.listdir(p)
+    #     frames.sort()  # order of frames matter
+    #     frames.pop()  # rm wav
+    #     total_f += len(frames)
+    #     for f in frames:
+    #         fp = os.path.join(p, f)
+    #         tmp = ndimage.imread(fp)
     #
-    # time_setup1 = (time.time() - time_start)
-    # # print('time setup1: %s' % str(time_setup1))
+    # time_jpg = (time.time() - time_start)
+    # print(total_f, total_n)
+    # print('time jpg: %s' % str(time_jpg))
     #
     time_start = time.time()
-    name_h5 = os.path.join(P.SETUP3, 'one.h5')
-    h5_file = h5.File(name_h5, 'r')
-
     for n in video_names:
-        video = h5_file[n][:]
-        for i in range(video.shape[0]):
-            img = video[i]
+        name_h5 = os.path.join(P.SETUP1, '%s.h5' % (n))
+        h5_file = h5.File(name_h5, 'r')
+        keys = h5_file.keys()
+        for k in keys:
+            # print(k)
+            img = h5_file[k][:]
+        h5_file.close()
 
-    time_setup3 = (time.time() - time_start)
+    time_setup1 = (time.time() - time_start)
+    print('time setup1: %s' % str(time_setup1))
+    #
+    # time_start = time.time()
+    # name_h5 = os.path.join(P.SETUP3, 'one.h5')
+    # h5_file = h5.File(name_h5, 'r')
+    #
+    # for n in video_names:
+    #     video = h5_file[n][:]
+    #     for i in range(video.shape[0]):
+    #         img = video[i]
+    #
+    # time_setup3 = (time.time() - time_start)
     # print('time setup3: %s' % str(time_setup3))
     #
     # time_start = time.time()
@@ -182,7 +183,7 @@ def reading_test():
     #
     # time_setup4 = (time.time() - time_start)
     #
-    # return time_setup4
+    return time_setup1
 
     # return [time_jpg, time_setup1, time_setup3, time_setup3_2]
 

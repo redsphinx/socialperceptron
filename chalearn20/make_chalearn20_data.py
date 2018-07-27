@@ -6,6 +6,7 @@ import numpy as np
 import pickle as pkl
 import os
 import h5py as h5
+import shutil
 
 
 def get_trait_labels():
@@ -302,4 +303,20 @@ def create_chalearn_data(which):
     print('done with %s' % which)
 
 
-# create_chalearn_data('test')
+def put_all_h5_in_one_folder():
+    train = os.listdir(P.CHALEARN_FACES_TRAIN_H5)
+    train.sort()
+    train.pop()  # remove empty validation folder
+    for f1 in train:
+        f1_path = os.path.join(P.CHALEARN_FACES_TRAIN_H5, f1)
+        divs = os.listdir(f1_path)
+        for f2 in divs:
+            f2_path = os.path.join(f1_path, f2)
+            videos = os.listdir(f2_path)
+            for v in videos:
+                v_path = os.path.join(f2_path, v)
+                # copy v_path file to CHALEARN_ALL_DATA_20
+                shutil.copy(v_path, P.CHALEARN_ALL_DATA_20)
+
+
+put_all_h5_in_one_folder()

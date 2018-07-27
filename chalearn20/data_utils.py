@@ -8,6 +8,7 @@ from PIL import Image
 import numpy as np
 from random import randint
 import os
+import time
 
 
 def visualize_grid(grid, points):
@@ -135,20 +136,44 @@ def get_data(which, left_keys, right_keys, data):
     left = np.zeros((len(left_keys), 1, 3, C2.SIDE, C2.SIDE), dtype=np.float32)
     right = np.zeros((len(right_keys), 1, 3, C2.SIDE, C2.SIDE), dtype=np.float32)
 
-    if which == 'train':
-        for i, k in enumerate(left_keys):
-            left[i] = data[k][:][0][get_frame(len(data[k][:][0]))]
-        for i, k in enumerate(right_keys):
-            right[i] = data[k][:][0][get_frame(len(data[k][:][0]))]
+    # TODO: do i need this?
+    # if which == 'train':
+    for i, k in enumerate(left_keys):
+        ts = time.time()
+        a = data[k]
+        # print('a', time.time() - ts)
+        # # ts = time.time()
+        b = a[:]
+        # # print('b', time.time() - ts)
+        # ts = time.time()
+        # c = a[0]
+        # print('c', time.time() - ts)
+        # ts = time.time()
+        # d = c[get_frame(len(data[k][:][0]))]
+        # print('d', time.time() - ts)
+        # ts = time.time()
+        # left[i] = d
+
+        # left[i] = data[k][0][1]
+        # left[i] = data[k][:][0][get_frame(len(data[k][:][0]))]
+
+        print('ass', time.time() - ts)
+    # for i, k in enumerate(right_keys):
+    #     right[i] = data[k][:][0][get_frame(len(data[k][:][0]))]
 
     return left, right
 
 
 def load_data(which, uid_keys_map, labs, data):
+    print('----------')
     left_uids, right_uids = get_batch_uid(which)
+
     left_keys, right_keys = get_keys(left_uids, right_uids, uid_keys_map)
+
     labels = get_labels(labs, left_keys, right_keys)
+
     left_data, right_data = get_data(which, left_keys, right_keys, data)
+
     return labels, left_data, right_data
 
 
