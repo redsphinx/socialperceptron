@@ -33,6 +33,7 @@ from deepimpression2.util import safe_mkdir
 from scipy import ndimage
 import time
 import pickle as pkl
+from random import randint
 
 
 def make_setup1():
@@ -199,20 +200,31 @@ def reading_test():
 # print(t.mean(axis=0))
 
 
+def get_frame(num_frames):
+    # ts = time.time()
+    num = randint(0, num_frames - 1)
+    # print(time.time() - ts)
+    return num
+
+
 def all_data_reading():
-    l = os.listdir(P.CHALEARN_ALL_DATA_20_2)
-    for v in l:
+    left = np.zeros((100, 3, 208, 208), dtype=np.float32)
+    l = os.listdir(P.CHALEARN_ALL_DATA_20_2)[0:100]
+    for i, v in enumerate(l):
+        print('---')
         v_path = os.path.join(P.CHALEARN_ALL_DATA_20_2, v)
         with h5.File(v_path, 'r') as mf:
             # tot_frames = len(mf.keys())
+
+            n = get_frame(len(mf.keys()))
             ts = time.time()
-            img = mf[str(0)]
+            left[i] = mf[str(n)]
+            print(time.time() - ts)
             # for i in range(tot_frames):
             #     img = mf[str(i)]
-            print(time.time() - ts)
 
 
-# all_data_reading()
+all_data_reading()
 
 
 '''

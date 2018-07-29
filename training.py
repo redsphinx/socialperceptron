@@ -42,10 +42,10 @@ val_steps = len(val_labels) // C.VAL_BATCH_SIZE
 # TODO: make lodaing faster
 
 print('Enter training loop')
-for e in range(C.EPOCHS):
+for e in range(2):
     loss_tmp = []
 
-    for s in range(training_steps):
+    for s in range(1):
         # ts = time.time()
         labels, left_data, right_data = D.load_data('val', val_uid_keys_map, val_labels)
         # labels, left_data, right_data = D.load_data('train', train_uid_keys_map, train_labels, train_data)

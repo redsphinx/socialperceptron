@@ -9,6 +9,7 @@ import numpy as np
 from random import randint
 import os
 import time
+from random import shuffle
 
 
 def visualize_grid(grid, points):
@@ -128,7 +129,9 @@ def get_labels(labels_h5, left_keys, right_keys):
 
 
 def get_frame(num_frames):
+    # ts = time.time()
     num = randint(0, num_frames - 1)
+    # print(time.time() - ts)
     return num
 
 
@@ -151,52 +154,61 @@ def reading_test():
     print('time setup1: %s' % str(time_setup1))
 
 
+def all_data_reading():
+    # left = np.zeros((2, 3, 208, 208), dtype=np.float32)
+    l = os.listdir(P.CHALEARN_ALL_DATA_20_2)
+
+    # shuffle(l)
+    l = l[0:100]
+
+    for i, v in enumerate(l):
+        print('---')
+        v_path = os.path.join(P.CHALEARN_ALL_DATA_20_2, v)
+        with h5.File(v_path, 'r') as mf:
+            # tot_frames = len(mf.keys())
+
+            n = get_frame(len(mf.keys()))
+            ts = time.time()
+            img = mf[str(n)]
+            print(time.time() - ts)
+            # for i in range(tot_frames):
+            #     img = mf[str(i)]
+
+
+# all_data_reading()
+
+
+def quicker_load(k):
+    k = k.split('.mp4')[0]
+    h5_path = os.path.join(P.CHALEARN_ALL_DATA_20_2, '%s.h5' % k)
+    v = h5.File(h5_path, 'r')
+    n = get_frame(len(v.keys()))
+    # tw = time.time()
+    fe = v[str(n)][:]
+    # print(time.time() - tw)
+    v.close()
+    return fe
+
 
 def get_data(left_keys, right_keys):
     left = np.zeros((len(left_keys), 3, C2.SIDE, C2.SIDE), dtype=np.float32)
-    right = np.zeros((len(right_keys), 1, 3, C2.SIDE, C2.SIDE), dtype=np.float32)
+    right = np.zeros((len(right_keys), 3, C2.SIDE, C2.SIDE), dtype=np.float32)
 
     for i, k in enumerate(left_keys):
-        k = k.split('.mp4')[0]
-        h5_path = os.path.join(P.CHALEARN_ALL_DATA_20, '%s.h5' % k)
+        print(k)
+        left[i] = quicker_load(k)
 
-        ts = time.time()
-        v = h5.File(h5_path, 'r')['video']
-        print(time.time() - ts)
-        ts = time.time()
-        left[i] = v[:][0][get_frame(v[:][0].shape[0])]
-        print(left[i].shape)
-        print(time.time() - ts)
-
-        # a = data[k]
-        # print('a', time.time() - ts)
-        # # ts = time.time()
-        # b = a[:]
-        # # print('b', time.time() - ts)
-        # ts = time.time()
-        # c = a[0]
-        # print('c', time.time() - ts)
-        # ts = time.time()
-        # d = c[get_frame(len(data[k][:][0]))]
-        # print('d', time.time() - ts)
-        # ts = time.time()
-        # left[i] = d
-
-        # left[i] = data[k][0][1]
-        # left[i] = data[k][:][0][get_frame(len(data[k][:][0]))]
-
-    # for i, k in enumerate(right_keys):
-    #     right[i] = data[k][:][0][get_frame(len(data[k][:][0]))]
+    for i, k in enumerate(right_keys):
+        print(k)
+        right[i] = quicker_load(k)
 
     return left, right
 
 
 def load_data(which, uid_keys_map, labs):
-    print('----------')
     left_uids, right_uids = get_batch_uid(which)
     left_keys, right_keys = get_keys(left_uids, right_uids, uid_keys_map)
     labels = get_labels(labs, left_keys, right_keys)
-
     left_data, right_data = get_data(left_keys, right_keys)
 
     return labels, left_data, right_data
