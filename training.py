@@ -47,8 +47,8 @@ for e in range(2):
 
     for s in range(1):
         # ts = time.time()
-        labels, left_data, right_data = D.load_data('val', val_uid_keys_map, val_labels)
-        # labels, left_data, right_data = D.load_data('train', train_uid_keys_map, train_labels, train_data)
+        # labels, left_data, right_data = D.load_data('val', val_uid_keys_map, val_labels)
+        labels, left_data, right_data = D.load_data('train', train_uid_keys_map, train_labels)
         # print((time.time() - ts))
         # training
     #     with chainer.using_config('train', True):

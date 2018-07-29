@@ -182,10 +182,14 @@ def quicker_load(k):
     k = k.split('.mp4')[0]
     h5_path = os.path.join(P.CHALEARN_ALL_DATA_20_2, '%s.h5' % k)
     v = h5.File(h5_path, 'r')
+    tw = time.time()
     n = get_frame(len(v.keys()))
-    # tw = time.time()
+    # TODO: figure out how to bypass this
+    # n = 100
+    print(time.time() - tw)
+    tw = time.time()
     fe = v[str(n)][:]
-    # print(time.time() - tw)
+    print(time.time() - tw)
     v.close()
     return fe
 
@@ -195,11 +199,9 @@ def get_data(left_keys, right_keys):
     right = np.zeros((len(right_keys), 3, C2.SIDE, C2.SIDE), dtype=np.float32)
 
     for i, k in enumerate(left_keys):
-        print(k)
         left[i] = quicker_load(k)
 
     for i, k in enumerate(right_keys):
-        print(k)
         right[i] = quicker_load(k)
 
     return left, right
