@@ -337,21 +337,36 @@ def array_for_each_frame(b, e):
     print(b, e)
     videos = os.listdir(P.CHALEARN_ALL_DATA_20)
     videos = videos[b:e]
+
+    processed = os.listdir(P.CHALEARN_ALL_DATA_20_2)
+    videos = list(set(videos) - set(processed))
+
     for v in videos:
         v_path = os.path.join(P.CHALEARN_ALL_DATA_20, v)
-        video_arr = h5.File(v_path, 'r')['video'][0]
-        new_h5 = os.path.join(P.CHALEARN_ALL_DATA_20_2, v)
-        with h5.File(new_h5, 'w') as new_h5:
-            for f in range(video_arr.shape[0]):
-                d = video_arr[f]
-                new_h5.create_dataset(name=str(f), data=d)
+        try:
+            video_arr = h5.File(v_path, 'r')['video'][0]
+            new_h5 = os.path.join(P.CHALEARN_ALL_DATA_20_2, v)
+            with h5.File(new_h5, 'w') as new_h5:
+                for f in range(video_arr.shape[0]):
+                    d = video_arr[f]
+                    new_h5.create_dataset(name=str(f), data=d)
+        except OSError:
+            print('OSError file %s' % v_path)
+
+
+
+
 
 
 # array_for_each_frame(0, 1000)
 # array_for_each_frame(1000, 2000) # issue
+# OSError file /scratch/users/gabras/data/chalearn20/all_data/3orJLMVqWYw.004.h5
+
 # array_for_each_frame(2000, 3000)
 # array_for_each_frame(3000, 4000)
-# array_for_each_frame(4000, 5000) # issue
+array_for_each_frame(4000, 5000) # issue
+# OSError file /scratch/users/gabras/data/chalearn20/all_data/Ya9Szm73LfE.002.h5
+
 # array_for_each_frame(5000, 6000)
 # array_for_each_frame(6000, 7000)
 # array_for_each_frame(7000, 8000)
