@@ -204,10 +204,15 @@ def all_data_reading():
     for v in l:
         v_path = os.path.join(P.CHALEARN_ALL_DATA_20_2, v)
         with h5.File(v_path, 'r') as mf:
-            print('asdf')
+            # tot_frames = len(mf.keys())
+            ts = time.time()
+            img = mf[str(0)]
+            # for i in range(tot_frames):
+            #     img = mf[str(i)]
+            print(time.time() - ts)
 
 
-all_data_reading()
+# all_data_reading()
 
 
 '''
