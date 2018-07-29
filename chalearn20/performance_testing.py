@@ -190,13 +190,25 @@ def reading_test():
     # return [time_jpg, time_setup1, time_setup3, time_setup3_2]
 
 
-num = 1
-t = np.zeros((num, 1))
-for i in range(num):
-    t[i] = reading_test()
+# num = 1
+# t = np.zeros((num, 1))
+# for i in range(num):
+#     t[i] = reading_test()
+#
+# print(t)
+# print(t.mean(axis=0))
 
-print(t)
-print(t.mean(axis=0))
+
+def all_data_reading():
+    l = os.listdir(P.CHALEARN_ALL_DATA_20_2)
+    for v in l:
+        v_path = os.path.join(P.CHALEARN_ALL_DATA_20_2, v)
+        with h5.File(v_path, 'r') as mf:
+            print('asdf')
+
+
+all_data_reading()
+
 
 '''
 space on disk

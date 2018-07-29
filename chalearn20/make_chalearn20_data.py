@@ -305,10 +305,12 @@ def create_chalearn_data(which):
 
 
 def put_all_h5_in_one_folder():
+
     # train
     train = os.listdir(P.CHALEARN_FACES_TRAIN_H5)
     train.sort()
     train.pop()  # remove empty validation folder
+
     for f1 in train:
         f1_path = os.path.join(P.CHALEARN_FACES_TRAIN_H5, f1)
         divs = os.listdir(f1_path)
@@ -317,19 +319,33 @@ def put_all_h5_in_one_folder():
             videos = os.listdir(f2_path)
             for v in videos:
                 v_path = os.path.join(f2_path, v)
-                shutil.copy(v_path, P.CHALEARN_ALL_DATA_20)
+                # shutil.copy(v_path, P.CHALEARN_ALL_DATA_20)
+                if '3orJLMVqWYw.004.h5' == v:
+                    print('3orJLMVqWYw.004.h5 in train', v_path)
+                if 'Ya9Szm73LfE.002.h5' == v:
+                    print('Ya9Szm73LfE.002.h5 in train', v_path)
 
     # test
     test = os.listdir(P.CHALEARN_FACES_TEST_H5)
     for v in test:
-        v_path = os.path.join(P.CHALEARN_FACES_TEST_H5, v)
-        shutil.copy(v_path, P.CHALEARN_ALL_DATA_20)
+        if '3orJLMVqWYw.004.h5' == v:
+            print('3orJLMVqWYw.004.h5 in test')
+        if 'Ya9Szm73LfE.002.h5' == v:
+            print('Ya9Szm73LfE.002.h5 in test')
+        # v_path = os.path.join(P.CHALEARN_FACES_TEST_H5, v)
+        # shutil.copy(v_path, P.CHALEARN_ALL_DATA_20)
 
     # val
     val = os.listdir(P.CHALEARN_FACES_VAL_H5)
     for v in val:
-        v_path = os.path.join(P.CHALEARN_FACES_VAL_H5, v)
-        shutil.copy(v_path, P.CHALEARN_ALL_DATA_20)
+        if '3orJLMVqWYw.004.h5' == v:
+            print('3orJLMVqWYw.004.h5 in val')
+        if 'Ya9Szm73LfE.002.h5' == v:
+            print('Ya9Szm73LfE.002.h5 in val')
+        # v_path = os.path.join(P.CHALEARN_FACES_VAL_H5, v)
+        # shutil.copy(v_path, P.CHALEARN_ALL_DATA_20)
+
+# put_all_h5_in_one_folder()
 
 
 def array_for_each_frame(b, e):
@@ -354,8 +370,19 @@ def array_for_each_frame(b, e):
             print('OSError file %s' % v_path)
 
 
+def last_two():
+    p1 = '/scratch/users/steiac/steiac/deployed-3d/3DDIdata/data_preprocessed/train-1/training80_09/3orJLMVqWYw.004.h5'
+    p2 = '/scratch/users/steiac/steiac/deployed-3d/3DDIdata/data_preprocessed/train-1/training80_09/Ya9Szm73LfE.002.h5'
 
-
+    l = [p1, p2]
+    for p in l:
+        v = p.split('/')[-1]
+        video_arr = h5.File(p, 'r')['video'][0]
+        new_h5 = os.path.join(P.CHALEARN_ALL_DATA_20_2, v)
+        with h5.File(new_h5, 'w') as new_h5:
+            for f in range(video_arr.shape[0]):
+                d = video_arr[f]
+                new_h5.create_dataset(name=str(f), data=d)
 
 
 # array_for_each_frame(0, 1000)
@@ -364,7 +391,7 @@ def array_for_each_frame(b, e):
 
 # array_for_each_frame(2000, 3000)
 # array_for_each_frame(3000, 4000)
-array_for_each_frame(4000, 5000) # issue
+# array_for_each_frame(4000, 5000) # issue
 # OSError file /scratch/users/gabras/data/chalearn20/all_data/Ya9Szm73LfE.002.h5
 
 # array_for_each_frame(5000, 6000)
