@@ -21,8 +21,6 @@ def update_loss(total_loss, l):
     return total_loss
 
 print('Initializing')
-# train_data = h5.File(P.CHALEARN_TRAIN_DATA_20, 'r')
-# val_data = h5.File(P.CHALEARN_VAL_DATA_20, 'r')
 
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
@@ -41,7 +39,6 @@ id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 # TODO: use GPU for doing things
 # TODO: check model input size
-# TODO: make lodaing faster
 
 print('Enter training loop')
 for e in range(2):

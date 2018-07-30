@@ -129,9 +129,7 @@ def get_labels(labels_h5, left_keys, right_keys):
 
 
 def get_frame(num_frames):
-    # ts = time.time()
     num = randint(0, num_frames - 1)
-    # print(time.time() - ts)
     return num
 
 
@@ -179,15 +177,8 @@ def quicker_load(k, id_frames):
     k = k.split('.mp4')[0]
     h5_path = os.path.join(P.CHALEARN_ALL_DATA_20_2, '%s.h5' % k)
     v = h5.File(h5_path, 'r')
-    tw = time.time()
-    # n = get_frame(len(v.keys()))
     n = get_frame(id_frames[k][0])
-
-    print('v keys ', time.time() - tw)
-
-    # tw = time.time()
     fe = v[str(n)][:]
-    # print(time.time() - tw)
     v.close()
     return fe
 
@@ -266,7 +257,3 @@ def num_frame_statistics():
             mf.create_dataset(name=v.split('.h5')[0], data=n)
 
     print('done')
-
-
-# num_frame_statistics()
-#

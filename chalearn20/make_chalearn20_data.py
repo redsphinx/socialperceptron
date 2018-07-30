@@ -345,8 +345,6 @@ def put_all_h5_in_one_folder():
         # v_path = os.path.join(P.CHALEARN_FACES_VAL_H5, v)
         # shutil.copy(v_path, P.CHALEARN_ALL_DATA_20)
 
-# put_all_h5_in_one_folder()
-
 
 def array_for_each_frame(b, e):
     # fml
@@ -384,49 +382,3 @@ def last_two():
                 d = video_arr[f]
                 new_h5.create_dataset(name=str(f), data=d)
 
-
-# array_for_each_frame(0, 1000)
-# array_for_each_frame(1000, 2000) # issue
-# OSError file /scratch/users/gabras/data/chalearn20/all_data/3orJLMVqWYw.004.h5
-
-# array_for_each_frame(2000, 3000)
-# array_for_each_frame(3000, 4000)
-# array_for_each_frame(4000, 5000) # issue
-# OSError file /scratch/users/gabras/data/chalearn20/all_data/Ya9Szm73LfE.002.h5
-
-# array_for_each_frame(5000, 6000)
-# array_for_each_frame(6000, 7000)
-# array_for_each_frame(7000, 8000)
-# array_for_each_frame(8000, 9000)
-# array_for_each_frame(9000, 10000)
-
-# issues:
-# 1000 2000
-# Traceback (most recent call last):
-#   File "/home/gabras/deployed/deepimpression2/chalearn20/make_chalearn20_data.py", line 351, in <module>
-#     # array_for_each_frame(1000, 2000)
-#   File "/home/gabras/deployed/deepimpression2/chalearn20/make_chalearn20_data.py", line 342, in array_for_each_frame
-#     video_arr = h5.File(v_path, 'r')['video'][0]
-#   File "/home/gabras/miniconda3/envs/python3-TF/lib/python3.6/site-packages/h5py/_hl/files.py", line 269, in __init__
-#     fid = make_fid(name, mode, userblock_size, fapl, swmr=swmr)
-#   File "/home/gabras/miniconda3/envs/python3-TF/lib/python3.6/site-packages/h5py/_hl/files.py", line 99, in make_fid
-#     fid = h5f.open(name, flags, fapl=fapl)
-#   File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper
-#   File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper
-#   File "h5py/h5f.pyx", line 78, in h5py.h5f.open
-# OSError: Unable to open file (file signature not found)
-
-# 4000 5000
-# Traceback (most recent call last):
-#   File "/home/gabras/deployed/deepimpression2/chalearn20/make_chalearn20_data.py", line 354, in <module>
-#     # array_for_each_frame(4000, 5000)
-#   File "/home/gabras/deployed/deepimpression2/chalearn20/make_chalearn20_data.py", line 342, in array_for_each_frame
-#     video_arr = h5.File(v_path, 'r')['video'][0]
-#   File "/home/gabras/miniconda3/envs/python3-TF/lib/python3.6/site-packages/h5py/_hl/files.py", line 269, in __init__
-#     fid = make_fid(name, mode, userblock_size, fapl, swmr=swmr)
-#   File "/home/gabras/miniconda3/envs/python3-TF/lib/python3.6/site-packages/h5py/_hl/files.py", line 99, in make_fid
-#     fid = h5f.open(name, flags, fapl=fapl)
-#   File "h5py/_objects.pyx", line 54, in h5py._objects.with_phil.wrapper
-#   File "h5py/_objects.pyx", line 55, in h5py._objects.with_phil.wrapper
-#   File "h5py/h5f.pyx", line 78, in h5py.h5f.open
-# OSError: Unable to open file (truncated file: eof = 39288832, sblock->base_addr = 0, stored_eof = 60811132)

@@ -1,16 +1,3 @@
-# # training on chalearn with cropped image faces
-# CHALEARN_FACES_TRAIN_H5 = '/scratch/users/steiac/steiac/deployed-3d/3DDIdata/data_preprocessed/'
-# CHALEARN_FACES_VAL_H5 = '/scratch/users/steiac/steiac/deployed-3d/3DDIdata/val_preprocessed/'
-# CHALEARN_FACES_TEST_H5 = '/scratch/users/gabras/data/chalearn10/test_preprocessed'
-#
-# CHALEARN_TRAIN_LABELS_20 = '/scratch/users/gabras/data/chalearn20/train_labels.h5'
-# CHALEARN_VAL_LABELS_20 = '/scratch/users/gabras/data/chalearn20/val_labels.h5'
-# CHALEARN_TEST_LABELS_20 = '/scratch/users/gabras/data/chalearn20/test_labels.h5'
-#
-# TRAIN_UID_KEYS_MAPPING = '/scratch/users/gabras/data/chalearn20/train_uid_keys_mapping.h5'
-# TEST_UID_KEYS_MAPPING = '/scratch/users/gabras/data/chalearn20/test_uid_keys_mapping.h5'
-# VAL_UID_KEYS_MAPPING = '/scratch/users/gabras/data/chalearn20/val_uid_keys_mapping.h5'
-
 
 # -------------------------------------------------------------------------------------------------
 # paths for the new data splits
@@ -22,9 +9,14 @@ CHALEARN_TRAIN_LABELS_20 = '/scratch/users/gabras/data/chalearn20/train_labels.h
 CHALEARN_VAL_LABELS_20 = '/scratch/users/gabras/data/chalearn20/val_labels.h5'
 CHALEARN_TEST_LABELS_20 = '/scratch/users/gabras/data/chalearn20/test_labels.h5'
 
-CHALEARN_ALL_DATA_20 = '/scratch/users/gabras/data/chalearn20/all_data'
 CHALEARN_ALL_DATA_20_2 = '/scratch/users/gabras/data/chalearn20/all_data_2'
 
+# unused
+# this is not used, will be moved to local soon
+CHALEARN_ALL_DATA_20 = '/scratch/users/gabras/data/chalearn20/all_data'
+
+# unused
+# these are not used, will be moved to local soon
 CHALEARN_TRAIN_DATA_20 = '/scratch/users/gabras/data/chalearn20/train_data.h5'
 CHALEARN_VAL_DATA_20 = '/scratch/users/gabras/data/chalearn20/val_data.h5'
 CHALEARN_TEST_DATA_20 = '/scratch/users/gabras/data/chalearn20/test_data.h5'
