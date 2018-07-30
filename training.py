@@ -73,12 +73,12 @@ for e in range(100): # EPOCHS
     loss_tmp_mean = np.mean(loss_tmp)
     train_loss.append(loss_tmp_mean)
     print('epoch %d. train loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
-    U.record_loss('train', loss_tmp_mean)
+    # U.record_loss('train', loss_tmp_mean)
 
     # validation
     loss_tmp = []
     ts = time.time()
-    for vs in range(val_steps):
+    for vs in range(val_steps): # val_steps
 
         labels, left_data, right_data = D.load_data('val', val_uid_keys_map, val_labels, id_frames)
 
@@ -98,8 +98,8 @@ for e in range(100): # EPOCHS
     loss_tmp_mean = np.mean(loss_tmp)
     val_loss.append(loss_tmp_mean)
     print('epoch %d. val loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
-    U.record_loss('val', loss_tmp_mean)
+    # U.record_loss('val', loss_tmp_mean)
 
     # save model
     name = os.path.join(P.MODELS, 'epoch_%d' % e)
-    chainer.serializers.save_npz(model, name)
+    chainer.serializers.save_npz(name, model)
