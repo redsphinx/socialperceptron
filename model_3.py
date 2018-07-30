@@ -1,0 +1,135 @@
+import chainer
+from chainer.links import Convolution2D, BatchNormalization, Linear
+from chainer.initializers import HeNormal
+from chainer.functions import relu, average_pooling_2d, max_pooling_2d, concat, dropout
+
+# add dropout
+
+### BLOCK ###
+class ConvolutionBlock(chainer.Chain):
+    def __init__(self, in_channels, out_channels):
+        super(ConvolutionBlock, self).__init__()
+        with self.init_scope():
+            self.conv = Convolution2D(in_channels, out_channels,
+                                      ksize=7, stride=2, pad=3,
+                                      initialW=HeNormal())
+            self.bn_conv = BatchNormalization(out_channels)
+
+    def __call__(self, x):
+        h = self.conv(x)
+        h = self.bn_conv(h)
+        y = relu(h)
+        return y
+
+
+class ResidualBlock(chainer.Chain):
+    def __init__(self, in_channels, out_channels):
+        super(ResidualBlock, self).__init__()
+        with self.init_scope():
+            self.res_branch2a = Convolution2D(in_channels, out_channels,
+                                              ksize=3, pad=1,
+                                              initialW=HeNormal())
+            self.bn_branch2a = BatchNormalization(out_channels)
+            self.res_branch2b = Convolution2D(out_channels, out_channels,
+                                              ksize=3, pad=1,
+                                              initialW=HeNormal())
+            self.bn_branch2b = BatchNormalization(out_channels)
+
+    def __call__(self, x):
+        h = self.res_branch2a(x)
+        h = self.bn_branch2a(h)
+        h = relu(h)
+        h = self.res_branch2b(h)
+        h = self.bn_branch2b(h)
+        h = x + h
+        y = relu(h)
+        return y
+
+
+class ResidualBlockB(chainer.Chain):
+    def __init__(self, in_channels, out_channels):
+        super(ResidualBlockB, self).__init__()
+        with self.init_scope():
+            self.res_branch1 = Convolution2D(in_channels, out_channels,
+                                             ksize=1, stride=2,
+                                             initialW=HeNormal())
+            self.bn_branch1 = BatchNormalization(out_channels)
+            self.res_branch2a = Convolution2D(in_channels, out_channels,
+                                              ksize=3, stride=2, pad=1,
+                                              initialW=HeNormal())
+            self.bn_branch2a = BatchNormalization(out_channels)
+            self.res_branch2b = Convolution2D(out_channels, out_channels,
+                                              ksize=3, pad=1,
+                                              initialW=HeNormal())
+            self.bn_branch2b = BatchNormalization(out_channels)
+
+    def __call__(self, x):
+        temp = self.res_branch1(x)
+        temp = self.bn_branch1(temp)
+        h = self.res_branch2a(x)
+        h = self.bn_branch2a(h)
+        h = chainer.functions.relu(h)
+        h = self.res_branch2b(h)
+        h = self.bn_branch2b(h)
+        h = temp + h
+        y = chainer.functions.relu(h)
+        return y
+### BLOCK ###
+
+
+### BRANCH ###
+class ResNet18(chainer.Chain):
+    def __init__(self):
+        super(ResNet18, self).__init__()
+        with self.init_scope():
+            self.conv1_relu = ConvolutionBlock(3, 32)
+            self.res2a_relu = ResidualBlock(32, 32)
+            self.res2b_relu = ResidualBlock(32, 32)
+            self.res3a_relu = ResidualBlockB(32, 64)
+            self.res3b_relu = ResidualBlock(64, 64)
+            self.res4a_relu = ResidualBlockB(64, 128)
+            self.res4b_relu = ResidualBlock(128, 128)
+            self.res5a_relu = ResidualBlockB(128, 256)
+            self.res5b_relu = ResidualBlock(256, 256)
+
+    def __call__(self, x):
+        h = self.conv1_relu(x)
+        h = max_pooling_2d(h, ksize=3, stride=2, pad=1)
+        h = self.res2a_relu(h)
+        h = self.res2b_relu(h)
+        h = self.res3a_relu(h)
+        h = self.res3b_relu(h)
+        h = self.res4a_relu(h)
+        h = self.res4b_relu(h)
+        h = self.res5a_relu(h)
+        h = self.res5b_relu(h)
+        y = average_pooling_2d(h, ksize=h.data.shape[2:])
+        # TODO: what is output size
+        # y.shape
+        # (32, 256, 1, 1)
+        return y
+### BRANCH ###
+
+
+### MODEL ###
+
+class Siamese(chainer.Chain):
+    def __init__(self):
+        super(Siamese, self).__init__()
+        with self.init_scope():
+            self.b1 = ResNet18()
+            self.b2 = ResNet18()
+            self.fc1 = Linear(in_size=512, out_size=10)
+            self.fc2 = Linear(in_size=10, out_size=10)
+
+    def __call__(self, x1, x2):
+        _1 = self.b1(x1) # (32, 256, 1, 1)
+        _2 = self.b1(x2)
+
+        h = concat((_1, _2))
+        h = dropout(h, ratio=0.5)
+        h = self.fc1(h)
+        h = dropout(h, ratio=0.5)
+        h = self.fc2(h)
+        h = chainer.functions.reshape(h, (h.shape[0], 5, 2))
+        return h

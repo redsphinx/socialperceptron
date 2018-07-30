@@ -2,7 +2,7 @@
 import chainer
 import numpy as np
 # from deepimpression2.model import Siamese
-from deepimpression2.model_2 import Siamese
+from deepimpression2.model_3 import Siamese
 import deepimpression2.constants as C
 from chainer.functions import sigmoid_cross_entropy
 from chainer.optimizers import Adam
@@ -102,5 +102,5 @@ for e in range(100): # EPOCHS
     U.record_loss('val', loss_tmp_mean)
 
     # save model
-    name = os.path.join(P.MODELS, 'epoch_%d_2' % e)
+    name = os.path.join(P.MODELS, 'epoch_%d_3' % e)
     chainer.serializers.save_npz(name, model)
