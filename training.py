@@ -73,7 +73,7 @@ for e in range(100): # EPOCHS
     loss_tmp_mean = np.mean(loss_tmp)
     train_loss.append(loss_tmp_mean)
     print('epoch %d. train loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
-    # U.record_loss('train', loss_tmp_mean)
+    U.record_loss('train', loss_tmp_mean)
 
     # validation
     loss_tmp = []
@@ -98,7 +98,7 @@ for e in range(100): # EPOCHS
     loss_tmp_mean = np.mean(loss_tmp)
     val_loss.append(loss_tmp_mean)
     print('epoch %d. val loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
-    # U.record_loss('val', loss_tmp_mean)
+    U.record_loss('val', loss_tmp_mean)
 
     # save model
     name = os.path.join(P.MODELS, 'epoch_%d' % e)
