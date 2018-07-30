@@ -33,6 +33,8 @@ TRAIN_UID_KEYS_MAPPING = '/scratch/users/gabras/data/chalearn20/train_uid_keys_m
 TEST_UID_KEYS_MAPPING = '/scratch/users/gabras/data/chalearn20/test_uid_keys_mapping.h5'
 VAL_UID_KEYS_MAPPING = '/scratch/users/gabras/data/chalearn20/val_uid_keys_mapping.h5'
 
+NUM_FRAMES = '/scratch/users/gabras/data/chalearn20/id_frames.h5'
+
 # -------------------------------------------------------------------------------------------------
 # paths for original data
 CHALEARN_TRAIN_LABELS_ORIGINAL = '/scratch/users/gabras/data/chalearn10/train_labels.pkl'

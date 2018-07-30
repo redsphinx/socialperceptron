@@ -175,43 +175,41 @@ def all_data_reading():
             #     img = mf[str(i)]
 
 
-# all_data_reading()
-
-
-def quicker_load(k):
+def quicker_load(k, id_frames):
     k = k.split('.mp4')[0]
     h5_path = os.path.join(P.CHALEARN_ALL_DATA_20_2, '%s.h5' % k)
     v = h5.File(h5_path, 'r')
     tw = time.time()
-    n = get_frame(len(v.keys()))
-    # TODO: figure out how to bypass this
-    # n = 100
-    print(time.time() - tw)
-    tw = time.time()
+    # n = get_frame(len(v.keys()))
+    n = get_frame(id_frames[k])
+
+    print('v keys ', time.time() - tw)
+
+    # tw = time.time()
     fe = v[str(n)][:]
-    print(time.time() - tw)
+    # print(time.time() - tw)
     v.close()
     return fe
 
 
-def get_data(left_keys, right_keys):
+def get_data(left_keys, right_keys, id_frames):
     left = np.zeros((len(left_keys), 3, C2.SIDE, C2.SIDE), dtype=np.float32)
     right = np.zeros((len(right_keys), 3, C2.SIDE, C2.SIDE), dtype=np.float32)
 
     for i, k in enumerate(left_keys):
-        left[i] = quicker_load(k)
+        left[i] = quicker_load(k, id_frames)
 
     for i, k in enumerate(right_keys):
-        right[i] = quicker_load(k)
+        right[i] = quicker_load(k, id_frames)
 
     return left, right
 
 
-def load_data(which, uid_keys_map, labs):
+def load_data(which, uid_keys_map, labs, id_frames):
     left_uids, right_uids = get_batch_uid(which)
     left_keys, right_keys = get_keys(left_uids, right_uids, uid_keys_map)
     labels = get_labels(labs, left_keys, right_keys)
-    left_data, right_data = get_data(left_keys, right_keys)
+    left_data, right_data = get_data(left_keys, right_keys, id_frames)
 
     return labels, left_data, right_data
 
@@ -252,3 +250,19 @@ def get_info_chalearn20_data():
     train.close()
     test.close()
     val.close()
+
+
+def num_frame_statistics():
+    videos = os.listdir(P.CHALEARN_ALL_DATA_20_2)
+
+    with h5.File(P.NUM_FRAMES, 'w') as mf:
+        for i, v in enumerate(videos):
+            print(i)
+            p = os.path.join(P.CHALEARN_ALL_DATA_20_2, v)
+            n = len(h5.File(p, 'r').keys())
+            mf.create_dataset(name=v.split('.h5')[0], data=n)
+
+    print('done')
+
+
+num_frame_statistics()

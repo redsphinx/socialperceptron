@@ -36,6 +36,8 @@ val_uid_keys_map = h5.File(P.VAL_UID_KEYS_MAPPING, 'r')
 training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
 val_steps = len(val_labels) // C.VAL_BATCH_SIZE
 
+id_frames = h5.File(P.NUM_FRAMES, 'r')
+
 
 # TODO: use GPU for doing things
 # TODO: check model input size
@@ -48,7 +50,7 @@ for e in range(2):
     for s in range(1):
         # ts = time.time()
         # labels, left_data, right_data = D.load_data('val', val_uid_keys_map, val_labels)
-        labels, left_data, right_data = D.load_data('train', train_uid_keys_map, train_labels)
+        labels, left_data, right_data = D.load_data('train', train_uid_keys_map, train_labels, id_frames)
         # print((time.time() - ts))
         # training
     #     with chainer.using_config('train', True):
