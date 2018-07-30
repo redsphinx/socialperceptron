@@ -1,8 +1,8 @@
 # training on chalearn with cropped image faces
 import chainer
 import numpy as np
-# from deepimpression2.model import Siamese
-from deepimpression2.model_3 import Siamese
+from deepimpression2.model import Siamese
+# from deepimpression2.model_3 import Siamese
 import deepimpression2.constants as C
 from chainer.functions import sigmoid_cross_entropy
 from chainer.optimizers import Adam
@@ -16,7 +16,7 @@ import os
 
 
 model = Siamese()
-optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
+optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.004)
 optimizer.setup(model)
 
 if C.ON_GPU:
@@ -102,5 +102,5 @@ for e in range(100): # EPOCHS
     U.record_loss('val', loss_tmp_mean)
 
     # save model
-    name = os.path.join(P.MODELS, 'epoch_%d_3' % e)
+    name = os.path.join(P.MODELS, 'epoch_%d_4' % e)
     chainer.serializers.save_npz(name, model)
