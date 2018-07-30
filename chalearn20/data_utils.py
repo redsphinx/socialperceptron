@@ -181,7 +181,7 @@ def quicker_load(k, id_frames):
     v = h5.File(h5_path, 'r')
     tw = time.time()
     # n = get_frame(len(v.keys()))
-    n = get_frame(id_frames[k])
+    n = get_frame(id_frames[k][0])
 
     print('v keys ', time.time() - tw)
 
@@ -260,9 +260,13 @@ def num_frame_statistics():
             print(i)
             p = os.path.join(P.CHALEARN_ALL_DATA_20_2, v)
             n = len(h5.File(p, 'r').keys())
+            print('asdf')
+            n = np.array([n], dtype=np.uint8)
+
             mf.create_dataset(name=v.split('.h5')[0], data=n)
 
     print('done')
 
 
-num_frame_statistics()
+# num_frame_statistics()
+#
