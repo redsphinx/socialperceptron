@@ -106,7 +106,8 @@ def get_labels(labels_h5, left_keys, right_keys):
     assert len(left_keys) == len(right_keys)
     tot = len(left_keys)
 
-    all_one_hot_labels = np.zeros((tot, 10), dtype=np.uint8)
+    # all_one_hot_labels = np.zeros((tot, 10), dtype=np.float32)
+    all_one_hot_labels = np.zeros((tot, 10), dtype=int)
 
     def which_side(l, r):
         if l > r:
@@ -124,6 +125,8 @@ def get_labels(labels_h5, left_keys, right_keys):
             one_hot_label.append(side[1])
 
         all_one_hot_labels[i] = one_hot_label
+
+    all_one_hot_labels = all_one_hot_labels.reshape((all_one_hot_labels.shape[0], 5, 2))
 
     return all_one_hot_labels
 

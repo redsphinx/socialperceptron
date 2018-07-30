@@ -9,16 +9,22 @@ import h5py as h5
 import deepimpression2.paths as P
 import deepimpression2.chalearn20.data_utils as D
 import time
+from chainer.backends.cuda import to_cpu, to_gpu
 
 
 model = Siamese()
 optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
 optimizer.setup(model)
 
+if C.ON_GPU:
+    model = model.to_gpu(device=C.DEVICE)
+
+
 
 def update_loss(total_loss, l):
     total_loss.append(l)
     return total_loss
+
 
 print('Initializing')
 
@@ -36,30 +42,33 @@ val_steps = len(val_labels) // C.VAL_BATCH_SIZE
 
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
-
-# TODO: use GPU for doing things
-# TODO: check model input size
-
 print('Enter training loop')
-for e in range(2):
+for e in range(10): # EPOCHS
     loss_tmp = []
 
-    for s in range(1):
-        # ts = time.time()
-        # labels, left_data, right_data = D.load_data('val', val_uid_keys_map, val_labels)
+    ts = time.time()
+    for s in range(10): # training_steps
         labels, left_data, right_data = D.load_data('train', train_uid_keys_map, train_labels, id_frames)
-        # print((time.time() - ts))
+
+        if C.ON_GPU:
+            left_data = to_gpu(left_data, device=C.DEVICE)
+            right_data = to_gpu(right_data, device=C.DEVICE)
+            labels = to_gpu(labels, device=C.DEVICE)
+
         # training
-    #     with chainer.using_config('train', True):
-    #         model.cleargrads()
-    #
-    #         prediction = model(left_data, right_data)
-    #         loss = sigmoid_cross_entropy(prediction, labels)
-    #
-    #         loss.backward()
-    #         optimizer.update()
-    #
-    # training_loss = update_loss(train_loss, np.mean(loss_tmp))
+        with chainer.using_config('train', True):
+            model.cleargrads()
+
+            prediction = model(left_data, right_data)
+            loss = sigmoid_cross_entropy(prediction, labels)
+
+            loss.backward()
+            optimizer.update()
+
+            loss_tmp.append(float(loss.data))
+
+    training_loss = update_loss(train_loss, np.mean(loss_tmp))
+    print('epoch %d ' % e, time.time() - ts, np.mean(loss_tmp))
 
     # implement validation
 

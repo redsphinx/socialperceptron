@@ -104,6 +104,8 @@ class ResNet18(chainer.Chain):
         h = self.res5b_relu(h)
         y = average_pooling_2d(h, ksize=h.data.shape[2:])
         # TODO: what is output size
+        # y.shape
+        # (32, 256, 1, 1)
         return y
 ### BRANCH ###
 
@@ -119,7 +121,10 @@ class Siamese(chainer.Chain):
             self.fc = Linear(in_size=512, out_size=10)
 
     def __call__(self, x1, x2):
-        h = concat(self.b1(x1), self.b2(x2))
+        _1 = self.b1(x1) # (32, 256, 1, 1)
+        _2 = self.b1(x2)
+
+        h = concat((_1, _2))
         h = self.fc(h)
-        h = chainer.functions.reshape(h, (5, 2))
+        h = chainer.functions.reshape(h, (h.shape[0], 5, 2))
         return h
