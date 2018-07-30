@@ -11,6 +11,7 @@ import deepimpression2.chalearn20.data_utils as D
 import time
 from chainer.backends.cuda import to_cpu, to_gpu
 import deepimpression2.util as U
+import os
 
 
 model = Siamese()
@@ -42,7 +43,7 @@ val_steps = len(val_labels) // C.VAL_BATCH_SIZE
 
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
-print('Enter training loop')
+print('Enter training loop with validation')
 for e in range(100): # EPOCHS
     loss_tmp = []
 
@@ -96,20 +97,9 @@ for e in range(100): # EPOCHS
 
     loss_tmp_mean = np.mean(loss_tmp)
     val_loss.append(loss_tmp_mean)
+    print('epoch %d. val loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
     U.record_loss('val', loss_tmp_mean)
 
-    print('epoch %d. val loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    # save model
+    name = os.path.join(P.MODELS, 'epoch_%d' % e)
+    chainer.serializers.save_npz(model, name)

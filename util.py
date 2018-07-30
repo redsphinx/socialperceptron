@@ -16,4 +16,4 @@ def record_loss(which, loss):
     # TODO: add case for test
 
     with open(path, 'a') as mf:
-        mf.write('%s' % str(loss)[0:6])
+        mf.write('%s\n' % str(loss)[0:6])
