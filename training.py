@@ -10,6 +10,7 @@ import deepimpression2.paths as P
 import deepimpression2.chalearn20.data_utils as D
 import time
 from chainer.backends.cuda import to_cpu, to_gpu
+import deepimpression2.util as U
 
 
 model = Siamese()
@@ -18,7 +19,6 @@ optimizer.setup(model)
 
 if C.ON_GPU:
     model = model.to_gpu(device=C.DEVICE)
-
 
 
 def update_loss(total_loss, l):
@@ -43,11 +43,12 @@ val_steps = len(val_labels) // C.VAL_BATCH_SIZE
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 print('Enter training loop')
-for e in range(10): # EPOCHS
+for e in range(100): # EPOCHS
     loss_tmp = []
 
     ts = time.time()
-    for s in range(10): # training_steps
+    for s in range(training_steps): # training_steps
+
         labels, left_data, right_data = D.load_data('train', train_uid_keys_map, train_labels, id_frames)
 
         if C.ON_GPU:
@@ -60,6 +61,7 @@ for e in range(10): # EPOCHS
             model.cleargrads()
 
             prediction = model(left_data, right_data)
+
             loss = sigmoid_cross_entropy(prediction, labels)
 
             loss.backward()
@@ -67,8 +69,47 @@ for e in range(10): # EPOCHS
 
             loss_tmp.append(float(loss.data))
 
-    training_loss = update_loss(train_loss, np.mean(loss_tmp))
-    print('epoch %d ' % e, time.time() - ts, np.mean(loss_tmp))
+    loss_tmp_mean = np.mean(loss_tmp)
+    train_loss.append(loss_tmp_mean)
+    print('epoch %d. train loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
+    U.record_loss('train', loss_tmp_mean)
 
-    # implement validation
+    # validation
+    loss_tmp = []
+    ts = time.time()
+    for vs in range(val_steps):
+
+        labels, left_data, right_data = D.load_data('val', val_uid_keys_map, val_labels, id_frames)
+
+        if C.ON_GPU:
+            left_data = to_gpu(left_data, device=C.DEVICE)
+            right_data = to_gpu(right_data, device=C.DEVICE)
+            labels = to_gpu(labels, device=C.DEVICE)
+
+        # training
+        with chainer.using_config('train', False):
+            model.cleargrads()
+            prediction = model(left_data, right_data)
+            loss = sigmoid_cross_entropy(prediction, labels)
+
+        loss_tmp.append(float(loss.data))
+
+    loss_tmp_mean = np.mean(loss_tmp)
+    val_loss.append(loss_tmp_mean)
+    U.record_loss('val', loss_tmp_mean)
+
+    print('epoch %d. val loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
