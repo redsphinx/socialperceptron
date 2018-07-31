@@ -42,6 +42,21 @@ def get_info_labels():
     val.close()
 
 
+def retrieve_unique_pairs(batch_size, grid, r):
+    unique_pairs = []
+    points = poisson_disc.poisson_disc_samples(grid, grid, r=r, k=batch_size)
+
+    for p in points:
+        if p[0] == p[1]:
+            pass
+        else:
+            unique_pairs.append(p)
+
+    unique_pairs = unique_pairs[0:batch_size]
+
+    return unique_pairs
+
+
 def get_batch_uid(which):
     # r is empirically selected for grid size and batch size
     # TODO: figure out relationship between r and grid and batch size
@@ -50,23 +65,17 @@ def get_batch_uid(which):
     if which == 'train':
         batch_size = C1.TRAIN_BATCH_SIZE
         grid = C2.NUM_TRAIN
-        r = 290
+        r = 270 # reduced from 290
     elif which == 'test':
         batch_size = C1.TEST_BATCH_SIZE
         grid = C2.NUM_TEST
-        r = 70
+        r = 50 # reduced from 70
     elif which == 'val':
         batch_size = C1.VAL_BATCH_SIZE
         grid = C2.NUM_VAL
-        r = 70
+        r = 50 # reduced from 70
 
-    points = poisson_disc.poisson_disc_samples(grid, grid, r=r, k=batch_size)
-    # print(len(points))
-
-    if len(points) < batch_size:
-        get_batch_uid(which)
-    else:
-        points = points[0:batch_size]
+    points = retrieve_unique_pairs(batch_size, grid, r)
 
     # visualize_grid(grid, points)
 
@@ -199,13 +208,23 @@ def get_data(left_keys, right_keys, id_frames):
     return left, right
 
 
-def load_data(which, uid_keys_map, labs, id_frames):
+def load_data(which, uid_keys_map, labs, id_frames, seen):
     left_uids, right_uids = get_batch_uid(which)
     left_keys, right_keys = get_keys(left_uids, right_uids, uid_keys_map)
     labels = get_labels(labs, left_keys, right_keys)
     left_data, right_data = get_data(left_keys, right_keys, id_frames)
-
+    seen[0].append(left_keys)
+    seen[1].append(right_keys)
     return labels, left_data, right_data
+
+
+def make_pairs(which, uid_keys_map, seen):
+    # used for debugging to check duplicate pairs
+    left_uids, right_uids = get_batch_uid(which)
+    left_keys, right_keys = get_keys(left_uids, right_uids, uid_keys_map)
+    seen[0].append(left_keys)
+    seen[1].append(right_keys)
+    return seen
 
 
 def get_info_stefan_data():

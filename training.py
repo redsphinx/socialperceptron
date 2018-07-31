@@ -16,19 +16,15 @@ import os
 
 
 model = Siamese()
-optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.004)
+# optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.004)
+optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
 optimizer.setup(model)
 
 if C.ON_GPU:
     model = model.to_gpu(device=C.DEVICE)
 
-
-def update_loss(total_loss, l):
-    total_loss.append(l)
-    return total_loss
-
-
 print('Initializing')
+print('model initialized with %d parameters' % model.count_params())
 
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
@@ -45,7 +41,7 @@ val_steps = len(val_labels) // C.VAL_BATCH_SIZE
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 print('Enter training loop with validation')
-for e in range(100): # EPOCHS
+for e in range(50): # EPOCHS
     loss_tmp = []
 
     ts = time.time()
@@ -74,7 +70,7 @@ for e in range(100): # EPOCHS
     loss_tmp_mean = np.mean(loss_tmp)
     train_loss.append(loss_tmp_mean)
     print('epoch %d. train loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
-    U.record_loss('train', loss_tmp_mean)
+    # U.record_loss('train', loss_tmp_mean)
 
     # validation
     loss_tmp = []
@@ -99,8 +95,9 @@ for e in range(100): # EPOCHS
     loss_tmp_mean = np.mean(loss_tmp)
     val_loss.append(loss_tmp_mean)
     print('epoch %d. val loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
-    U.record_loss('val', loss_tmp_mean)
+    # U.record_loss('val', loss_tmp_mean)
 
     # save model
     name = os.path.join(P.MODELS, 'epoch_%d_4' % e)
-    chainer.serializers.save_npz(name, model)
+    # chainer.serializers.save_npz(name, model)
+

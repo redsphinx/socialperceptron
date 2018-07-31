@@ -103,7 +103,6 @@ class ResNet18(chainer.Chain):
         h = self.res5a_relu(h)
         h = self.res5b_relu(h)
         y = average_pooling_2d(h, ksize=h.data.shape[2:])
-        # TODO: what is output size
         # y.shape
         # (32, 256, 1, 1)
         return y
