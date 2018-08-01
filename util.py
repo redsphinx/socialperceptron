@@ -8,15 +8,25 @@ def safe_mkdir(dir):
         os.mkdir(dir)
 
 
-def record_loss(which, loss):
+def record_loss(which, loss, cm_trait):
     if which == 'train':
         path = P.TRAIN_LOG
     elif which == 'val':
         path = P.VAL_LOG
     # TODO: add case for test
 
+    line = ''
+
     with open(path, 'a') as mf:
-        mf.write('%s\n' % str(loss)[0:6])
+        cm_trait = list(cm_trait.flatten())
+        for i in range(len(cm_trait)):
+            line += str(cm_trait[i])[0:4]
+            line += ','
+
+        line = line[0:-1]
+        # tmp = '%s,%s\n' % (str(loss)[0:6], line)
+        # print(tmp)
+        mf.write('%s,%s\n' % (str(loss)[0:6], line))
 
 
 def binarize(arr):
@@ -60,6 +70,6 @@ def make_confusion_matrix(prediction, labels):
                     fr += 1
                     cm_per_trait[j][3] += 1
 
-    cm_per_trait = np.mean(cm_per_trait, axis=0)
+    # cm_per_trait = np.mean(cm_per_trait, axis=0)
 
     return [tl, fl, tr, fr], cm_per_trait
