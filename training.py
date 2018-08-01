@@ -122,6 +122,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
     U.record_loss('val', loss_tmp_mean, np.mean(cm_trait_tmp, axis=0))
 
     # save model
-    # name = os.path.join(P.MODELS, 'epoch_%d_4' % e)
-    # chainer.serializers.save_npz(name, model)
+    if (e + 1) % 10:
+        name = os.path.join(P.MODELS, 'epoch_%d_5' % e)
+        chainer.serializers.save_npz(name, model)
 

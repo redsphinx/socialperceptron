@@ -1,6 +1,7 @@
 import numpy as np
 import os
 import deepimpression2.paths as P
+import matplotlib.pyplot as plt
 
 
 def safe_mkdir(dir):
@@ -13,7 +14,8 @@ def record_loss(which, loss, cm_trait):
         path = P.TRAIN_LOG
     elif which == 'val':
         path = P.VAL_LOG
-    # TODO: add case for test
+    elif which == 'test':
+        path = P.TEST_LOG
 
     line = ''
 
@@ -73,3 +75,43 @@ def make_confusion_matrix(prediction, labels):
     # cm_per_trait = np.mean(cm_per_trait, axis=0)
 
     return [tl, fl, tr, fr], cm_per_trait
+
+
+def mk_plots(which):
+    assert(which in ['train', 'val', 'test'])
+
+    if which == 'train':
+        loss_path = P.TRAIN_LOG
+        name = 'train'
+    elif which == 'val':
+        loss_path = P.VAL_LOG
+        name = 'val'
+    elif which == 'test':
+        loss_path = P.TEST_LOG
+
+    data = np.genfromtxt(loss_path, float, delimiter=',')
+    x = np.arange(0, data.shape[0])
+
+    # cross entropy loss plot
+    y = data[:, 0]
+    # plt.plot(x, y, 'r')
+    # plt.title('%s cross entropy loss' % name)
+    # plt.xlabel('epochs')
+    # # name = os.path.join(P.FIGURES, 'train.png')
+    # plt.savefig('%s.png' % name)
+
+    # confusion matrix
+    oceas = data[:, 1:len(data)].reshape((100, 5, 4))
+    o = oceas[:, 0, :]
+    c = oceas[:, 1, :]
+    e = oceas[:, 2, :]
+    a = oceas[:, 3, :]
+    s = oceas[:, 4, :]
+
+
+
+
+
+mk_plots('train')
+
+
