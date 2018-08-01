@@ -208,13 +208,11 @@ def get_data(left_keys, right_keys, id_frames):
     return left, right
 
 
-def load_data(which, uid_keys_map, labs, id_frames, seen):
+def load_data(which, uid_keys_map, labs, id_frames):
     left_uids, right_uids = get_batch_uid(which)
     left_keys, right_keys = get_keys(left_uids, right_uids, uid_keys_map)
     labels = get_labels(labs, left_keys, right_keys)
     left_data, right_data = get_data(left_keys, right_keys, id_frames)
-    seen[0].append(left_keys)
-    seen[1].append(right_keys)
     return labels, left_data, right_data
 
 
