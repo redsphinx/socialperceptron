@@ -69,6 +69,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
             loss.backward()
             optimizer.update()
 
+        bin_prediction = U.binarize(to_cpu(prediction.data))
         loss_tmp.append(float(loss.data))
         cm_tmp[s] = U.make_confusion_matrix(to_cpu(prediction.data), to_cpu(labels))
 
@@ -77,7 +78,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
     train_loss.append(loss_tmp_mean)
     # print('epoch %d. train loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
     print('E %d. train loss: ' % e, loss_tmp_mean,
-          ' [tl, fl, tr, fr]: ', np.mean(cm_tmp),
+          ' [tl, fl, tr, fr]: ', np.mean(cm_tmp, axis=0),
           ' time: ', time.time() - ts)
 
     # U.record_loss('train', loss_tmp_mean)
@@ -109,7 +110,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
     val_loss.append(loss_tmp_mean)
     # print('epoch %d. val loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
     print('E %d. val loss: ' % e, loss_tmp_mean,
-          ' [tl, fl, tr, fr]: ', np.mean(cm_tmp),
+          ' [tl, fl, tr, fr]: ', np.mean(cm_tmp, axis=0),
           ' time: ', time.time() - ts)
     # U.record_loss('val', loss_tmp_mean)
 

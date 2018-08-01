@@ -41,18 +41,25 @@ def make_confusion_matrix(prediction, labels):
     prediction = binarize(prediction)
     shapes = prediction.shape
     tl, fl, tr, fr = 0, 0, 0, 0
+    cm_per_trait = np.zeros((shapes[1], 4), dtype=int) # traits: OCEAS, confusions: tl, fl, tr, fr
 
     for i in range(shapes[0]):
         for j in range(shapes[1]):
             if labels[i][j][0] == 1:
                 if prediction[i][j][0] == 1:
                     tl += 1
+                    cm_per_trait[j][0] += 1
                 else:
                     fl += 1
+                    cm_per_trait[j][1] += 1
             elif labels[i][j][0] == 0:
                 if prediction[i][j][0] == 0:
                     tr += 1
+                    cm_per_trait[j][2] += 1
                 else:
                     fr += 1
+                    cm_per_trait[j][3] += 1
 
-    return [tl, fl, tr, fr]
+    cm_per_trait = np.mean(cm_per_trait, axis=0)
+
+    return [tl, fl, tr, fr], cm_per_trait
