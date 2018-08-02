@@ -2,7 +2,7 @@
 import chainer
 import numpy as np
 # from deepimpression2.model import Siamese
-from deepimpression2.model_6 import Siamese
+from deepimpression2.model_7 import Siamese
 import deepimpression2.constants as C
 from chainer.functions import sigmoid_cross_entropy
 from chainer.optimizers import Adam
@@ -143,6 +143,6 @@ for e in range(C.EPOCHS): # C.EPOCHS
 
     # save model
     if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_6' % e)
+        name = os.path.join(P.MODELS, 'epoch_%d_8' % e)
         chainer.serializers.save_npz(name, model)
 

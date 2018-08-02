@@ -1,9 +1,9 @@
 import chainer
 from chainer.links import Convolution2D, BatchNormalization, Linear
 from chainer.initializers import HeNormal
-from chainer.functions import relu, average_pooling_2d, max_pooling_2d, concat, dropout
+from chainer.functions import relu, average_pooling_2d, max_pooling_2d, dropout
 
-# add dropout
+# subtraction and dropout
 
 ### BLOCK ###
 class ConvolutionBlock(chainer.Chain):
@@ -117,15 +117,14 @@ class Siamese(chainer.Chain):
         super(Siamese, self).__init__()
         with self.init_scope():
             self.b1 = ResNet18()
-            self.b2 = ResNet18()
-            self.fc1 = Linear(in_size=512, out_size=10)
+            self.fc1 = Linear(in_size=256, out_size=10)
             self.fc2 = Linear(in_size=10, out_size=10)
 
     def __call__(self, x1, x2):
         _1 = self.b1(x1) # (32, 256, 1, 1)
         _2 = self.b1(x2)
 
-        h = concat((_1, _2))
+        h = _1 - _2
         h = dropout(h, ratio=0.5)
         h = self.fc1(h)
         h = dropout(h, ratio=0.5)
