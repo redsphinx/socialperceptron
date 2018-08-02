@@ -3,7 +3,8 @@ from chainer.links import Convolution2D, BatchNormalization, Linear
 from chainer.initializers import HeNormal
 from chainer.functions import relu, average_pooling_2d, max_pooling_2d, dropout
 
-# subtraction and dropout
+# subtraction and dropout and glorotnormal
+
 
 ### BLOCK ###
 class ConvolutionBlock(chainer.Chain):

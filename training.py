@@ -2,7 +2,7 @@
 import chainer
 import numpy as np
 # from deepimpression2.model import Siamese
-from deepimpression2.model_7 import Siamese
+from deepimpression2.model_9 import Siamese
 import deepimpression2.constants as C
 from chainer.functions import sigmoid_cross_entropy
 from chainer.optimizers import Adam
@@ -69,6 +69,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
 
         # training
         with chainer.using_config('train', True):
+        # with chainer.using_config('train', False):
             model.cleargrads()
             prediction = model(left_data, right_data)
             loss = sigmoid_cross_entropy(prediction, labels)
@@ -142,7 +143,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
     U.record_loss('val', loss_tmp_mean, np.mean(cm_trait_tmp, axis=0), np.mean(bs_tmp, axis=1))
 
     # save model
-    if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_8' % e)
-        chainer.serializers.save_npz(name, model)
+    # if ((e + 1) % 10) == 0:
+    #     name = os.path.join(P.MODELS, 'epoch_%d_8' % e)
+    #     chainer.serializers.save_npz(name, model)
 

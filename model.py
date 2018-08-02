@@ -1,7 +1,8 @@
 import chainer
 from chainer.links import Convolution2D, BatchNormalization, Linear
-from chainer.initializers import HeNormal
+from chainer.initializers import HeNormal, GlorotUniform, Zero, One
 from chainer.functions import relu, average_pooling_2d, max_pooling_2d, concat
+import numpy as np
 
 
 ### BLOCK ###
@@ -9,14 +10,24 @@ class ConvolutionBlock(chainer.Chain):
     def __init__(self, in_channels, out_channels):
         super(ConvolutionBlock, self).__init__()
         with self.init_scope():
+            # self.bn0 = BatchNormalization(in_channels, decay=0.99, eps=0.001,
+            #                               initial_gamma=One, initial_beta=Zero)
             self.conv = Convolution2D(in_channels, out_channels,
                                       ksize=7, stride=2, pad=3,
-                                      initialW=HeNormal())
+                                      initialW=GlorotUniform())
+                                      # initialW=HeNormal())
             self.bn_conv = BatchNormalization(out_channels)
 
     def __call__(self, x):
+        # TODO: wtf batchnorm??
+        # h = self.bn0(x)
         h = self.conv(x)
+        # x1 = to_gpu(np.arange(18, dtype=np.float32).reshape((1, 3, 6)), device=C.DEVICE)
+        # print(chainer.functions.max(h))
+        # print(chainer.functions.sum(h))
         h = self.bn_conv(h)
+        # print(chainer.functions.max(h))
+        # print(chainer.functions.sum(h))
         y = relu(h)
         return y
 
@@ -27,11 +38,13 @@ class ResidualBlock(chainer.Chain):
         with self.init_scope():
             self.res_branch2a = Convolution2D(in_channels, out_channels,
                                               ksize=3, pad=1,
-                                              initialW=HeNormal())
+                                              initialW=GlorotUniform())
+                                              # initialW=HeNormal())
             self.bn_branch2a = BatchNormalization(out_channels)
             self.res_branch2b = Convolution2D(out_channels, out_channels,
                                               ksize=3, pad=1,
-                                              initialW=HeNormal())
+                                              initialW=GlorotUniform())
+                                              # initialW=HeNormal())
             self.bn_branch2b = BatchNormalization(out_channels)
 
     def __call__(self, x):
@@ -51,15 +64,18 @@ class ResidualBlockB(chainer.Chain):
         with self.init_scope():
             self.res_branch1 = Convolution2D(in_channels, out_channels,
                                              ksize=1, stride=2,
-                                             initialW=HeNormal())
+                                             initialW=GlorotUniform())
+                                             # initialW=HeNormal())
             self.bn_branch1 = BatchNormalization(out_channels)
             self.res_branch2a = Convolution2D(in_channels, out_channels,
                                               ksize=3, stride=2, pad=1,
-                                              initialW=HeNormal())
+                                              initialW=GlorotUniform())
+                                              # initialW=HeNormal())
             self.bn_branch2a = BatchNormalization(out_channels)
             self.res_branch2b = Convolution2D(out_channels, out_channels,
                                               ksize=3, pad=1,
-                                              initialW=HeNormal())
+                                              initialW=GlorotUniform())
+                                              # initialW=HeNormal())
             self.bn_branch2b = BatchNormalization(out_channels)
 
     def __call__(self, x):
@@ -116,7 +132,7 @@ class Siamese(chainer.Chain):
         super(Siamese, self).__init__()
         with self.init_scope():
             self.b1 = ResNet18()
-            self.b2 = ResNet18()
+            # self.b2 = ResNet18()
             self.fc = Linear(in_size=512, out_size=10)
 
     def __call__(self, x1, x2):

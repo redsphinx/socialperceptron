@@ -89,16 +89,16 @@ def mk_plots(which):
 
     if which == 'train':
         # loss_path = P.TRAIN_LOG
-        loss_path = '/scratch/users/gabras/data/loss/train_7.txt'
+        loss_path = '/scratch/users/gabras/data/loss/train_9.txt'
     elif which == 'val':
         # loss_path = P.VAL_LOG
-        loss_path = '/scratch/users/gabras/data/loss/val_7.txt'
+        loss_path = '/scratch/users/gabras/data/loss/val_9.txt'
     elif which == 'test':
         pass
         # loss_path = P.TEST_LOG
 
-    data = np.genfromtxt(loss_path, float, delimiter=',')[0:22]
-    # data = np.genfromtxt(loss_path, float, delimiter=',')[0:85]
+    # data = np.genfromtxt(loss_path, float, delimiter=',')[0:22]
+    data = np.genfromtxt(loss_path, float, delimiter=',')[0:85]
     x = np.arange(0, data.shape[0])
 
     # cross entropy loss plot
@@ -132,5 +132,5 @@ def mk_plots(which):
         plt.savefig('cm_%s_%s.png' % (traits[i], which))
 
 
-# mk_plots('val')
+# mk_plots('train')
 
