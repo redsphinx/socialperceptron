@@ -1,8 +1,8 @@
 # training on chalearn with cropped image faces
 import chainer
 import numpy as np
-from deepimpression2.model import Siamese
-# from deepimpression2.model_3 import Siamese
+# from deepimpression2.model import Siamese
+from deepimpression2.model_6 import Siamese
 import deepimpression2.constants as C
 from chainer.functions import sigmoid_cross_entropy
 from chainer.optimizers import Adam
@@ -98,7 +98,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
     # validation
     loss_tmp = []
     cm_tmp = np.zeros((val_steps, 4), dtype=int)
-    cm_trait_tmp = np.zeros((training_steps, 5, 4), dtype=int)
+    cm_trait_tmp = np.zeros((val_steps, 5, 4), dtype=int)
     bs_tmp = np.zeros((2, val_steps, 5), dtype=int)
 
     ts = time.time()
@@ -106,8 +106,8 @@ for e in range(C.EPOCHS): # C.EPOCHS
 
         labels, left_data, right_data = D.load_data('val', val_uid_keys_map, val_labels, id_frames)
         num_left, num_right = D.label_statistics(labels)
-        bs_tmp[0][s] = num_left
-        bs_tmp[1][s] = num_right
+        bs_tmp[0][vs] = num_left
+        bs_tmp[1][vs] = num_right
 
         if C.ON_GPU:
             left_data = to_gpu(left_data, device=C.DEVICE)
@@ -125,8 +125,10 @@ for e in range(C.EPOCHS): # C.EPOCHS
 
     batch_statistics_val[0][e] = np.mean(bs_tmp[0], axis=0)
     batch_statistics_val[1][e] = np.mean(bs_tmp[1], axis=0)
+
     confusion_matrix_trait_val[e] = np.mean(cm_trait_tmp, axis=0)
     confusion_matrix_val[e] = np.mean(cm_tmp, axis=0)
+
     loss_tmp_mean = np.mean(loss_tmp, axis=0)
     val_loss.append(loss_tmp_mean)
     # print('epoch %d. val loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
@@ -140,7 +142,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
     U.record_loss('val', loss_tmp_mean, np.mean(cm_trait_tmp, axis=0), np.mean(bs_tmp, axis=1))
 
     # save model
-    # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_5' % e)
-    #     chainer.serializers.save_npz(name, model)
+    if ((e + 1) % 10) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_6' % e)
+        chainer.serializers.save_npz(name, model)
 
