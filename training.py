@@ -32,10 +32,12 @@ val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
 train_loss = []
 confusion_matrix_train = np.zeros((C.EPOCHS, 4), dtype=int)
 confusion_matrix_trait_train = np.zeros((C.EPOCHS, 5, 4), dtype=int)
+batch_statistics_train = np.zeros((2, C.EPOCHS, 5))
 
 val_loss = []
 confusion_matrix_val = np.zeros((C.EPOCHS, 4), dtype=int)
 confusion_matrix_trait_val = np.zeros((C.EPOCHS, 5, 4), dtype=int)
+batch_statistics_val = np.zeros((2, C.EPOCHS, 5))
 
 train_uid_keys_map = h5.File(P.TRAIN_UID_KEYS_MAPPING, 'r')
 val_uid_keys_map = h5.File(P.VAL_UID_KEYS_MAPPING, 'r')
@@ -50,11 +52,15 @@ for e in range(C.EPOCHS): # C.EPOCHS
     loss_tmp = []
     cm_tmp = np.zeros((training_steps, 4), dtype=int)
     cm_trait_tmp = np.zeros((training_steps, 5, 4), dtype=int)
+    bs_tmp = np.zeros((2, training_steps, 5), dtype=int)
 
     ts = time.time()
     for s in range(training_steps):  # training_steps
 
         labels, left_data, right_data = D.load_data('train', train_uid_keys_map, train_labels, id_frames)
+        num_left, num_right = D.label_statistics(labels)
+        bs_tmp[0][s] = num_left
+        bs_tmp[1][s] = num_right
 
         if C.ON_GPU:
             left_data = to_gpu(left_data, device=C.DEVICE)
@@ -73,6 +79,8 @@ for e in range(C.EPOCHS): # C.EPOCHS
         loss_tmp.append(float(loss.data))
         cm_tmp[s], cm_trait_tmp[s] = U.make_confusion_matrix(to_cpu(prediction.data), to_cpu(labels))
 
+    batch_statistics_train[0][e] = np.mean(bs_tmp[0], axis=0)
+    batch_statistics_train[1][e] = np.mean(bs_tmp[1], axis=0)
     confusion_matrix_trait_train[e] = np.mean(cm_trait_tmp, axis=0)
     confusion_matrix_train[e] = np.mean(cm_tmp, axis=0)
     loss_tmp_mean = np.mean(loss_tmp, axis=0)
@@ -80,20 +88,26 @@ for e in range(C.EPOCHS): # C.EPOCHS
     # print('epoch %d. train loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
     print('E %d. train loss: ' % e, loss_tmp_mean,
           ' [tl, fl, tr, fr]: ', np.mean(cm_tmp, axis=0),
+          ' left labels OCEAS: ', batch_statistics_train[0][e],
+          ' right labels OCEAS: ', batch_statistics_train[1][e],
           ' row: OCEAS\n', np.mean(cm_trait_tmp, axis=0),
           ' time: ', time.time() - ts)
 
-    U.record_loss('train', loss_tmp_mean, np.mean(cm_trait_tmp, axis=0))
+    U.record_loss('train', loss_tmp_mean, np.mean(cm_trait_tmp, axis=0), np.mean(bs_tmp, axis=1))
 
     # validation
     loss_tmp = []
     cm_tmp = np.zeros((val_steps, 4), dtype=int)
     cm_trait_tmp = np.zeros((training_steps, 5, 4), dtype=int)
+    bs_tmp = np.zeros((2, val_steps, 5), dtype=int)
 
     ts = time.time()
     for vs in range(val_steps):  # val_steps
 
         labels, left_data, right_data = D.load_data('val', val_uid_keys_map, val_labels, id_frames)
+        num_left, num_right = D.label_statistics(labels)
+        bs_tmp[0][s] = num_left
+        bs_tmp[1][s] = num_right
 
         if C.ON_GPU:
             left_data = to_gpu(left_data, device=C.DEVICE)
@@ -109,6 +123,8 @@ for e in range(C.EPOCHS): # C.EPOCHS
         loss_tmp.append(float(loss.data))
         cm_tmp[vs], cm_trait_tmp[vs] = U.make_confusion_matrix(to_cpu(prediction.data), to_cpu(labels))
 
+    batch_statistics_val[0][e] = np.mean(bs_tmp[0], axis=0)
+    batch_statistics_val[1][e] = np.mean(bs_tmp[1], axis=0)
     confusion_matrix_trait_val[e] = np.mean(cm_trait_tmp, axis=0)
     confusion_matrix_val[e] = np.mean(cm_tmp, axis=0)
     loss_tmp_mean = np.mean(loss_tmp, axis=0)
@@ -116,13 +132,15 @@ for e in range(C.EPOCHS): # C.EPOCHS
     # print('epoch %d. val loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
     print('E %d. val loss: ' % e, loss_tmp_mean,
           ' [tl, fl, tr, fr]: ', np.mean(cm_tmp, axis=0),
+          ' left labels OCEAS: ', batch_statistics_val[0][e],
+          ' right labels OCEAS: ', batch_statistics_val[1][e],
           ' row: OCEAS\n', np.mean(cm_trait_tmp, axis=0),
           ' time: ', time.time() - ts)
 
-    U.record_loss('val', loss_tmp_mean, np.mean(cm_trait_tmp, axis=0))
+    U.record_loss('val', loss_tmp_mean, np.mean(cm_trait_tmp, axis=0), np.mean(bs_tmp, axis=1))
 
     # save model
-    if (e + 1) % 10:
-        name = os.path.join(P.MODELS, 'epoch_%d_5' % e)
-        chainer.serializers.save_npz(name, model)
+    # if ((e + 1) % 10) == 0:
+    #     name = os.path.join(P.MODELS, 'epoch_%d_5' % e)
+    #     chainer.serializers.save_npz(name, model)
 

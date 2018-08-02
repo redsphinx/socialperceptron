@@ -9,7 +9,7 @@ def safe_mkdir(dir):
         os.mkdir(dir)
 
 
-def record_loss(which, loss, cm_trait):
+def record_loss(which, loss, cm_trait, label_stats):
     if which == 'train':
         path = P.TRAIN_LOG
     elif which == 'val':
@@ -21,9 +21,13 @@ def record_loss(which, loss, cm_trait):
 
     with open(path, 'a') as mf:
         cm_trait = list(cm_trait.flatten())
+        # 20, 5*4, OCEAS * [tl, fl, tr, fr]
         for i in range(len(cm_trait)):
-            line += str(cm_trait[i])[0:4]
-            line += ','
+            line += str(cm_trait[i])[0:4] + ','
+        # 10, 2*5, [left, right] * OCEAS
+        label_stats = list(label_stats.flatten())
+        for i in range(len(label_stats)):
+            line += str(label_stats[i])[0:4] + ','
 
         line = line[0:-1]
         # tmp = '%s,%s\n' % (str(loss)[0:6], line)
@@ -82,10 +86,8 @@ def mk_plots(which):
 
     if which == 'train':
         loss_path = P.TRAIN_LOG
-        name = 'train'
     elif which == 'val':
         loss_path = P.VAL_LOG
-        name = 'val'
     elif which == 'test':
         loss_path = P.TEST_LOG
 
@@ -93,25 +95,39 @@ def mk_plots(which):
     x = np.arange(0, data.shape[0])
 
     # cross entropy loss plot
-    y = data[:, 0]
+    # y = data[:, 0]
     # plt.plot(x, y, 'r')
-    # plt.title('%s cross entropy loss' % name)
+    # plt.title('%s cross entropy loss' % which)
     # plt.xlabel('epochs')
-    # # name = os.path.join(P.FIGURES, 'train.png')
-    # plt.savefig('%s.png' % name)
+    # plt.savefig('%s.png' % which)
 
     # confusion matrix
-    oceas = data[:, 1:len(data)].reshape((100, 5, 4))
+    oceas = data[:, 1:21].reshape((100, 5, 4))
     o = oceas[:, 0, :]
     c = oceas[:, 1, :]
     e = oceas[:, 2, :]
     a = oceas[:, 3, :]
     s = oceas[:, 4, :]
 
+    # plot o
+    tl = o[:, 0]
+    fl = o[:, 1]
+    tr = o[:, 2]
+    fr = o[:, 3]
+    plt.plot(x, tl, label='TL')
+    plt.plot(x, fl, label='FL')
+    plt.plot(x, tr, label='TR')
+    plt.plot(x, fr, label='FR')
+
+    plt.legend()
+
+    plt.title('confusion matrix openness')
+    plt.xlabel('epochs')
+    plt.savefig('cm_%s_%s.png' % ('O', which))
 
 
 
 
-mk_plots('train')
+
 
 

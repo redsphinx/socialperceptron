@@ -4,6 +4,7 @@ import deepimpression2.paths as P
 import deepimpression2.constants as C1
 import deepimpression2.chalearn20.constants as C2
 from deepimpression2.chalearn20 import poisson_disc
+from deepimpression2 import util as U
 from PIL import Image
 import numpy as np
 from random import randint
@@ -277,3 +278,18 @@ def num_frame_statistics():
             mf.create_dataset(name=v.split('.h5')[0], data=n)
 
     print('done')
+
+
+def label_statistics(labels):
+    # ratio left right in batch
+    # (1, 0) = left    (0, 1) = right
+    num_left, num_right = [0] * 5, [0] * 5
+    labels = U.binarize(labels)
+    for i in labels:
+        for j in range(5):
+            if i[j][0] == 1:
+                num_left[j] += 1
+            else:
+                num_right[j] += 1
+
+    return num_left, num_right
