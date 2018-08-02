@@ -85,47 +85,52 @@ def mk_plots(which):
     assert(which in ['train', 'val', 'test'])
 
     if which == 'train':
-        loss_path = P.TRAIN_LOG
+        # loss_path = P.TRAIN_LOG
+        loss_path = '/scratch/users/gabras/data/loss/train_6.txt'
     elif which == 'val':
-        loss_path = P.VAL_LOG
+        # loss_path = P.VAL_LOG
+        loss_path = '/scratch/users/gabras/data/loss/val_6.txt'
     elif which == 'test':
-        loss_path = P.TEST_LOG
+        pass
+        # loss_path = P.TEST_LOG
 
-    data = np.genfromtxt(loss_path, float, delimiter=',')
+    # data = np.genfromtxt(loss_path, float, delimiter=',')[2:]
+    data = np.genfromtxt(loss_path, float, delimiter=',')[0:85]
     x = np.arange(0, data.shape[0])
 
     # cross entropy loss plot
-    # y = data[:, 0]
-    # plt.plot(x, y, 'r')
-    # plt.title('%s cross entropy loss' % which)
-    # plt.xlabel('epochs')
-    # plt.savefig('%s.png' % which)
+    y = data[:, 0]
+    # y = data
+    plt.plot(x, y, 'r')
+    plt.title('%s cross entropy loss' % which)
+    plt.xlabel('epochs')
+    plt.savefig('%s.png' % which)
 
     # confusion matrix
-    oceas = data[:, 1:21].reshape((100, 5, 4))
-    o = oceas[:, 0, :]
-    c = oceas[:, 1, :]
-    e = oceas[:, 2, :]
-    a = oceas[:, 3, :]
-    s = oceas[:, 4, :]
+    oceas = data[:, 1:21].reshape((data.shape[0], 5, 4))
 
-    # plot o
-    tl = o[:, 0]
-    fl = o[:, 1]
-    tr = o[:, 2]
-    fr = o[:, 3]
-    plt.plot(x, tl, label='TL')
-    plt.plot(x, fl, label='FL')
-    plt.plot(x, tr, label='TR')
-    plt.plot(x, fr, label='FR')
+    traits = ['o', 'c', 'e', 'a', 's']
+    for i in range(5):
+        plt.figure()
+        t = oceas[:, i, :]
+        tl = t[:, 0]
+        fl = t[:, 1]
+        tr = t[:, 2]
+        fr = t[:, 3]
+        plt.plot(x, tl, label='TL')
+        plt.plot(x, fl, label='FL')
+        plt.plot(x, tr, label='TR')
+        plt.plot(x, fr, label='FR')
 
-    plt.legend()
+        plt.legend()
 
-    plt.title('confusion matrix openness')
-    plt.xlabel('epochs')
-    plt.savefig('cm_%s_%s.png' % ('O', which))
+        plt.title('confusion matrix trait "%s" %s' % (traits[i], which) )
+        plt.xlabel('epochs')
+        plt.savefig('cm_%s_%s.png' % (traits[i], which))
 
 
+
+# mk_plots('val')
 
 
 

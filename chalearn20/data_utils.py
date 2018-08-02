@@ -293,3 +293,11 @@ def label_statistics(labels):
                 num_right[j] += 1
 
     return num_left, num_right
+
+
+# p = '/scratch/users/gabras/data/loss/train_5.txt'
+# pf = np.genfromtxt(p, float, delimiter=',')
+# pf = pf[:, -10:]
+# avg = np.mean(pf, axis=0)
+#
+# print('asdf')
