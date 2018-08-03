@@ -5,6 +5,12 @@ import deepimpression2.paths as P
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
+import math
+
+
+def sigmoid(x):
+    s = 1 / (1 + math.exp(-x))
+    return s
 
 
 def safe_mkdir(dir):
@@ -39,17 +45,23 @@ def record_loss(which, loss, cm_trait, label_stats):
 
 
 def binarize(arr):
-    assert(arr.ndim == 3)
+    assert(arr.ndim == 2)
 
     shapes = arr.shape
     new_arr = np.zeros(shapes, dtype=int)
 
     for i in range(shapes[0]):
         for j in range(shapes[1]):
-            if arr[i][j][0] > arr[i][j][1]:
-                new_arr[i][j] = [1, 0]
+            if sigmoid(arr[i][j]) > 0.5:
+                new_arr[i][j] = 1
             else:
-                new_arr[i][j] = [0, 1]
+                new_arr[i][j] = 0
+
+        # # for j in range(shapes[1]):
+        # if arr[i][0] > arr[i][1]:
+        #     new_arr[i] = 1  # [1, 0] -> 1
+        # else:
+        #     new_arr[i] = 0  # [0, 1] -> 0
 
     return new_arr
 
@@ -60,19 +72,19 @@ def make_confusion_matrix(prediction, labels):
     prediction = binarize(prediction)
     shapes = prediction.shape
     tl, fl, tr, fr = 0, 0, 0, 0
-    cm_per_trait = np.zeros((shapes[1], 4), dtype=int) # traits: OCEAS, confusions: tl, fl, tr, fr
+    cm_per_trait = np.zeros((shapes[1], 4), dtype=int)  # traits: OCEAS, confusions: tl, fl, tr, fr
 
     for i in range(shapes[0]):
         for j in range(shapes[1]):
-            if labels[i][j][0] == 1:
-                if prediction[i][j][0] == 1:
+            if labels[i][j] == 1:
+                if prediction[i][j] == 1:
                     tl += 1
                     cm_per_trait[j][0] += 1
                 else:
                     fl += 1
                     cm_per_trait[j][1] += 1
-            elif labels[i][j][0] == 0:
-                if prediction[i][j][0] == 0:
+            elif labels[i][j] == 0:
+                if prediction[i][j] == 0:
                     tr += 1
                     cm_per_trait[j][2] += 1
                 else:
@@ -132,12 +144,12 @@ def mk_plots(which, num):
 
         plt.legend()
 
-        plt.title('confusion matrix trait "%s" %s' % (traits[i], which) )
+        plt.title('confusion matrix trait "%s" %s' % (traits[i], which))
         plt.xlabel('epochs')
 
         plt.savefig('%s/cm_%s_%s.png' % (save_path, traits[i], which))
 
 
-n = '11'
-mk_plots('train', n)
-mk_plots('val', n)
+# n = '12'
+# mk_plots('train', n)
+# mk_plots('val', n)

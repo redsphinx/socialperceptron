@@ -111,19 +111,22 @@ def get_keys(left_uids, right_uids, uid_keys_map):
 
 def get_labels(labels_h5, left_keys, right_keys):
     # for each trait (left, right). example label: [0, 1, 1, 0, 0, 1, 1, 0, 1, 0] for OCEAS traits
-    # (1, 0) = left
-    # (0, 1) = right
+    # (1, 0) = left -> 1
+    # (0, 1) = right -> 0
     assert len(left_keys) == len(right_keys)
     tot = len(left_keys)
 
     # all_one_hot_labels = np.zeros((tot, 10), dtype=np.float32)
-    all_one_hot_labels = np.zeros((tot, 10), dtype=int)
+    # all_one_hot_labels = np.zeros((tot, 10), dtype=int)
+    all_one_hot_labels = np.zeros((tot, 5), dtype=int)
 
     def which_side(l, r):
         if l > r:
-            return 1, 0
+            return 1
+            # return 1, 0
         else:
-            return 0, 1
+            return 0
+            # return 0, 1
 
     for i in range(tot):
         left_label = labels_h5[left_keys[i]][:]
@@ -131,12 +134,14 @@ def get_labels(labels_h5, left_keys, right_keys):
         one_hot_label = []
         for j in range(5):
             side = which_side(left_label[j], right_label[j])
-            one_hot_label.append(side[0])
-            one_hot_label.append(side[1])
+            one_hot_label.append(side)
+            # one_hot_label.append(side[0])
+            # one_hot_label.append(side[1])
 
         all_one_hot_labels[i] = one_hot_label
 
-    all_one_hot_labels = all_one_hot_labels.reshape((all_one_hot_labels.shape[0], 5, 2))
+    # all_one_hot_labels = all_one_hot_labels.reshape((all_one_hot_labels.shape[0], 5, 2))
+    all_one_hot_labels = all_one_hot_labels.reshape((all_one_hot_labels.shape[0], 5))
 
     return all_one_hot_labels
 
@@ -282,12 +287,12 @@ def num_frame_statistics():
 
 def label_statistics(labels):
     # ratio left right in batch
-    # (1, 0) = left    (0, 1) = right
+    # (1, 0) = left -> 1    (0, 1) = right -> 0
     num_left, num_right = [0] * 5, [0] * 5
     labels = U.binarize(labels)
     for i in labels:
         for j in range(5):
-            if i[j][0] == 1:
+            if i[j] == 1:
                 num_left[j] += 1
             else:
                 num_right[j] += 1

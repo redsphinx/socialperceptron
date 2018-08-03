@@ -72,14 +72,13 @@ for e in range(C.EPOCHS): # C.EPOCHS
         # training
         with cp.cuda.Device(C.DEVICE):
             with chainer.using_config('train', True):
-            # with chainer.using_config('train', False):
                 model.cleargrads()
                 prediction = model(left_data, right_data)
-                # loss = sigmoid_cross_entropy(prediction, labels)
-                _1 = sigmoid_cross_entropy(prediction, labels)
-                _2 = mean_squared_error(prediction, cp.asarray(labels, dtype=cp.float32))
+                loss = sigmoid_cross_entropy(prediction, labels)
+                # _1 = sigmoid_cross_entropy(prediction, labels)
+                # _2 = mean_squared_error(prediction, cp.asarray(labels, dtype=cp.float32))
                 # print('loss: %s   %s' % (str(_1.data)[0:5], str(_2.data)[0:5]))
-                loss = _1 + alpha * _2
+                # loss = _1 + alpha * _2
 
                 loss.backward()
                 optimizer.update()
@@ -103,7 +102,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
 
     U.record_loss('train', loss_tmp_mean, np.mean(cm_trait_tmp, axis=0), np.mean(bs_tmp, axis=1))
 
-    # validation
+    # # validation
     loss_tmp = []
     cm_tmp = np.zeros((val_steps, 4), dtype=int)
     cm_trait_tmp = np.zeros((val_steps, 5, 4), dtype=int)
@@ -127,9 +126,9 @@ for e in range(C.EPOCHS): # C.EPOCHS
             with chainer.using_config('train', False):
                 model.cleargrads()
                 prediction = model(left_data, right_data)
-                # loss = sigmoid_cross_entropy(prediction, labels)
-                loss = sigmoid_cross_entropy(prediction, labels) + \
-                       alpha * mean_squared_error(prediction, cp.asarray(labels, dtype=cp.float32))
+                loss = sigmoid_cross_entropy(prediction, labels)
+                # loss = sigmoid_cross_entropy(prediction, labels) + \
+                #        alpha * mean_squared_error(prediction, cp.asarray(labels, dtype=cp.float32))
 
         loss_tmp.append(float(loss.data))
         cm_tmp[vs], cm_trait_tmp[vs] = U.make_confusion_matrix(to_cpu(prediction.data), to_cpu(labels))
@@ -153,7 +152,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
     U.record_loss('val', loss_tmp_mean, np.mean(cm_trait_tmp, axis=0), np.mean(bs_tmp, axis=1))
 
     # save model
-    # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_8' % e)
-    #     chainer.serializers.save_npz(name, model)
+    if ((e + 1) % 10) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_12' % e)
+        chainer.serializers.save_npz(name, model)
 

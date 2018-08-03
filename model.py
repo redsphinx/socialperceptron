@@ -53,7 +53,7 @@ class ResidualBlock(chainer.Chain):
         h = relu(h)
         h = self.res_branch2b(h)
         h = self.bn_branch2b(h)
-        h = x + h
+        h += x
         y = relu(h)
         return y
 
@@ -133,7 +133,8 @@ class Siamese(chainer.Chain):
         with self.init_scope():
             self.b1 = ResNet18()
             # self.b2 = ResNet18()
-            self.fc = Linear(in_size=512, out_size=10)
+            # self.fc = Linear(in_size=512, out_size=10)
+            self.fc = Linear(in_size=512, out_size=5)
 
     def __call__(self, x1, x2):
         _1 = self.b1(x1) # (32, 256, 1, 1)
@@ -141,5 +142,5 @@ class Siamese(chainer.Chain):
 
         h = concat((_1, _2))
         h = self.fc(h)
-        h = chainer.functions.reshape(h, (h.shape[0], 5, 2)) # 5 dim
+        # h = chainer.functions.reshape(h, (h.shape[0], 5, 2)) # 5 dim
         return h
