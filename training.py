@@ -1,8 +1,8 @@
 # training on chalearn with cropped image faces
 import chainer
 import numpy as np
-# from deepimpression2.model import Siamese
-from deepimpression2.model_9 import Siamese
+from deepimpression2.model import Siamese
+# from deepimpression2.model_9 import Siamese
 import deepimpression2.constants as C
 from chainer.functions import sigmoid_cross_entropy
 from chainer.optimizers import Adam

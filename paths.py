@@ -56,8 +56,8 @@ SETUP4 = '/scratch/users/gabras/data/trying_out/setup4'
 
 # -------------------------------------------------------------------------------------------------
 # log files
-TRAIN_LOG = '/scratch/users/gabras/data/loss/train_9.txt'
-VAL_LOG = '/scratch/users/gabras/data/loss/val_9.txt'
+TRAIN_LOG = '/scratch/users/gabras/data/loss/train_10.txt'
+VAL_LOG = '/scratch/users/gabras/data/loss/val_10.txt'
 TEST_LOG = '/scratch/users/gabras/data/loss/test.txt'
 
 # -------------------------------------------------------------------------------------------------
@@ -66,4 +66,4 @@ MODELS = '/scratch/users/gabras/data/models'
 
 # -------------------------------------------------------------------------------------------------
 # figures
-FIGURES = '/scratch/users/gabras/data/loss/figures'
+FIGURES = '/home/gabras/deployed/deepimpression2/figures'

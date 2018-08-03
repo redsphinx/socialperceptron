@@ -84,30 +84,35 @@ def make_confusion_matrix(prediction, labels):
     return [tl, fl, tr, fr], cm_per_trait
 
 
-def mk_plots(which):
+def mk_plots(which, num):
     assert(which in ['train', 'val', 'test'])
 
     if which == 'train':
         # loss_path = P.TRAIN_LOG
-        loss_path = '/scratch/users/gabras/data/loss/train_9.txt'
+        loss_path = '/scratch/users/gabras/data/loss/train_%s.txt' % num
     elif which == 'val':
         # loss_path = P.VAL_LOG
-        loss_path = '/scratch/users/gabras/data/loss/val_9.txt'
+        loss_path = '/scratch/users/gabras/data/loss/val_%s.txt' % num
     elif which == 'test':
         pass
         # loss_path = P.TEST_LOG
 
+    save_path = os.path.join(P.FIGURES, 'train_%s' % num)
+    if not os.path.exists(save_path):
+        os.mkdir(save_path)
+
     # data = np.genfromtxt(loss_path, float, delimiter=',')[0:22]
-    data = np.genfromtxt(loss_path, float, delimiter=',')[0:85]
+    data = np.genfromtxt(loss_path, float, delimiter=',')
     x = np.arange(0, data.shape[0])
 
+    plt.figure()
     # cross entropy loss plot
     y = data[:, 0]
     # y = data
     plt.plot(x, y, 'r')
     plt.title('%s cross entropy loss' % which)
     plt.xlabel('epochs')
-    plt.savefig('%s.png' % which)
+    plt.savefig('%s/%s.png' % (save_path, which))
 
     # confusion matrix
     oceas = data[:, 1:21].reshape((data.shape[0], 5, 4))
@@ -129,8 +134,10 @@ def mk_plots(which):
 
         plt.title('confusion matrix trait "%s" %s' % (traits[i], which) )
         plt.xlabel('epochs')
-        plt.savefig('cm_%s_%s.png' % (traits[i], which))
+
+        plt.savefig('%s/cm_%s_%s.png' % (save_path, traits[i], which))
 
 
-# mk_plots('train')
-
+n = '10'
+mk_plots('train', n)
+mk_plots('val', n)

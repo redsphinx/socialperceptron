@@ -10,8 +10,6 @@ class ConvolutionBlock(chainer.Chain):
     def __init__(self, in_channels, out_channels):
         super(ConvolutionBlock, self).__init__()
         with self.init_scope():
-            # self.bn0 = BatchNormalization(in_channels, decay=0.99, eps=0.001,
-            #                               initial_gamma=One, initial_beta=Zero)
             self.conv = Convolution2D(in_channels, out_channels,
                                       ksize=7, stride=2, pad=3,
                                       initialW=GlorotUniform())
@@ -19,15 +17,8 @@ class ConvolutionBlock(chainer.Chain):
             self.bn_conv = BatchNormalization(out_channels)
 
     def __call__(self, x):
-        # TODO: wtf batchnorm??
-        # h = self.bn0(x)
         h = self.conv(x)
-        # x1 = to_gpu(np.arange(18, dtype=np.float32).reshape((1, 3, 6)), device=C.DEVICE)
-        # print(chainer.functions.max(h))
-        # print(chainer.functions.sum(h))
         h = self.bn_conv(h)
-        # print(chainer.functions.max(h))
-        # print(chainer.functions.sum(h))
         y = relu(h)
         return y
 
