@@ -17,7 +17,7 @@ import cupy as cp
 
 
 model = Siamese()
-# optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.004)
+# optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.0001)
 optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
 optimizer.setup(model)
 alpha = 1

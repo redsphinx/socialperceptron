@@ -141,6 +141,5 @@ class Siamese(chainer.Chain):
 
         h = concat((_1, _2))
         h = self.fc(h)
-        h = chainer.functions.reshape(h, (h.shape[0], 5, 2))
-        # TODO: maybe needs a relu?
+        h = chainer.functions.reshape(h, (h.shape[0], 5, 2)) # 5 dim
         return h
