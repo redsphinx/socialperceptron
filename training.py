@@ -4,7 +4,7 @@ import numpy as np
 from deepimpression2.model import Siamese
 # from deepimpression2.model_9 import Siamese
 import deepimpression2.constants as C
-from chainer.functions import sigmoid_cross_entropy
+from chainer.functions import sigmoid_cross_entropy, mean_squared_error
 from chainer.optimizers import Adam
 import h5py as h5
 import deepimpression2.paths as P
@@ -13,12 +13,14 @@ import time
 from chainer.backends.cuda import to_gpu, to_cpu
 import deepimpression2.util as U
 import os
+import cupy as cp
 
 
 model = Siamese()
 # optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.004)
 optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
 optimizer.setup(model)
+alpha = 1
 
 if C.ON_GPU:
     model = model.to_gpu(device=C.DEVICE)
@@ -68,14 +70,19 @@ for e in range(C.EPOCHS): # C.EPOCHS
             labels = to_gpu(labels, device=C.DEVICE)
 
         # training
-        with chainer.using_config('train', True):
-        # with chainer.using_config('train', False):
-            model.cleargrads()
-            prediction = model(left_data, right_data)
-            loss = sigmoid_cross_entropy(prediction, labels)
+        with cp.cuda.Device(C.DEVICE):
+            with chainer.using_config('train', True):
+            # with chainer.using_config('train', False):
+                model.cleargrads()
+                prediction = model(left_data, right_data)
+                # loss = sigmoid_cross_entropy(prediction, labels)
+                _1 = sigmoid_cross_entropy(prediction, labels)
+                _2 = mean_squared_error(prediction, cp.asarray(labels, dtype=cp.float32))
+                # print('loss: %s   %s' % (str(_1.data)[0:5], str(_2.data)[0:5]))
+                loss = _1 + alpha * _2
 
-            loss.backward()
-            optimizer.update()
+                loss.backward()
+                optimizer.update()
 
         loss_tmp.append(float(loss.data))
         cm_tmp[s], cm_trait_tmp[s] = U.make_confusion_matrix(to_cpu(prediction.data), to_cpu(labels))
@@ -115,11 +122,14 @@ for e in range(C.EPOCHS): # C.EPOCHS
             right_data = to_gpu(right_data, device=C.DEVICE)
             labels = to_gpu(labels, device=C.DEVICE)
 
-        # training
-        with chainer.using_config('train', False):
-            model.cleargrads()
-            prediction = model(left_data, right_data)
-            loss = sigmoid_cross_entropy(prediction, labels)
+        # validation
+        with cp.cuda.Device(C.DEVICE):
+            with chainer.using_config('train', False):
+                model.cleargrads()
+                prediction = model(left_data, right_data)
+                # loss = sigmoid_cross_entropy(prediction, labels)
+                loss = sigmoid_cross_entropy(prediction, labels) + \
+                       alpha * mean_squared_error(prediction, cp.asarray(labels, dtype=cp.float32))
 
         loss_tmp.append(float(loss.data))
         cm_tmp[vs], cm_trait_tmp[vs] = U.make_confusion_matrix(to_cpu(prediction.data), to_cpu(labels))

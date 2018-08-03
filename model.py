@@ -5,6 +5,15 @@ from chainer.functions import relu, average_pooling_2d, max_pooling_2d, concat
 import numpy as np
 
 
+which_initializer = 1
+initial = None
+
+if which_initializer == 1:
+    initial = HeNormal()
+elif which_initializer == 2:
+    initial = GlorotUniform()
+
+
 ### BLOCK ###
 class ConvolutionBlock(chainer.Chain):
     def __init__(self, in_channels, out_channels):
@@ -12,7 +21,7 @@ class ConvolutionBlock(chainer.Chain):
         with self.init_scope():
             self.conv = Convolution2D(in_channels, out_channels,
                                       ksize=7, stride=2, pad=3,
-                                      initialW=GlorotUniform())
+                                      initialW=initial)
                                       # initialW=HeNormal())
             self.bn_conv = BatchNormalization(out_channels)
 
@@ -29,12 +38,12 @@ class ResidualBlock(chainer.Chain):
         with self.init_scope():
             self.res_branch2a = Convolution2D(in_channels, out_channels,
                                               ksize=3, pad=1,
-                                              initialW=GlorotUniform())
+                                              initialW=initial)
                                               # initialW=HeNormal())
             self.bn_branch2a = BatchNormalization(out_channels)
             self.res_branch2b = Convolution2D(out_channels, out_channels,
                                               ksize=3, pad=1,
-                                              initialW=GlorotUniform())
+                                              initialW=initial)
                                               # initialW=HeNormal())
             self.bn_branch2b = BatchNormalization(out_channels)
 
@@ -55,17 +64,17 @@ class ResidualBlockB(chainer.Chain):
         with self.init_scope():
             self.res_branch1 = Convolution2D(in_channels, out_channels,
                                              ksize=1, stride=2,
-                                             initialW=GlorotUniform())
+                                             initialW=initial)
                                              # initialW=HeNormal())
             self.bn_branch1 = BatchNormalization(out_channels)
             self.res_branch2a = Convolution2D(in_channels, out_channels,
                                               ksize=3, stride=2, pad=1,
-                                              initialW=GlorotUniform())
+                                              initialW=initial)
                                               # initialW=HeNormal())
             self.bn_branch2a = BatchNormalization(out_channels)
             self.res_branch2b = Convolution2D(out_channels, out_channels,
                                               ksize=3, pad=1,
-                                              initialW=GlorotUniform())
+                                              initialW=initial)
                                               # initialW=HeNormal())
             self.bn_branch2b = BatchNormalization(out_channels)
 
