@@ -132,15 +132,14 @@ class Siamese(chainer.Chain):
         super(Siamese, self).__init__()
         with self.init_scope():
             self.b1 = ResNet18()
-            # self.b2 = ResNet18()
-            # self.fc = Linear(in_size=512, out_size=10)
-            self.fc = Linear(in_size=512, out_size=5)
+            # self.fc = Linear(in_size=512, out_size=10) # wrong way of making predictions
+            # self.fc = Linear(in_size=512, out_size=5) # right way with 5 traits
+            self.fc = Linear(in_size=512, out_size=1)  # with collapsed traits
 
     def __call__(self, x1, x2):
-        _1 = self.b1(x1) # (32, 256, 1, 1)
+        _1 = self.b1(x1)  # (32, 256, 1, 1)
         _2 = self.b1(x2)
 
         h = concat((_1, _2))
         h = self.fc(h)
-        # h = chainer.functions.reshape(h, (h.shape[0], 5, 2)) # 5 dim
         return h

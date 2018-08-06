@@ -146,6 +146,35 @@ def get_labels(labels_h5, left_keys, right_keys):
     return all_one_hot_labels
 
 
+def get_labels_collapsed(labels_h5, left_keys, right_keys):
+    # collapse all OCEAS traits into single positive or negative trait
+    # left -> 1
+    # right -> 0
+    assert len(left_keys) == len(right_keys)
+    tot = len(left_keys)
+
+    all_one_hot_labels = np.zeros((tot, 1), dtype=int)
+
+    def which_side(l, r):
+        if sum(l) > sum(r):
+            return 1
+        else:
+            return 0
+
+    for i in range(tot):
+        left_label = labels_h5[left_keys[i]][:]
+        right_label = labels_h5[right_keys[i]][:]
+        one_hot_label = []
+        side = which_side(left_label, right_label)
+        one_hot_label.append(side)
+
+        all_one_hot_labels[i] = one_hot_label
+
+    # all_one_hot_labels = all_one_hot_labels.reshape((all_one_hot_labels.shape[0], 1))
+
+    return all_one_hot_labels
+
+
 def get_frame(num_frames):
     num = randint(0, num_frames - 1)
     return num
@@ -214,10 +243,13 @@ def get_data(left_keys, right_keys, id_frames):
     return left, right
 
 
-def load_data(which, uid_keys_map, labs, id_frames):
+def load_data(which, uid_keys_map, labs, id_frames, trait_mode='all'):
     left_uids, right_uids = get_batch_uid(which)
     left_keys, right_keys = get_keys(left_uids, right_uids, uid_keys_map)
-    labels = get_labels(labs, left_keys, right_keys)
+    if trait_mode == 'all':
+        labels = get_labels(labs, left_keys, right_keys)  # get 5 trait labels
+    elif trait_mode == 'collapsed':
+        labels = get_labels_collapsed(labs, left_keys, right_keys)  # get collapsed labels
     left_data, right_data = get_data(left_keys, right_keys, id_frames)
     return labels, left_data, right_data
 
