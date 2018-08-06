@@ -17,8 +17,8 @@ import cupy as cp
 
 
 model = Siamese()
-# optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.0001)
-optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
+optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.0001)
+# optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
 optimizer.setup(model)
 alpha = 1
 
@@ -153,6 +153,6 @@ for e in range(C.EPOCHS): # C.EPOCHS
 
     # save model
     if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_12' % e)
+        name = os.path.join(P.MODELS, 'epoch_%d_13' % e)
         chainer.serializers.save_npz(name, model)
 
