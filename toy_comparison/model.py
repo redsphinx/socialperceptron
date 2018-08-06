@@ -37,7 +37,7 @@ class Siamese(chainer.Chain):
     def __init__(self):
         super(Siamese, self).__init__()
         with self.init_scope():
-            self.fc1 = Linear(in_size=1, out_size=1)
+            self.fc1 = Linear(in_size=1, out_size=1, nobias=True)
 
     def __call__(self, x1, x2):
         h = x1 - x2

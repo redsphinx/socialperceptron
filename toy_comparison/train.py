@@ -59,7 +59,7 @@ def main():
     optimizer.setup(model)
 
     epochs = 1000
-    batch_size = 1
+    batch_size = 64
 
     data_batch = np.zeros((batch_size, 2), dtype=np.float32)
 
@@ -115,7 +115,7 @@ def main():
 
         if (e+1) % 100 == 0:
             cm = make_confusion_matrix(prediction, labels)
-            print(e, cm)
+            print(e, cm, loss, 'W: ', model.fc1.W, 'b: ', model.fc1.b)
 
 
 for i in range(10):
