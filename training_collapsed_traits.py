@@ -32,12 +32,12 @@ train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
 
 train_loss = []
-confusion_matrix_train = np.zeros((C.EPOCHS, 4), dtype=int)
+confusion_matrix_train = np.zeros((C.EPOCHS, 4), dtype=float)
 # confusion_matrix_trait_train = np.zeros((C.EPOCHS, 5, 4), dtype=int)
 batch_statistics_train = np.zeros((2, C.EPOCHS))
 
 val_loss = []
-confusion_matrix_val = np.zeros((C.EPOCHS, 4), dtype=int)
+confusion_matrix_val = np.zeros((C.EPOCHS, 4), dtype=float)
 # confusion_matrix_trait_val = np.zeros((C.EPOCHS, 5, 4), dtype=int)
 batch_statistics_val = np.zeros((2, C.EPOCHS))
 
@@ -60,8 +60,8 @@ for e in range(C.EPOCHS): # C.EPOCHS
     for s in range(training_steps):  # training_steps
 
         labels, left_data, right_data = D.load_data('train', train_uid_keys_map, train_labels,
-                                                    id_frames, trait_mode='collapsed')
-        num_left, num_right = D.label_statistics(labels)
+                                                    id_frames, trait_mode='collapse')
+        num_left, num_right = D.label_statistics(labels, trait_mode='collapse')
         bs_tmp[0][s] = num_left
         bs_tmp[1][s] = num_right
 
@@ -101,7 +101,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
           ' right labels: ', batch_statistics_train[1][e],
           ' time: ', time.time() - ts)
 
-    U.record_loss('train', loss_tmp_mean, cm_trait=None, label_stats=np.mean(bs_tmp, axis=1))
+    U.record_loss('train', loss_tmp_mean, confusion_matrix_train[e], np.mean(bs_tmp, axis=1))
 
     # # validation
     loss_tmp = []
@@ -114,7 +114,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
 
         labels, left_data, right_data = D.load_data('val', val_uid_keys_map, val_labels,
                                                     id_frames, trait_mode='collapse')
-        num_left, num_right = D.label_statistics(labels)
+        num_left, num_right = D.label_statistics(labels, trait_mode='collapse')
         bs_tmp[0][vs] = num_left
         bs_tmp[1][vs] = num_right
 
@@ -149,7 +149,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
           ' right labels OCEAS: ', batch_statistics_val[1][e],
           ' time: ', time.time() - ts)
 
-    U.record_loss('val', loss_tmp_mean, cm_trait=None, label_stats=np.mean(bs_tmp, axis=1))
+    U.record_loss('val', loss_tmp_mean, confusion_matrix_train[e], np.mean(bs_tmp, axis=1))
 
     # save model
     # if ((e + 1) % 10) == 0:

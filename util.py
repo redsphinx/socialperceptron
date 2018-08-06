@@ -29,11 +29,10 @@ def record_loss(which, loss, cm_trait, label_stats):
     line = ''
 
     with open(path, 'a') as mf:
-        if cm_trait is not None:
-            cm_trait = list(cm_trait.flatten())
-            # 20, 5*4, OCEAS * [tl, fl, tr, fr]
-            for i in range(len(cm_trait)):
-                line += str(cm_trait[i])[0:4] + ','
+        cm_trait = list(cm_trait.flatten())
+        # 20, 5*4, OCEAS * [tl, fl, tr, fr]
+        for i in range(len(cm_trait)):
+            line += str(cm_trait[i])[0:4] + ','
         # 10, 2*5, [left, right] * OCEAS
         label_stats = list(label_stats.flatten())
         for i in range(len(label_stats)):
@@ -60,8 +59,8 @@ def binarize(arr, trait_mode='all'):
                     new_arr[i][j] = 0
 
     elif trait_mode == 'collapse':
-        assert (arr.ndim == 1)
-
+        # return arr
+        assert (arr.ndim == 2)
         shapes = arr.shape
         new_arr = np.zeros(shapes, dtype=int)
 
@@ -70,7 +69,6 @@ def binarize(arr, trait_mode='all'):
                 new_arr[i] = 1
             else:
                 new_arr[i] = 0
-
 
     return new_arr
 
@@ -105,13 +103,13 @@ def make_confusion_matrix(prediction, labels, trait_mode='all'):
 
     elif trait_mode == 'collapse':
         for i in range(shapes[0]):
-            if labels[i] == 1:
-                if prediction[i] == 1:
+            if int(labels[i]) == 1:
+                if int(prediction[i]) == 1:
                     tl += 1
                 else:
                     fl += 1
-            elif labels[i] == 0:
-                if prediction[i] == 0:
+            elif int(labels[i]) == 0:
+                if int(prediction[i]) == 0:
                     tr += 1
                 else:
                     fr += 1

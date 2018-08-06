@@ -156,7 +156,8 @@ def get_labels_collapsed(labels_h5, left_keys, right_keys):
     all_one_hot_labels = np.zeros((tot, 1), dtype=int)
 
     def which_side(l, r):
-        if sum(l) > sum(r):
+        # only first 5 traits count
+        if sum(l[0:5]) > sum(r[0:5]):
             return 1
         else:
             return 0
@@ -248,7 +249,7 @@ def load_data(which, uid_keys_map, labs, id_frames, trait_mode='all'):
     left_keys, right_keys = get_keys(left_uids, right_uids, uid_keys_map)
     if trait_mode == 'all':
         labels = get_labels(labs, left_keys, right_keys)  # get 5 trait labels
-    elif trait_mode == 'collapsed':
+    elif trait_mode == 'collapse':
         labels = get_labels_collapsed(labs, left_keys, right_keys)  # get collapsed labels
     left_data, right_data = get_data(left_keys, right_keys, id_frames)
     return labels, left_data, right_data
@@ -317,17 +318,22 @@ def num_frame_statistics():
     print('done')
 
 
-def label_statistics(labels):
+def label_statistics(labels, trait_mode='all'):
     # ratio left right in batch
     # (1, 0) = left -> 1    (0, 1) = right -> 0
-    num_left, num_right = [0] * 5, [0] * 5
-    labels = U.binarize(labels)
-    for i in labels:
-        for j in range(5):
-            if i[j] == 1:
-                num_left[j] += 1
-            else:
-                num_right[j] += 1
+    if trait_mode == 'all':
+        num_left, num_right = [0] * 5, [0] * 5
+        labels = U.binarize(labels)
+        for i in labels:
+            for j in range(5):
+                if i[j] == 1:
+                    num_left[j] += 1
+                else:
+                    num_right[j] += 1
+
+    elif trait_mode == 'collapse':
+        num_left = int(sum(labels))
+        num_right = len(labels) - num_left
 
     return num_left, num_right
 
