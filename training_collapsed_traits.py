@@ -108,7 +108,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
           ' right labels: ', batch_statistics_train[1][e],
           ' time: ', time.time() - ts)
 
-    # U.record_loss('train', loss_tmp_mean, confusion_matrix_train[e], np.mean(bs_tmp, axis=1))
+    U.record_loss('train', loss_tmp_mean, confusion_matrix_train[e], np.mean(bs_tmp, axis=1))
 
     # # validation
     loss_tmp = []
@@ -155,7 +155,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
           ' right labels: ', batch_statistics_val[1][e],
           ' time: ', time.time() - ts)
 
-    # U.record_loss('val', loss_tmp_mean, confusion_matrix_train[e], np.mean(bs_tmp, axis=1))
+    U.record_loss('val', loss_tmp_mean, confusion_matrix_train[e], np.mean(bs_tmp, axis=1))
 
     # save model
     # if ((e + 1) % 10) == 0:
