@@ -14,6 +14,7 @@ from chainer.backends.cuda import to_gpu, to_cpu
 import deepimpression2.util as U
 import os
 import cupy as cp
+from chainer.functions import expand_dims
 
 
 model = Siamese()
@@ -61,7 +62,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
 
         labels, left_data, right_data = D.load_data('train', train_uid_keys_map, train_labels,
                                                     id_frames, trait_mode='collapse')
-        num_left, num_right = D.label_statistics(labels, trait_mode='collapse')
+        num_left, num_right = D.label_statistics(labels, trait_mode='collapse', xe='sigmoid')
         bs_tmp[0][s] = num_left
         bs_tmp[1][s] = num_right
 
@@ -74,7 +75,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
         with cp.cuda.Device(C.DEVICE):
             with chainer.using_config('train', True):
                 model.cleargrads()
-                prediction = model(left_data, right_data)
+                prediction = expand_dims(model(left_data, right_data), axis=-1)
 
                 # sof XE
                 loss = softmax_cross_entropy(prediction, labels)
@@ -120,7 +121,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
 
         labels, left_data, right_data = D.load_data('val', val_uid_keys_map, val_labels,
                                                     id_frames, trait_mode='collapse')
-        num_left, num_right = D.label_statistics(labels, trait_mode='collapse')
+        num_left, num_right = D.label_statistics(labels, trait_mode='collapse', xe='sigmoid')
         bs_tmp[0][vs] = num_left
         bs_tmp[1][vs] = num_right
 
@@ -133,8 +134,8 @@ for e in range(C.EPOCHS): # C.EPOCHS
         with cp.cuda.Device(C.DEVICE):
             with chainer.using_config('train', False):
                 model.cleargrads()
-                prediction = model(left_data, right_data)
-                loss = sigmoid_cross_entropy(prediction, labels)
+                prediction = expand_dims(model(left_data, right_data), axis=-1)
+                loss = softmax_cross_entropy(prediction, labels)
                 # loss = sigmoid_cross_entropy(prediction, labels) + \
                 #        alpha * mean_squared_error(prediction, cp.asarray(labels, dtype=cp.float32))
 

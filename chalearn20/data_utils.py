@@ -186,7 +186,7 @@ def get_labels_collapsed(labels_h5, left_keys, right_keys, xe='sigmoid'):
 
             all_one_hot_labels[i] = side
 
-        all_one_hot_labels = all_one_hot_labels.reshape((all_one_hot_labels.shape[0], 2))
+        # all_one_hot_labels = all_one_hot_labels.reshape((all_one_hot_labels.shape[0], 2))
 
     return all_one_hot_labels
 
@@ -265,7 +265,7 @@ def load_data(which, uid_keys_map, labs, id_frames, trait_mode='all'):
     if trait_mode == 'all':
         labels = get_labels(labs, left_keys, right_keys)  # get 5 trait labels
     elif trait_mode == 'collapse':
-        labels = get_labels_collapsed(labs, left_keys, right_keys, xe='softmax')
+        labels = get_labels_collapsed(labs, left_keys, right_keys, xe='sigmoid')
     left_data, right_data = get_data(left_keys, right_keys, id_frames)
     return labels, left_data, right_data
 

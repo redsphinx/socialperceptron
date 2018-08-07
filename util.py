@@ -13,6 +13,11 @@ def sigmoid(x):
     return s
 
 
+def softmax(x):
+    s = np.exp(x) / np.sum(np.exp(x))
+    return s
+
+
 def safe_mkdir(dir):
     if not os.path.exists(dir):
         os.mkdir(dir)
@@ -44,7 +49,8 @@ def record_loss(which, loss, cm_trait, label_stats):
         mf.write('%s,%s\n' % (str(loss)[0:6], line))
 
 
-def binarize(arr, trait_mode='all'):
+def binarize(arr, trait_mode='all', xe='sigmoid'):
+    shapes = arr.shape
     if trait_mode == 'all':
         assert(arr.ndim == 2)
 
@@ -59,16 +65,38 @@ def binarize(arr, trait_mode='all'):
                     new_arr[i][j] = 0
 
     elif trait_mode == 'collapse':
-        # return arr
-        assert (arr.ndim == 2)
-        shapes = arr.shape
-        new_arr = np.zeros(shapes, dtype=int)
 
-        for i in range(shapes[0]):
-            if sigmoid(arr[i]) > 0.5:
-                new_arr[i] = 1
-            else:
-                new_arr[i] = 0
+        if xe == 'sigmoid':
+            assert (arr.ndim == 2)
+            new_arr = np.zeros(shapes, dtype=int)
+
+            for i in range(shapes[0]):
+                if sigmoid(arr[i]) > 0.5:
+                    new_arr[i] = 1
+                else:
+                    new_arr[i] = 0
+        elif xe == 'softmax':
+            assert (arr.ndim == 3)
+            new_arr = np.zeros((shapes[0], shapes[1]), dtype=int)
+
+            # Truth
+            # 1 = left
+            # 0 = right
+            #
+            # gabi, don't do this with softmax
+            # [0, 1] = 0 = right
+            # [1, 0] = 1 = left
+            #
+            # softmax, do this
+            # [class 0, class 1]
+            # [0, 1] = 1 = left
+            # [1, 0] = 0 = right
+
+            for i in range(shapes[0]):
+                if softmax(arr[i])[0] > 0.5:
+                    new_arr[i] = [0, 1]
+                else:
+                    new_arr[i] = [1, 0]
 
     return new_arr
 
@@ -76,7 +104,7 @@ def binarize(arr, trait_mode='all'):
 def make_confusion_matrix(prediction, labels, trait_mode='all', xe='sigmoid'):
     # shape prediction and labels (32, 5, 2)
     # (1, 0) = left    (0, 1) = right
-    prediction = binarize(prediction, trait_mode)
+    prediction = binarize(prediction, trait_mode, xe)
     shapes = prediction.shape
     tl, fl, tr, fr = 0, 0, 0, 0
     cm_per_trait = np.zeros((shapes[1], 4), dtype=int)  # traits: OCEAS, confusions: tl, fl, tr, fr
@@ -116,12 +144,12 @@ def make_confusion_matrix(prediction, labels, trait_mode='all', xe='sigmoid'):
                         fr += 1
         elif xe == 'softmax':
             for i in range(shapes[0]):
-                if int(labels[i][0]) == 1:
+                if int(labels[i]) == 1:
                     if int(prediction[i][0]) == 1:
                         tl += 1
                     else:
                         fl += 1
-                elif int(labels[i][0]) == 0:
+                elif int(labels[i]) == 0:
                     if int(prediction[i][0]) == 0:
                         tr += 1
                     else:

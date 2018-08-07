@@ -1,7 +1,7 @@
 import chainer
 from chainer.links import Convolution2D, BatchNormalization, Linear
 from chainer.initializers import HeNormal, GlorotUniform, Zero, One
-from chainer.functions import relu, average_pooling_2d, max_pooling_2d, concat
+from chainer.functions import relu, average_pooling_2d, max_pooling_2d, concat, identity
 import numpy as np
 
 
@@ -142,4 +142,5 @@ class Siamese(chainer.Chain):
 
         h1 = self.fc1(_1)
         h2 = self.fc1(_2)
-        return h1, h2
+        h = concat((h1, h2), axis=1)
+        return h
