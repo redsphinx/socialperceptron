@@ -146,14 +146,12 @@ def get_labels(labels_h5, left_keys, right_keys):
     return all_one_hot_labels
 
 
-def get_labels_collapsed(labels_h5, left_keys, right_keys):
+def get_labels_collapsed(labels_h5, left_keys, right_keys, xe='sigmoid'):
     # collapse all OCEAS traits into single positive or negative trait
     # left -> 1
     # right -> 0
     assert len(left_keys) == len(right_keys)
     tot = len(left_keys)
-
-    all_one_hot_labels = np.zeros((tot, 1), dtype=int)
 
     def which_side(l, r):
         # only first 5 traits count
@@ -162,16 +160,33 @@ def get_labels_collapsed(labels_h5, left_keys, right_keys):
         else:
             return 0
 
-    for i in range(tot):
-        left_label = labels_h5[left_keys[i]][:]
-        right_label = labels_h5[right_keys[i]][:]
-        one_hot_label = []
-        side = which_side(left_label, right_label)
-        one_hot_label.append(side)
+    if xe == 'sigmoid':
+        all_one_hot_labels = np.zeros((tot, 1), dtype=int)
 
-        all_one_hot_labels[i] = one_hot_label
+        for i in range(tot):
+            left_label = labels_h5[left_keys[i]][:]
+            right_label = labels_h5[right_keys[i]][:]
+            one_hot_label = []
+            side = which_side(left_label, right_label)
+            one_hot_label.append(side)
 
-    # all_one_hot_labels = all_one_hot_labels.reshape((all_one_hot_labels.shape[0], 1))
+            all_one_hot_labels[i] = one_hot_label
+
+    elif xe == 'softmax':
+        all_one_hot_labels = np.zeros((tot, 2), dtype=int)
+
+        for i in range(tot):
+            left_label = labels_h5[left_keys[i]][:]
+            right_label = labels_h5[right_keys[i]][:]
+            side = which_side(left_label, right_label)
+            if side == 1:
+                side = [1, 0]
+            else:
+                side = [0, 1]
+
+            all_one_hot_labels[i] = side
+
+        all_one_hot_labels = all_one_hot_labels.reshape((all_one_hot_labels.shape[0], 2))
 
     return all_one_hot_labels
 
@@ -250,7 +265,7 @@ def load_data(which, uid_keys_map, labs, id_frames, trait_mode='all'):
     if trait_mode == 'all':
         labels = get_labels(labs, left_keys, right_keys)  # get 5 trait labels
     elif trait_mode == 'collapse':
-        labels = get_labels_collapsed(labs, left_keys, right_keys)  # get collapsed labels
+        labels = get_labels_collapsed(labs, left_keys, right_keys, xe='softmax')
     left_data, right_data = get_data(left_keys, right_keys, id_frames)
     return labels, left_data, right_data
 
@@ -318,7 +333,7 @@ def num_frame_statistics():
     print('done')
 
 
-def label_statistics(labels, trait_mode='all'):
+def label_statistics(labels, trait_mode='all', xe='sigmoid'):
     # ratio left right in batch
     # (1, 0) = left -> 1    (0, 1) = right -> 0
     if trait_mode == 'all':
@@ -332,8 +347,12 @@ def label_statistics(labels, trait_mode='all'):
                     num_right[j] += 1
 
     elif trait_mode == 'collapse':
-        num_left = int(sum(labels))
-        num_right = len(labels) - num_left
+        if xe == 'sigmoid':
+            num_left = int(sum(labels))
+            num_right = len(labels) - num_left
+        elif xe == 'softmax':
+            num_left = np.sum(labels, axis=0)[0]
+            num_right = np.sum(labels, axis=0)[1]
 
     return num_left, num_right
 

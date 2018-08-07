@@ -73,7 +73,7 @@ def binarize(arr, trait_mode='all'):
     return new_arr
 
 
-def make_confusion_matrix(prediction, labels, trait_mode='all'):
+def make_confusion_matrix(prediction, labels, trait_mode='all', xe='sigmoid'):
     # shape prediction and labels (32, 5, 2)
     # (1, 0) = left    (0, 1) = right
     prediction = binarize(prediction, trait_mode)
@@ -102,17 +102,30 @@ def make_confusion_matrix(prediction, labels, trait_mode='all'):
         return [tl, fl, tr, fr], cm_per_trait
 
     elif trait_mode == 'collapse':
-        for i in range(shapes[0]):
-            if int(labels[i]) == 1:
-                if int(prediction[i]) == 1:
-                    tl += 1
-                else:
-                    fl += 1
-            elif int(labels[i]) == 0:
-                if int(prediction[i]) == 0:
-                    tr += 1
-                else:
-                    fr += 1
+        if xe == 'sigmoid':
+            for i in range(shapes[0]):
+                if int(labels[i]) == 1:
+                    if int(prediction[i]) == 1:
+                        tl += 1
+                    else:
+                        fl += 1
+                elif int(labels[i]) == 0:
+                    if int(prediction[i]) == 0:
+                        tr += 1
+                    else:
+                        fr += 1
+        elif xe == 'softmax':
+            for i in range(shapes[0]):
+                if int(labels[i][0]) == 1:
+                    if int(prediction[i][0]) == 1:
+                        tl += 1
+                    else:
+                        fl += 1
+                elif int(labels[i][0]) == 0:
+                    if int(prediction[i][0]) == 0:
+                        tr += 1
+                    else:
+                        fr += 1
 
         return [tl, fl, tr, fr]
 
@@ -148,29 +161,29 @@ def mk_plots(which, num):
     plt.savefig('%s/%s.png' % (save_path, which))
 
     # confusion matrix
-    oceas = data[:, 1:21].reshape((data.shape[0], 5, 4))
+    # oceas = data[:, 1:21].reshape((data.shape[0], 5, 4))
+    #
+    # traits = ['o', 'c', 'e', 'a', 's']
+    # for i in range(5):
+    #     plt.figure()
+    #     t = oceas[:, i, :]
+    #     tl = t[:, 0]
+    #     fl = t[:, 1]
+    #     tr = t[:, 2]
+    #     fr = t[:, 3]
+    #     plt.plot(x, tl, label='TL')
+    #     plt.plot(x, fl, label='FL')
+    #     plt.plot(x, tr, label='TR')
+    #     plt.plot(x, fr, label='FR')
+    #
+    #     plt.legend()
+    #
+    #     plt.title('confusion matrix trait "%s" %s' % (traits[i], which))
+    #     plt.xlabel('epochs')
+    #
+    #     plt.savefig('%s/cm_%s_%s.png' % (save_path, traits[i], which))
 
-    traits = ['o', 'c', 'e', 'a', 's']
-    for i in range(5):
-        plt.figure()
-        t = oceas[:, i, :]
-        tl = t[:, 0]
-        fl = t[:, 1]
-        tr = t[:, 2]
-        fr = t[:, 3]
-        plt.plot(x, tl, label='TL')
-        plt.plot(x, fl, label='FL')
-        plt.plot(x, tr, label='TR')
-        plt.plot(x, fr, label='FR')
 
-        plt.legend()
-
-        plt.title('confusion matrix trait "%s" %s' % (traits[i], which))
-        plt.xlabel('epochs')
-
-        plt.savefig('%s/cm_%s_%s.png' % (save_path, traits[i], which))
-
-
-# n = '13'
+# n = '14'
 # mk_plots('train', n)
 # mk_plots('val', n)

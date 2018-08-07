@@ -1,10 +1,10 @@
 # training on chalearn with cropped image faces
 import chainer
 import numpy as np
-from deepimpression2.model import Siamese
-# from deepimpression2.model_9 import Siamese
+# from deepimpression2.model import Siamese
+from deepimpression2.model_15 import Siamese
 import deepimpression2.constants as C
-from chainer.functions import sigmoid_cross_entropy, mean_squared_error
+from chainer.functions import sigmoid_cross_entropy, mean_squared_error, softmax_cross_entropy
 from chainer.optimizers import Adam
 import h5py as h5
 import deepimpression2.paths as P
@@ -75,7 +75,14 @@ for e in range(C.EPOCHS): # C.EPOCHS
             with chainer.using_config('train', True):
                 model.cleargrads()
                 prediction = model(left_data, right_data)
-                loss = sigmoid_cross_entropy(prediction, labels)
+
+                # sof XE
+                loss = softmax_cross_entropy(prediction, labels)
+
+                # sig XE
+                # loss = sigmoid_cross_entropy(prediction, labels)
+
+                # sig XE + MSE
                 # _1 = sigmoid_cross_entropy(prediction, labels)
                 # _2 = mean_squared_error(prediction, cp.asarray(labels, dtype=cp.float32))
                 # print('loss: %s   %s' % (str(_1.data)[0:5], str(_2.data)[0:5]))
@@ -85,7 +92,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
                 optimizer.update()
 
         loss_tmp.append(float(loss.data))
-        cm_tmp[s] = U.make_confusion_matrix(to_cpu(prediction.data), to_cpu(labels), trait_mode='collapse')
+        cm_tmp[s] = U.make_confusion_matrix(to_cpu(prediction.data), to_cpu(labels), trait_mode='collapse', xe='softmax')
 
     batch_statistics_train[0][e] = np.mean(bs_tmp[0], axis=0)
     batch_statistics_train[1][e] = np.mean(bs_tmp[1], axis=0)
@@ -94,14 +101,13 @@ for e in range(C.EPOCHS): # C.EPOCHS
 
     loss_tmp_mean = np.mean(loss_tmp, axis=0)
     train_loss.append(loss_tmp_mean)
-    # print('epoch %d. train loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
     print('E %d. train loss: ' % e, loss_tmp_mean,
           ' [tl, fl, tr, fr]: ', np.mean(cm_tmp, axis=0),
           ' left labels: ', batch_statistics_train[0][e],
           ' right labels: ', batch_statistics_train[1][e],
           ' time: ', time.time() - ts)
 
-    U.record_loss('train', loss_tmp_mean, confusion_matrix_train[e], np.mean(bs_tmp, axis=1))
+    # U.record_loss('train', loss_tmp_mean, confusion_matrix_train[e], np.mean(bs_tmp, axis=1))
 
     # # validation
     loss_tmp = []
@@ -133,7 +139,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
                 #        alpha * mean_squared_error(prediction, cp.asarray(labels, dtype=cp.float32))
 
         loss_tmp.append(float(loss.data))
-        cm_tmp[vs] = U.make_confusion_matrix(to_cpu(prediction.data), to_cpu(labels), trait_mode='collapse')
+        cm_tmp[vs] = U.make_confusion_matrix(to_cpu(prediction.data), to_cpu(labels), trait_mode='collapse', xe='softmax')
 
     batch_statistics_val[0][e] = np.mean(bs_tmp[0], axis=0)
     batch_statistics_val[1][e] = np.mean(bs_tmp[1], axis=0)
@@ -142,14 +148,13 @@ for e in range(C.EPOCHS): # C.EPOCHS
 
     loss_tmp_mean = np.mean(loss_tmp, axis=0)
     val_loss.append(loss_tmp_mean)
-    # print('epoch %d. val loss: ' % e, loss_tmp_mean, ' time: ', time.time() - ts)
     print('E %d. val loss: ' % e, loss_tmp_mean,
           ' [tl, fl, tr, fr]: ', np.mean(cm_tmp, axis=0),
-          ' left labels OCEAS: ', batch_statistics_val[0][e],
-          ' right labels OCEAS: ', batch_statistics_val[1][e],
+          ' left labels: ', batch_statistics_val[0][e],
+          ' right labels: ', batch_statistics_val[1][e],
           ' time: ', time.time() - ts)
 
-    U.record_loss('val', loss_tmp_mean, confusion_matrix_train[e], np.mean(bs_tmp, axis=1))
+    # U.record_loss('val', loss_tmp_mean, confusion_matrix_train[e], np.mean(bs_tmp, axis=1))
 
     # save model
     # if ((e + 1) % 10) == 0:
