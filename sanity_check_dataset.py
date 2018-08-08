@@ -1,10 +1,9 @@
 # training on chalearn with cropped image faces
 import chainer
 import numpy as np
-# from deepimpression2.model import Siamese
-from deepimpression2.model_15 import Siamese
+from deepimpression2.model_16 import Deepimpression
 import deepimpression2.constants as C
-from chainer.functions import sigmoid_cross_entropy, mean_squared_error, softmax_cross_entropy
+from chainer.functions import sigmoid_cross_entropy, mean_absolute_error, softmax_cross_entropy
 from chainer.optimizers import Adam
 import h5py as h5
 import deepimpression2.paths as P
@@ -15,13 +14,13 @@ import deepimpression2.util as U
 import os
 import cupy as cp
 from chainer.functions import expand_dims
+from random import shuffle
 
 
-model = Siamese()
+model = Deepimpression()
 # optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.0001)
 optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
 optimizer.setup(model)
-alpha = 1
 
 if C.ON_GPU:
     model = model.to_gpu(device=C.DEVICE)
@@ -33,14 +32,10 @@ train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
 
 train_loss = []
-confusion_matrix_train = np.zeros((C.EPOCHS, 4), dtype=float)
-# confusion_matrix_trait_train = np.zeros((C.EPOCHS, 5, 4), dtype=int)
-batch_statistics_train = np.zeros((2, C.EPOCHS))
+pred_diff_train = np.zeros((C.EPOCHS, 5), float)
 
 val_loss = []
-confusion_matrix_val = np.zeros((C.EPOCHS, 4), dtype=float)
-# confusion_matrix_trait_val = np.zeros((C.EPOCHS, 5, 4), dtype=int)
-batch_statistics_val = np.zeros((2, C.EPOCHS))
+pred_diff_val = np.zeros((C.EPOCHS, 5), float)
 
 train_uid_keys_map = h5.File(P.TRAIN_UID_KEYS_MAPPING, 'r')
 val_uid_keys_map = h5.File(P.VAL_UID_KEYS_MAPPING, 'r')
@@ -53,112 +48,84 @@ id_frames = h5.File(P.NUM_FRAMES, 'r')
 print('Enter training loop with validation')
 for e in range(C.EPOCHS): # C.EPOCHS
     loss_tmp = []
-    cm_tmp = np.zeros((training_steps, 4), dtype=int)
-    # cm_trait_tmp = np.zeros((training_steps, 5, 4), dtype=int)
-    bs_tmp = np.zeros((2, training_steps), dtype=int)
+    pd_tmp = np.zeros((training_steps, 5), dtype=float)
+    _tr_labs = list(train_labels)
+    shuffle(_tr_labs)
 
     ts = time.time()
     for s in range(training_steps):  # training_steps
-
-        labels, left_data, right_data = D.load_data('train', train_uid_keys_map, train_labels,
-                                                    id_frames, trait_mode='collapse')
-        num_left, num_right = D.label_statistics(labels, trait_mode='collapse', xe='sigmoid')
-        bs_tmp[0][s] = num_left
-        bs_tmp[1][s] = num_right
+        train_labels_selected = _tr_labs[s*C.TRAIN_BATCH_SIZE:(s+1)*C.TRAIN_BATCH_SIZE]
+        assert(len(train_labels_selected) == C.TRAIN_BATCH_SIZE)
+        labels, data = D.load_data_sanity(train_labels_selected, train_labels, id_frames)
 
         if C.ON_GPU:
-            left_data = to_gpu(left_data, device=C.DEVICE)
-            right_data = to_gpu(right_data, device=C.DEVICE)
+            data = to_gpu(data, device=C.DEVICE)
             labels = to_gpu(labels, device=C.DEVICE)
 
         # training
         with cp.cuda.Device(C.DEVICE):
             with chainer.using_config('train', True):
                 model.cleargrads()
-                prediction = expand_dims(model(left_data, right_data), axis=-1)
+                prediction = model(data)
 
-                # sof XE
-                loss = softmax_cross_entropy(prediction, labels)
-
-                # sig XE
-                # loss = sigmoid_cross_entropy(prediction, labels)
-
-                # sig XE + MSE
-                # _1 = sigmoid_cross_entropy(prediction, labels)
-                # _2 = mean_squared_error(prediction, cp.asarray(labels, dtype=cp.float32))
-                # print('loss: %s   %s' % (str(_1.data)[0:5], str(_2.data)[0:5]))
-                # loss = _1 + alpha * _2
+                loss = mean_absolute_error(prediction, labels)
 
                 loss.backward()
                 optimizer.update()
 
         loss_tmp.append(float(loss.data))
-        cm_tmp[s] = U.make_confusion_matrix(to_cpu(prediction.data), to_cpu(labels), trait_mode='collapse', xe='softmax')
 
-    batch_statistics_train[0][e] = np.mean(bs_tmp[0], axis=0)
-    batch_statistics_train[1][e] = np.mean(bs_tmp[1], axis=0)
-    # confusion_matrix_trait_train[e] = np.mean(cm_trait_tmp, axis=0)
-    confusion_matrix_train[e] = np.mean(cm_tmp, axis=0)
+        pd_tmp[s] = U.pred_diff_trait(to_cpu(prediction.data), to_cpu(labels))
 
+
+    pred_diff_train[e] = np.mean(pd_tmp, axis=0)
     loss_tmp_mean = np.mean(loss_tmp, axis=0)
     train_loss.append(loss_tmp_mean)
     print('E %d. train loss: ' % e, loss_tmp_mean,
-          ' [tl, fl, tr, fr]: ', np.mean(cm_tmp, axis=0),
-          ' left labels: ', batch_statistics_train[0][e],
-          ' right labels: ', batch_statistics_train[1][e],
+          ' pred diff OCEAS: ', pred_diff_train[e],
           ' time: ', time.time() - ts)
 
-    U.record_loss('train', loss_tmp_mean, confusion_matrix_train[e], np.mean(bs_tmp, axis=1))
+    U.record_loss_sanity('train', loss_tmp_mean, pred_diff_train[e])
 
-    # # validation
+    # validation
     loss_tmp = []
-    cm_tmp = np.zeros((val_steps, 4), dtype=int)
-    # cm_trait_tmp = np.zeros((val_steps, 5, 4), dtype=int)
-    bs_tmp = np.zeros((2, val_steps), dtype=int)
+    pd_tmp = np.zeros((val_steps, 5), dtype=float)
+    _v_labs = list(val_labels)
+    shuffle(_v_labs)
 
     ts = time.time()
     for vs in range(val_steps):  # val_steps
-
-        labels, left_data, right_data = D.load_data('val', val_uid_keys_map, val_labels,
-                                                    id_frames, trait_mode='collapse')
-        num_left, num_right = D.label_statistics(labels, trait_mode='collapse', xe='sigmoid')
-        bs_tmp[0][vs] = num_left
-        bs_tmp[1][vs] = num_right
+        val_labels_selected = _v_labs[s * C.VAL_BATCH_SIZE:(s + 1) * C.VAL_BATCH_SIZE]
+        assert (len(val_labels_selected) == C.VAL_BATCH_SIZE)
+        labels, data = D.load_data_sanity(val_labels_selected, val_labels, id_frames)
 
         if C.ON_GPU:
-            left_data = to_gpu(left_data, device=C.DEVICE)
-            right_data = to_gpu(right_data, device=C.DEVICE)
+            data = to_gpu(data, device=C.DEVICE)
             labels = to_gpu(labels, device=C.DEVICE)
 
-        # validation
+        # training
         with cp.cuda.Device(C.DEVICE):
             with chainer.using_config('train', False):
                 model.cleargrads()
-                prediction = expand_dims(model(left_data, right_data), axis=-1)
-                loss = softmax_cross_entropy(prediction, labels)
-                # loss = sigmoid_cross_entropy(prediction, labels) + \
-                #        alpha * mean_squared_error(prediction, cp.asarray(labels, dtype=cp.float32))
+                prediction = model(data)
+                loss = mean_absolute_error(prediction, labels)
+
 
         loss_tmp.append(float(loss.data))
-        cm_tmp[vs] = U.make_confusion_matrix(to_cpu(prediction.data), to_cpu(labels), trait_mode='collapse', xe='softmax')
 
-    batch_statistics_val[0][e] = np.mean(bs_tmp[0], axis=0)
-    batch_statistics_val[1][e] = np.mean(bs_tmp[1], axis=0)
-    # confusion_matrix_trait_val[e] = np.mean(cm_trait_tmp, axis=0)
-    confusion_matrix_val[e] = np.mean(cm_tmp, axis=0)
+        pd_tmp[s] = U.pred_diff_trait(to_cpu(prediction.data), to_cpu(labels))
 
+    pred_diff_val[e] = np.mean(pd_tmp, axis=0)
     loss_tmp_mean = np.mean(loss_tmp, axis=0)
     val_loss.append(loss_tmp_mean)
     print('E %d. val loss: ' % e, loss_tmp_mean,
-          ' [tl, fl, tr, fr]: ', np.mean(cm_tmp, axis=0),
-          ' left labels: ', batch_statistics_val[0][e],
-          ' right labels: ', batch_statistics_val[1][e],
+          ' pred diff OCEAS: ', pred_diff_val[e],
           ' time: ', time.time() - ts)
 
-    U.record_loss('val', loss_tmp_mean, confusion_matrix_train[e], np.mean(bs_tmp, axis=1))
+    U.record_loss_sanity('val', loss_tmp_mean, pred_diff_val[e])
 
     # save model
-    # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_13' % e)
-    #     chainer.serializers.save_npz(name, model)
+    if ((e + 1) % 10) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_16' % e)
+        chainer.serializers.save_npz(name, model)
 

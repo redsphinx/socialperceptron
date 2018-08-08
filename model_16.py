@@ -128,9 +128,9 @@ class ResNet18(chainer.Chain):
 
 ### MODEL ###
 
-class Siamese(chainer.Chain):
+class Deepimpression(chainer.Chain):
     def __init__(self):
-        super(Siamese, self).__init__()
+        super(Deepimpression, self).__init__()
         with self.init_scope():
             self.b1 = ResNet18()
             self.fc = Linear(in_size=256, out_size=5)

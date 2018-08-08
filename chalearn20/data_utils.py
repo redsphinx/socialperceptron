@@ -270,6 +270,37 @@ def load_data(which, uid_keys_map, labs, id_frames, trait_mode='all'):
     return labels, left_data, right_data
 
 
+def get_data_sanity(keys, id_frames):
+    data = np.zeros((len(keys), 3, C2.SIDE, C2.SIDE), dtype=np.float32)
+
+    for i, k in enumerate(keys):
+        data[i] = quicker_load(k, id_frames)
+
+    return data
+
+
+def load_data_sanity(labs_selected, labs_h5, id_frames):
+    # keep track of which UID seen in main file, send selected labs based on batch
+    labels = np.zeros((len(labs_selected), 5), dtype=np.float32)
+
+    # shuffle all labs
+    shuffle(labs_selected)
+    # for each UID, get random video key + labels
+    keys = []
+    for i in range(len(labs_selected)):
+        # get keys
+        k = labs_selected[i]
+        keys.append(k)
+        # get labels
+        labels[i] = labs_h5[k][0:5]
+
+    # get data
+    data = get_data_sanity(keys, id_frames)
+
+    # return labels, data
+    return labels, data
+
+
 def make_pairs(which, uid_keys_map, seen):
     # used for debugging to check duplicate pairs
     left_uids, right_uids = get_batch_uid(which)

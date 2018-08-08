@@ -49,6 +49,34 @@ def record_loss(which, loss, cm_trait, label_stats):
         mf.write('%s,%s\n' % (str(loss)[0:6], line))
 
 
+def record_loss_sanity(which, loss, pred_diff):
+    assert(which in ['train', 'val', 'test'])
+
+    if which == 'train':
+        path = P.TRAIN_LOG
+    elif which == 'val':
+        path = P.VAL_LOG
+    elif which == 'test':
+        path = P.TEST_LOG
+
+    line = ''
+
+    with open(path, 'a') as mf:
+        for i in range(len(pred_diff)):
+            line += str(pred_diff[i])[0:4] + ','
+
+        line = line[0:-1]
+        # tmp = '%s,%s\n' % (str(loss)[0:6], line)
+        mf.write('%s,%s\n' % (str(loss)[0:6], line))
+
+
+def pred_diff_trait(prediction, labels):
+    # OCEAS
+    diff = np.abs(prediction - labels)
+    diff = np.mean(diff, axis=0)
+    return diff
+
+
 def binarize(arr, trait_mode='all', xe='sigmoid'):
     shapes = arr.shape
     if trait_mode == 'all':
