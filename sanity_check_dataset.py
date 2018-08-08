@@ -95,7 +95,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
 
     ts = time.time()
     for vs in range(val_steps):  # val_steps
-        val_labels_selected = _v_labs[s * C.VAL_BATCH_SIZE:(s + 1) * C.VAL_BATCH_SIZE]
+        val_labels_selected = _v_labs[vs * C.VAL_BATCH_SIZE:(vs + 1) * C.VAL_BATCH_SIZE]
         assert (len(val_labels_selected) == C.VAL_BATCH_SIZE)
         labels, data = D.load_data_sanity(val_labels_selected, val_labels, id_frames)
 
@@ -113,7 +113,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
 
         loss_tmp.append(float(loss.data))
 
-        pd_tmp[s] = U.pred_diff_trait(to_cpu(prediction.data), to_cpu(labels))
+        pd_tmp[vs] = U.pred_diff_trait(to_cpu(prediction.data), to_cpu(labels))
 
     pred_diff_val[e] = np.mean(pd_tmp, axis=0)
     loss_tmp_mean = np.mean(loss_tmp, axis=0)
