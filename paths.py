@@ -56,8 +56,8 @@ SETUP4 = '/scratch/users/gabras/data/trying_out/setup4'
 
 # -------------------------------------------------------------------------------------------------
 # log files
-TRAIN_LOG = '/scratch/users/gabras/data/loss/train_15.txt'
-VAL_LOG = '/scratch/users/gabras/data/loss/val_15.txt'
+TRAIN_LOG = '/scratch/users/gabras/data/loss/train_16.txt'
+VAL_LOG = '/scratch/users/gabras/data/loss/val_16.txt'
 TEST_LOG = '/scratch/users/gabras/data/loss/test.txt'
 
 # -------------------------------------------------------------------------------------------------
