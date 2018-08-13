@@ -125,7 +125,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
     U.record_loss_sanity('val', loss_tmp_mean, pred_diff_val[e])
 
     # save model
-    if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_16' % e)
-        chainer.serializers.save_npz(name, model)
+    # if ((e + 1) % 10) == 0:
+    #     name = os.path.join(P.MODELS, 'epoch_%d_16' % e)
+    #     chainer.serializers.save_npz(name, model)
 

@@ -212,7 +212,7 @@ def mk_plots(which, num):
     y = data[:, 0]
     # y = data
     plt.plot(x, y, 'r')
-    plt.title('%s cross entropy loss' % which)
+    plt.title('%s mean absolute error loss' % which)
     plt.xlabel('epochs')
     plt.savefig('%s/%s.png' % (save_path, which))
 
@@ -240,6 +240,6 @@ def mk_plots(which, num):
     #     plt.savefig('%s/cm_%s_%s.png' % (save_path, traits[i], which))
 
 
-# n = '15'
+# n = '17'
 # mk_plots('train', n)
 # mk_plots('val', n)
