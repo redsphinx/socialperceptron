@@ -97,8 +97,7 @@ def find_face_simple(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     face_rectangles = detector(gray, 2)
     if len(face_rectangles) == 0:
-        print('no face detected in the generated image')
-        return [0, 0, 0, 0]
+        return None
         # return xp.zeros((image.shape), dtype=xp.uint8)
     largest_face_rectangle = find_largest_face(face_rectangles)
 
