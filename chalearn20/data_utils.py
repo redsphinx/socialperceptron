@@ -34,9 +34,12 @@ def get_info_labels():
     test = h5.File(P.CHALEARN_TEST_LABELS_20, 'r')
     val = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
 
-    print('training videos: %d  unique ID: %d  video per UID: %f' % (len(train.keys()), numbers[0], float(len(train.keys())/float(numbers[0])) ) )
-    print('testing videos: %d  unique ID: %d  video per UID: %f' % (len(test.keys()), numbers[1], float(len(test.keys())/float(numbers[1])) ) )
-    print('validation videos: %d  unique ID: %d  video per UID: %f' % (len(val.keys()), numbers[2], float(len(val.keys())/float(numbers[2])) ) )
+    print('training videos: %d  unique ID: %d  video per UID: %f' % (
+    len(train.keys()), numbers[0], float(len(train.keys()) / float(numbers[0]))))
+    print('testing videos: %d  unique ID: %d  video per UID: %f' % (
+    len(test.keys()), numbers[1], float(len(test.keys()) / float(numbers[1]))))
+    print('validation videos: %d  unique ID: %d  video per UID: %f' % (
+    len(val.keys()), numbers[2], float(len(val.keys()) / float(numbers[2]))))
 
     train.close()
     test.close()
@@ -61,20 +64,20 @@ def retrieve_unique_pairs(batch_size, grid, r):
 def get_batch_uid(which):
     # r is empirically selected for grid size and batch size
     # TODO: figure out relationship between r and grid and batch size
-    assert(which in ['train', 'test', 'val'])
+    assert (which in ['train', 'test', 'val'])
 
     if which == 'train':
         batch_size = C1.TRAIN_BATCH_SIZE
         grid = C2.NUM_TRAIN
-        r = 270 # reduced from 290
+        r = 270  # reduced from 290
     elif which == 'test':
         batch_size = C1.TEST_BATCH_SIZE
         grid = C2.NUM_TEST
-        r = 50 # reduced from 70
+        r = 50  # reduced from 70
     elif which == 'val':
         batch_size = C1.VAL_BATCH_SIZE
         grid = C2.NUM_VAL
-        r = 50 # reduced from 70
+        r = 50  # reduced from 70
 
     points = retrieve_unique_pairs(batch_size, grid, r)
 
@@ -96,13 +99,13 @@ def get_keys(left_uids, right_uids, uid_keys_map):
 
     for l in left_uids:
         k = uid_keys_map[l][:]
-        i = randint(0, len(k)-1)
+        i = randint(0, len(k) - 1)
         k = k[i].astype('str')
         left_keys.append(k)
-    
+
     for r in right_uids:
         k = uid_keys_map[r][:]
-        i = randint(0, len(k)-1)
+        i = randint(0, len(k) - 1)
         k = k[i].astype('str')
         right_keys.append(k)
 
@@ -386,7 +389,6 @@ def label_statistics(labels, trait_mode='all', xe='sigmoid'):
             num_right = np.sum(labels, axis=0)[1]
 
     return num_left, num_right
-
 
 # p = '/scratch/users/gabras/data/loss/train_5.txt'
 # pf = np.genfromtxt(p, float, delimiter=',')
