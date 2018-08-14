@@ -70,13 +70,13 @@ FIGURES = '/home/gabras/deployed/deepimpression2/figures'
 
 # -------------------------------------------------------------------------------------------------
 # original dataset
-# TODO: copy original dataset from hinton to schmidhuber
-# train: /vol/ccnlab-scratch1/gabras/chalearn_train
-# test: on schmidhuber
-# val: /vol/ccnlab-scratch1/gabras/chalearn_validation/val-1
+CHALEARN_TRAIN_ORIGINAL = '/scratch/users/gabras/data/chalearn10/original_train'
+CHALEARN_VAL_ORIGINAL = '/scratch/users/gabras/data/chalearn10/original_val'
 
 # -------------------------------------------------------------------------------------------------
 # chalearn30
+CHALEARN30_ALL_DATA = '/scratch/users/gabras/data/chalearn30/all_data'
+
 # train
 # test
 # val
