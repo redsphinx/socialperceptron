@@ -45,9 +45,10 @@ def convert(which):
                         face_pos[k] = bb
                         f = f.transpose([2, 0, 1])
                         f = np.expand_dims(f, 0)
-                        my_file.create_dataset(str(k), f)
+                        my_file.create_dataset(name=str(k), data=f)
 
-                    my_file.create_dataset('faces', face_pos)
+                    my_file.create_dataset(name='faces', data=face_pos)
+                    # TODO: make parallel
 
 
 convert('test')
