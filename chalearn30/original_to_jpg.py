@@ -68,10 +68,24 @@ def check_converted():
 # parallel_convert('test', 1000, 1500, convert)  # done
 
 # parallel_convert('test', 1500, 2000, convert) # ? fails at 1924
-# parallel_convert('test', 1924, 2000, convert, number_processes=10)
-
+# parallel_convert('test', 1924, 2000, convert, number_processes=10)  # done
 # parallel_convert('train', 0, 500, convert) # ? fails at 425
-# parallel_convert('train', 425, 500, convert, number_processes=10)
-
+# parallel_convert('train', 425, 500, convert, number_processes=10)  # done
 # parallel_convert('train', 500, 1000, convert) # ? fails at 626
-parallel_convert('train', 626, 1000, convert, number_processes=20)
+# parallel_convert('train', 626, 1000, convert, number_processes=20)  # busy on schmidhuber
+
+# ---
+
+# parallel_convert('train', 1000, 2000, convert, number_processes=20) # hinton busy
+# parallel_convert('train', 2000, 3000, convert, number_processes=30) # turing busy
+# parallel_convert('train', 3000, 4000, convert, number_processes=30) # archimedes busy
+# parallel_convert('train', 4000, 5000, convert, number_processes=20) # ramachandran busy
+# parallel_convert('train', 5000, 6000, convert, number_processes=20) # charcot busy
+
+
+# parallel_convert('val', 0, 500, convert, number_processes=20) # sejnowski busy
+# parallel_convert('val', 500, 1000, convert, number_processes=20) # hodgkin busy
+# parallel_convert('val', 1000, 1500, convert, number_processes=20) # mountcastle  TODO bit busy
+# parallel_convert('val', 1500, 2000, convert, number_processes=20) # schmidhuber busy
+
+
