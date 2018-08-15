@@ -98,4 +98,7 @@ def check_converted():
 # parallel_convert('test', 1000, 1500, convert)
 # parallel_convert('test', 1500, 2000, convert)
 # parallel_convert('train', 0, 500, convert)
-parallel_convert('train', 500, 1000, convert)
+# parallel_convert('train', 500, 1000, convert)
+
+
+# ..converting orlXEgAepGo.002.h5
