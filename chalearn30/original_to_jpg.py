@@ -77,34 +77,39 @@ def move_cluster_completeness():
     # get all the mp4s
     all_train = DU.get_all_videos('train')
 
-    for n in tqdm(diff):
+    for n in diff:
         cnt += 1
         h5 = os.path.join(p_cluster, n)
-        with h5py.File(h5, 'r') as mf:
+        try:
+            mf = h5py.File(h5, 'r')
+            # with h5py.File(h5, 'r') as mf:
             frames_h5 = len(mf.keys()) - 1
+            mf.close()
 
-        n_base = n.split('.h5')[0]
-        frames_mp4 = 0
+            n_base = n.split('.h5')[0]
+            frames_mp4 = 0
 
-        # find matching mp4
-        for v in all_train:
-            if n_base in v:
-                frames_mp4 = DU.mp4_to_arr(v).shape[0]
-                break
+            # find matching mp4
+            for v in all_train:
+                if n_base in v:
+                    frames_mp4 = DU.mp4_to_arr(v).shape[0]
+                    break
 
-        if frames_mp4 == 0:
-            print('ohboi')
-            return
+            if frames_mp4 == 0:
+                print('ohboi')
+                return
 
-        if frames_h5 == frames_mp4:
-            src = os.path.join(p_cluster, n)
-            dst = os.path.join(p_main, n)
-            # shutil.move(src=src, dst=dst)
-            completed_which_moved += 1
-            print(completed_which_moved, cnt)
+            if frames_h5 == frames_mp4:
+                src = os.path.join(p_cluster, n)
+                dst = os.path.join(p_main, n)
+                shutil.move(src=src, dst=dst)
+                completed_which_moved += 1
+                print(completed_which_moved, cnt)
+        except OSError:
+            print(h5, 'failed')
 
 
-# move_cluster_completeness()
+move_cluster_completeness()
 
 
 def get_left_off_index():
