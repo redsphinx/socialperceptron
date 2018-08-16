@@ -103,8 +103,6 @@ def move_cluster_completeness():
             completed_which_moved += 1
             print(completed_which_moved, cnt)
 
-    print('tot diff: %d')
-
 
 # move_cluster_completeness()
 
@@ -152,11 +150,42 @@ def get_left_off_index():
     indices_4000_5000.sort()
     indices_5000_6000.sort()
 
-    print(indices_1000_2000[0],indices_1000_2000[-1], '\n',
-          indices_2000_3000[0],indices_2000_3000[-1], '\n',
-          indices_3000_4000[0],indices_3000_4000[-1], '\n',
-          indices_4000_5000[0],indices_4000_5000[-1], '\n',
-          indices_5000_6000[0],indices_5000_6000[-1])
+    # print(indices_1000_2000[0],indices_1000_2000[-1], '\n',
+    #       indices_2000_3000[0],indices_2000_3000[-1], '\n',
+    #       indices_3000_4000[0],indices_3000_4000[-1], '\n',
+    #       indices_4000_5000[0],indices_4000_5000[-1], '\n',
+    #       indices_5000_6000[0],indices_5000_6000[-1])
+
+    all_train = np.array(all_train)
+    all_train_1000_2000 = list(all_train[indices_1000_2000])
+    all_train_2000_3000 = list(all_train[indices_2000_3000])
+    all_train_3000_4000 = list(all_train[indices_3000_4000])
+    all_train_4000_5000 = list(all_train[indices_4000_5000])
+    all_train_5000_6000 = list(all_train[indices_5000_6000])
+
+    # return ones that have already been converted
+    return all_train_1000_2000, all_train_2000_3000, all_train_3000_4000, all_train_4000_5000, all_train_5000_6000
+
+
+def parallel_convert_mod(which, b, e, func, number_processes=20):
+    all_videos = DU.get_all_videos(which)
+    a12, a23, a34, a45, a56 = get_left_off_index()
+
+    pool = Pool(processes=number_processes)
+    all_videos = all_videos[b:e]
+    if b == 1000:
+        all_videos = list(set(all_videos) - set(a12))
+    elif b == 2000:
+        all_videos = list(set(all_videos) - set(a23))
+    elif b == 3000:
+        all_videos = list(set(all_videos) - set(a34))
+    elif b == 4000:
+        all_videos = list(set(all_videos) - set(a45))
+    elif b == 5000:
+        all_videos = list(set(all_videos) - set(a56))
+
+    pool.apply_async(func)
+    pool.map(func, all_videos)
 
 
 # get_left_off_index()
@@ -191,8 +220,8 @@ def get_left_off_index():
 # parallel_convert('train', 4000, 5000, convert, number_processes=20) # ramachandran busy, issues, partial
 # parallel_convert('train', 5000, 6000, convert, number_processes=20) # charcot busy, issues, partial
 # fixing, all on schmidhuber
-parallel_convert('train', 1258, 2000, convert, number_processes=15)
-parallel_convert('train', 2531, 3000, convert, number_processes=15)
-parallel_convert('train', 3423, 4000, convert, number_processes=15)
-parallel_convert('train', 4273, 5000, convert, number_processes=15)
-parallel_convert('train', 5252, 6000, convert, number_processes=15)
+# parallel_convert_mod('train', 1000, 2000, convert, number_processes=15)
+# parallel_convert_mod('train', 2000, 3000, convert, number_processes=15)
+# parallel_convert_mod('train', 3000, 4000, convert, number_processes=15)
+# parallel_convert_mod('train', 4000, 5000, convert, number_processes=15)
+# parallel_convert_mod('train', 5000, 6000, convert, number_processes=15)
