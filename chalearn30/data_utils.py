@@ -56,6 +56,20 @@ def check_which_not_done(which, b, e):
             print(vp)
 
 
+def only_names_check_which_not_done(which, b, e):
+    all_videos = get_all_videos(which)[b:e]
+
+    for i, vp in enumerate(all_videos):
+        # for i, vp in tqdm(enumerate(all_videos)):
+        video_name = vp.split('/')[-1].split('.mp4')[0] + '.h5'
+        h5_path = os.path.join(P.CHALEARN30_ALL_DATA, video_name)
+        if not os.path.exists(h5_path):
+            print('asdf')
+            print(i, vp)
+
+
+
 # check_which_not_done('test', 1400) # fails from 1400 + 524
 # check_which_not_done('train', 0, 500) # fails from 425
 # check_which_not_done('train', 500, 1000) # fails from 500 + 126
+# only_names_check_which_not_done('train', 626, 1000)
