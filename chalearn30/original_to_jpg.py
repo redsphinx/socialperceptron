@@ -8,6 +8,8 @@ from multiprocessing import Pool
 import deepimpression2.chalearn30.data_utils as DU
 import shutil
 from tqdm import tqdm
+import skvideo.io
+
 
 
 def convert(video_path):
@@ -224,6 +226,39 @@ def parallel_convert_missing(func, number_processes=30):
     pool.map(func, all_videos)
 
 
+def controleren():
+    def get_frames_mp4(bn):
+        for j, v in enumerate(all_videos):
+            if bn in v:
+                return skvideo.io.ffprobe(v)['video']['@nb_frames'], v
+
+    def get_frames_h5(p):
+        with h5py.File(p, 'r') as mf:
+            frs = len(mf.keys()) - 1
+        return frs
+
+    still_todo = []
+
+    all_videos = DU.get_all_videos('train') + DU.get_all_videos('test') + DU.get_all_videos('val')
+    all_h5 = os.listdir(P.CHALEARN30_ALL_DATA)
+
+    for i, h5 in enumerate(all_h5):
+        base_name = h5.split('.h5')[0]
+        h5_path = os.path.join(P.CHALEARN30_ALL_DATA, h5)
+
+        h5_frames = get_frames_h5(h5_path)
+        mp4_frames, v_path = get_frames_mp4(base_name)
+
+        if h5_frames != mp4_frames:
+            still_todo.append(v_path)
+            print('ohno, %s' % (v_path))
+
+    print('still todo', len(still_todo))
+    return still_todo
+
+
+b = controleren()
+
 
 # get_left_off_index()
 # 1000 1258
@@ -264,4 +299,4 @@ def parallel_convert_missing(func, number_processes=30):
 # parallel_convert_mod('train', 5000, 6000, convert, number_processes=15)
 
 # convert missing
-parallel_convert_missing(convert)
+# parallel_convert_missing(convert)
