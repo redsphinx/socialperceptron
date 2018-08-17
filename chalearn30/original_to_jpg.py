@@ -70,6 +70,7 @@ def move_cluster_completeness():
     main_list = os.listdir(p_main)
     cluster_list = os.listdir(p_cluster)
     diff = set(cluster_list) - set(main_list)
+    # print(len(diff))
 
     cnt = 0
     completed_which_moved = 0
@@ -79,12 +80,14 @@ def move_cluster_completeness():
 
     for n in diff:
         cnt += 1
+        print(cnt)
         h5 = os.path.join(p_cluster, n)
         try:
             mf = h5py.File(h5, 'r')
             # with h5py.File(h5, 'r') as mf:
             frames_h5 = len(mf.keys()) - 1
             mf.close()
+            print('opened and closed')
 
             n_base = n.split('.h5')[0]
             frames_mp4 = 0
@@ -105,11 +108,10 @@ def move_cluster_completeness():
                 shutil.move(src=src, dst=dst)
                 completed_which_moved += 1
                 print(completed_which_moved, cnt)
-        except OSError:
-            print(h5, 'failed')
-
-
-move_cluster_completeness()
+            else:
+                print('frames should be %d, but are %d' % (frames_mp4, frames_h5))
+        except (OSError, RuntimeError) as e:
+            print(h5, 'failed', e)
 
 
 def get_left_off_index():
@@ -172,6 +174,28 @@ def get_left_off_index():
     return all_train_1000_2000, all_train_2000_3000, all_train_3000_4000, all_train_4000_5000, all_train_5000_6000
 
 
+def get_missing():
+    p_main = '/scratch/users/gabras/data/chalearn30/all_data'  # probably all complete
+    p_cluster = '/scratch/users/gabras/data/chalearn30/chalearn30/all_data'
+    main_list = os.listdir(p_main)
+    cluster_list = os.listdir(p_cluster)
+    diff = set(cluster_list) - set(main_list)
+
+    all_train = DU.get_all_videos('train')
+    missing = []
+
+    def do_thing(t):
+        for i, v in enumerate(all_train):
+            if t in v:
+                missing.append(v)
+
+    for p in diff:
+        p_base = p.split('.h5')[0]
+        do_thing(p_base)
+
+    return missing
+
+
 def parallel_convert_mod(which, b, e, func, number_processes=20):
     all_videos = DU.get_all_videos(which)
     a12, a23, a34, a45, a56 = get_left_off_index()
@@ -191,6 +215,14 @@ def parallel_convert_mod(which, b, e, func, number_processes=20):
 
     pool.apply_async(func)
     pool.map(func, all_videos)
+
+
+def parallel_convert_missing(func, number_processes=30):
+    all_videos = get_missing()
+    pool = Pool(processes=number_processes)
+    pool.apply_async(func)
+    pool.map(func, all_videos)
+
 
 
 # get_left_off_index()
@@ -230,3 +262,6 @@ def parallel_convert_mod(which, b, e, func, number_processes=20):
 # parallel_convert_mod('train', 3000, 4000, convert, number_processes=15)
 # parallel_convert_mod('train', 4000, 5000, convert, number_processes=15)
 # parallel_convert_mod('train', 5000, 6000, convert, number_processes=15)
+
+# convert missing
+parallel_convert_missing(convert)
