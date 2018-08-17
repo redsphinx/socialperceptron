@@ -266,10 +266,7 @@ def controleren(b, e):
 # b = controleren(6000, 7000)
 # b = controleren(7000, 8000)
 # b = controleren(8000, 9000)
-b = controleren(9000, 10000)
-
-
-
+# b = controleren(9000, 10000)
 
 # get_left_off_index()
 # 1000 1258

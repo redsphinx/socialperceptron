@@ -67,9 +67,8 @@ def only_names_check_which_not_done(which, b, e):
             print('asdf')
             print(i, vp)
 
-
-
 # check_which_not_done('test', 1400) # fails from 1400 + 524
 # check_which_not_done('train', 0, 500) # fails from 425
 # check_which_not_done('train', 500, 1000) # fails from 500 + 126
 # only_names_check_which_not_done('train', 626, 1000)
+
