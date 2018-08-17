@@ -226,11 +226,11 @@ def parallel_convert_missing(func, number_processes=30):
     pool.map(func, all_videos)
 
 
-def controleren():
+def controleren(b, e):
     def get_frames_mp4(bn):
         for j, v in enumerate(all_videos):
             if bn in v:
-                return skvideo.io.ffprobe(v)['video']['@nb_frames'], v
+                return int(skvideo.io.ffprobe(v)['video']['@nb_frames']), v
 
     def get_frames_h5(p):
         with h5py.File(p, 'r') as mf:
@@ -242,7 +242,8 @@ def controleren():
     all_videos = DU.get_all_videos('train') + DU.get_all_videos('test') + DU.get_all_videos('val')
     all_h5 = os.listdir(P.CHALEARN30_ALL_DATA)
 
-    for i, h5 in enumerate(all_h5):
+    for i, h5 in enumerate(all_h5[b:e]):
+        print(i)
         base_name = h5.split('.h5')[0]
         h5_path = os.path.join(P.CHALEARN30_ALL_DATA, h5)
 
@@ -257,7 +258,17 @@ def controleren():
     return still_todo
 
 
-b = controleren()
+# b = controleren(1340, 2000)
+# b = controleren(2000, 3000)
+# b = controleren(3000, 4000)
+# b = controleren(4000, 5000)
+# b = controleren(5000, 6000)
+# b = controleren(6000, 7000)
+# b = controleren(7000, 8000)
+# b = controleren(8000, 9000)
+b = controleren(9000, 10000)
+
+
 
 
 # get_left_off_index()
