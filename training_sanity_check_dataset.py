@@ -37,8 +37,8 @@ pred_diff_train = np.zeros((C.EPOCHS, 5), float)
 val_loss = []
 pred_diff_val = np.zeros((C.EPOCHS, 5), float)
 
-train_uid_keys_map = h5.File(P.TRAIN_UID_KEYS_MAPPING, 'r')
-val_uid_keys_map = h5.File(P.VAL_UID_KEYS_MAPPING, 'r')
+# train_uid_keys_map = h5.File(P.TRAIN_UID_KEYS_MAPPING, 'r')
+# val_uid_keys_map = h5.File(P.VAL_UID_KEYS_MAPPING, 'r')
 
 training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
 val_steps = len(val_labels) // C.VAL_BATCH_SIZE
