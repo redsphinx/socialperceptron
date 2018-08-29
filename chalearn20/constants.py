@@ -7,3 +7,7 @@ NUM_TEST = 500
 
 # data size
 SIDE = 208
+
+# data size after [bg, face, all] split
+W = 456
+H = 256

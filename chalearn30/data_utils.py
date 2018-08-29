@@ -142,7 +142,7 @@ def fill_average(image, which_data, optface):
 
 def get_data(keys, id_frames, which_data):
     # TODO: figure out the dimensions, they all should be same dimensions
-    data = np.zeros((len(keys), 3, C2.SIDE, C2.SIDE), dtype=np.float32)
+    data = np.zeros((len(keys), 3, C2.W, C2.H), dtype=np.float32)
 
     for i, k in enumerate(keys):
         image, optface = quicker_load(k, id_frames, which_data)

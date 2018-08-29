@@ -11,7 +11,6 @@ from tqdm import tqdm
 import skvideo.io
 
 
-
 def convert(video_path):
     # for video_path in all_videos:
     video = DU.mp4_to_arr(video_path)
