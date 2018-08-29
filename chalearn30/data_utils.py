@@ -78,11 +78,11 @@ def only_names_check_which_not_done(which, b, e):
 
 def quicker_load(k, id_frames, which_data):
     k = k.split('.mp4')[0]
-    h5_path = os.path.join(P.CHALEARN_ALL_DATA_20_2, '%s.h5' % k)
+    h5_path = os.path.join(P.CHALEARN30_ALL_DATA, '%s.h5' % k)
     v = h5.File(h5_path, 'r')
 
     n = D.get_frame(id_frames[k][0])
-    fe = v[str(n)][:]
+    fe = v[str(n)][:]  # shape=(1, c, h, w)
 
     if which_data in ['face', 'bg']:
         optface = v['faces'][n]
@@ -101,33 +101,32 @@ def fill_average(image, which_data, optface):
             print('Problem: which_data == all but optface not None')
             return None
     else:
-        w, h = image.shape[1], image.shape[2]  # data is transposed before save
+        h, w = image.shape[2], image.shape[3]  # data is transposed before save
         if which_data == 'bg':
             # image = Image.fromarray(image)
-            # TODO: figure out if w, h are in correct order
             tot = 0
-            px_mean = np.zeros((3, 1, 1), dtype=image.dtype)
+            px_mean = np.zeros((1, 3))
             for i in range(w):
                 for j in range(h):
                     if i not in range(optface[0], optface[2]+1) and j not in range(optface[1], optface[3]+1):
-                        px_mean += image[:, i, j]
+                        px_mean += image[:, :, j, i]
                         tot += 1
 
             px_mean /= tot
 
             for i in range(optface[0], optface[2]+1):
                 for j in range(optface[1], optface[3]+1):
-                    image[:, i, j] = px_mean
+                    image[:, :, j, i] = px_mean
 
             return image
 
         elif which_data == 'face':
             tot = 0
-            px_mean = np.zeros((3, 1, 1), dtype=image.dtype)
+            px_mean = np.zeros((1, 3))
 
             for i in range(optface[0], optface[2] + 1):
                 for j in range(optface[1], optface[3] + 1):
-                    px_mean += image[:, i, j]
+                    px_mean += image[:, :, j, i]
                     tot += 1
 
             px_mean /= tot
@@ -135,14 +134,14 @@ def fill_average(image, which_data, optface):
             for i in range(w):
                 for j in range(h):
                     if i not in range(optface[0], optface[2] + 1) and j not in range(optface[1], optface[3] + 1):
-                        image[:, i, j] = px_mean
+                        image[:, :, j, i] = px_mean
 
             return image
 
 
 def get_data(keys, id_frames, which_data):
     # TODO: figure out the dimensions, they all should be same dimensions
-    data = np.zeros((len(keys), 3, C2.W, C2.H), dtype=np.float32)
+    data = np.zeros((len(keys), 3, C2.H, C2.W), dtype=np.float32)
 
     for i, k in enumerate(keys):
         image, optface = quicker_load(k, id_frames, which_data)
