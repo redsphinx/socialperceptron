@@ -41,6 +41,16 @@ from random import shuffle
 
 
 my_model = Deepimpression()
+
+load_model = True
+if load_model:
+    p = os.path.join(P.MODELS, 'epoch_9_22')
+    chainer.serializers.load_npz(p, my_model)
+    print('model loaded')
+    continuefrom = 10
+else:
+    continuefrom = 0
+
 # optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.0001)
 my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
 my_optimizer.setup(my_model)
@@ -131,7 +141,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
 
 print('Enter training loop with validation')
-for e in range(epochs):
+for e in range(continuefrom, epochs):
     train_on = 'face'
     validate_on = 'face'
     # ----------------------------------------------------------------------------
