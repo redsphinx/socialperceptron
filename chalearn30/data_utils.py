@@ -123,21 +123,8 @@ def fill_average(image, which_data, optface):
         h, w = image.shape[2], image.shape[3]  # data is transposed before save
 
         if which_data == 'bg':
-            # image = Image.fromarray(image)
-            tot = 0
-            px_mean = np.zeros((1, 3))
-            for i in range(w):
-                for j in range(h):
-                    if i not in range(optface[0], optface[2]) and j not in range(optface[1], optface[3]):
-                        try:
-                            px_mean += image[:, :, j, i]
-                        except IndexError:
-                            print(1, IndexError, j, i)
-                        tot += 1
-
-            if tot == 0:
-                tot = 1
-            px_mean /= tot
+            px_mean = np.mean(image, 2)
+            px_mean = np.mean(px_mean, 2)
 
             for i in range(optface[0], optface[2]):
                 for j in range(optface[1], optface[3]):
