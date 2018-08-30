@@ -53,8 +53,8 @@ print('model initialized with %d parameters' % my_model.count_params())
 
 which_data_train = 'all'
 
-# epochs = C.EPOCHS
-epochs = 10
+epochs = C.EPOCHS
+# epochs = 10
 
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
@@ -65,10 +65,10 @@ pred_diff_train = np.zeros((epochs, 5), float)
 val_loss = []
 pred_diff_val = np.zeros((epochs, 5), float)
 
-# training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
-# val_steps = len(val_labels) // C.VAL_BATCH_SIZE
-training_steps = 10
-val_steps = 10
+training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
+val_steps = len(val_labels) // C.VAL_BATCH_SIZE
+# training_steps = 10
+# val_steps = 10
 
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
@@ -127,27 +127,28 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
           ' pred diff OCEAS: ', pred_diff[e],
           ' time: ', time.time() - ts)
 
-    # U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
+    U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
 
 
 print('Enter training loop with validation')
 for e in range(epochs):
+    train_on = 'face'
+    validate_on = 'face'
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
     run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
-        loss_saving=train_loss, which_data='bg')
+        loss_saving=train_loss, which_data=train_on)
     # ----------------------------------------------------------------------------
     # validation
     # ----------------------------------------------------------------------------
     run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
-        loss_saving=val_loss, which_data='bg')
-
+        loss_saving=val_loss, which_data=validate_on)
 
     # save model
-    # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_20' % e)
-    #     chainer.serializers.save_npz(name, model)
+    if ((e + 1) % 10) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_22' % e)
+        chainer.serializers.save_npz(name, my_model)
 

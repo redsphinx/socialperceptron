@@ -101,14 +101,15 @@ def quicker_load(k, id_frames, which_data):
 
 
 def fill_average(image, which_data, optface):
-    if optface[3] > C2.H:
-        optface[3] = C2.H
-    if optface[2] > C2.W:
-        optface[2] = C2.W
-    if optface[1] < 0:
-        optface[1] = 0
-    if optface[0] < 0:
-        optface[0] = 0
+    if optface is not None:
+        if optface[3] > C2.H:
+            optface[3] = C2.H
+        if optface[2] > C2.W:
+            optface[2] = C2.W
+        if optface[1] < 0:
+            optface[1] = 0
+        if optface[0] < 0:
+            optface[0] = 0
 
     # print(optface)
 
