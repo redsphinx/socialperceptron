@@ -82,7 +82,14 @@ def quicker_load(k, id_frames, which_data):
     v = h5.File(h5_path, 'r')
 
     n = D.get_frame(id_frames[k][0])
-    fe = v[str(n)][:]  # shape=(1, c, h, w)
+    try:
+        fe = v[str(n)][:]  # shape=(1, c, h, w)
+    except KeyError:
+        print('KeyError: %d does not exist in %s' % (n, k))
+        real_len = len(v.keys()) - 1
+        print('total len of h5 file is %d' % (real_len))
+        n = D.get_frame(real_len)
+        fe = v[str(n)][:]
 
     if which_data in ['face', 'bg']:
         optface = v['faces'][n]
@@ -131,16 +138,23 @@ def fill_average(image, which_data, optface):
 
             px_mean /= tot
 
-            for i in range(w):
-                for j in range(h):
-                    if i not in range(optface[0], optface[2] + 1) and j not in range(optface[1], optface[3] + 1):
-                        image[:, :, j, i] = px_mean
+            px_mean = np.expand_dims(px_mean, -1)
+            px_mean = np.expand_dims(px_mean, -1)
+
+            new_bg = np.ones(image.shape) * px_mean
+            for i in range(optface[0], optface[2] + 1):
+                for j in range(optface[1], optface[3] + 1):
+                    new_bg[:, :, j, i] = image[:, :, j, i]
+
+            # for i in range(w):
+            #     for j in range(h):
+            #         if i not in range(optface[0], optface[2] + 1) and j not in range(optface[1], optface[3] + 1):
+            #             image[:, :, j, i] = px_mean
 
             return image
 
 
 def get_data(keys, id_frames, which_data):
-    # TODO: figure out the dimensions, they all should be same dimensions
     data = np.zeros((len(keys), 3, C2.H, C2.W), dtype=np.float32)
 
     for i, k in enumerate(keys):
