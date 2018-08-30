@@ -101,55 +101,93 @@ def quicker_load(k, id_frames, which_data):
 
 
 def fill_average(image, which_data, optface):
+    if optface[3] > C2.H:
+        optface[3] = C2.H
+    if optface[2] > C2.W:
+        optface[2] = C2.W
+    if optface[1] < 0:
+        optface[1] = 0
+    if optface[0] < 0:
+        optface[0] = 0
+
+    # print(optface)
+
     if which_data == 'all':
         if optface is None:
             return image
         else:
             print('Problem: which_data == all but optface not None')
             return None
+
     else:
         h, w = image.shape[2], image.shape[3]  # data is transposed before save
+
         if which_data == 'bg':
             # image = Image.fromarray(image)
             tot = 0
             px_mean = np.zeros((1, 3))
             for i in range(w):
                 for j in range(h):
-                    if i not in range(optface[0], optface[2]+1) and j not in range(optface[1], optface[3]+1):
-                        px_mean += image[:, :, j, i]
+                    if i not in range(optface[0], optface[2]) and j not in range(optface[1], optface[3]):
+                        try:
+                            px_mean += image[:, :, j, i]
+                        except IndexError:
+                            print(1, IndexError, j, i)
                         tot += 1
 
+            if tot == 0:
+                tot = 1
             px_mean /= tot
 
-            for i in range(optface[0], optface[2]+1):
-                for j in range(optface[1], optface[3]+1):
-                    image[:, :, j, i] = px_mean
+            for i in range(optface[0], optface[2]):
+                for j in range(optface[1], optface[3]):
+                    try:
+                        image[:, :, j, i] = px_mean
+                    except IndexError:
+                        print(2, IndexError, j, i)
+
+            image = image.astype(np.uint8)
+
+            # img1 = Image.fromarray(np.transpose(image[0], (1, 2, 0)), mode='RGB')
+            # p = '/home/gabras/deployed/deepimpression2/chalearn30/bg'
+            # img1.save('%s/one.jpg' % p)
 
             return image
 
         elif which_data == 'face':
             tot = 0
             px_mean = np.zeros((1, 3))
+            # print(optface)
 
-            for i in range(optface[0], optface[2] + 1):
-                for j in range(optface[1], optface[3] + 1):
-                    px_mean += image[:, :, j, i]
+            for i in range(optface[0], optface[2]):  # w
+                for j in range(optface[1], optface[3]):  # h
+                    try:
+                        px_mean += image[:, :, j, i]
+                    except IndexError:
+                        print(3, IndexError, j, i, optface)
                     tot += 1
 
+            if tot == 0:
+                tot = 1
             px_mean /= tot
 
             px_mean = np.expand_dims(px_mean, -1)
             px_mean = np.expand_dims(px_mean, -1)
 
             new_bg = np.ones(image.shape) * px_mean
-            for i in range(optface[0], optface[2] + 1):
-                for j in range(optface[1], optface[3] + 1):
-                    new_bg[:, :, j, i] = image[:, :, j, i]
+            for i in range(optface[0], optface[2]):
+                for j in range(optface[1], optface[3]):
+                    try:
+                        new_bg[:, :, j, i] = image[:, :, j, i]
+                    except IndexError:
+                        print(4, IndexError, j, i, optface)
 
-            # for i in range(w):
-            #     for j in range(h):
-            #         if i not in range(optface[0], optface[2] + 1) and j not in range(optface[1], optface[3] + 1):
-            #             image[:, :, j, i] = px_mean
+            image = new_bg
+            image = image.astype(np.uint8)
+
+            # img1 = Image.fromarray(np.transpose(image[0], (1, 2, 0)), mode='RGB')
+            # p = '/home/gabras/deployed/deepimpression2/chalearn30/face'
+            # img1.save('%s/one.jpg' % p)
 
             return image
 
@@ -179,3 +217,33 @@ def load_data(labs_selected, labs_h5, id_frames, which_data):
 
     data = get_data(keys, id_frames, which_data)
     return labels, data
+
+
+def check_saved_faces():
+    val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
+    _labs = list(val_labels)
+    id_frames = h5.File(P.NUM_FRAMES, 'r')
+
+    labels = np.zeros((len(_labs), 5), dtype=np.float32)
+    which_data = 'face'
+
+    shuffle(_labs)
+    keys = []
+    for i in range(len(_labs)):
+        k = _labs[i]
+        keys.append(k)
+        labels[i] = val_labels[k][0:5]
+
+    # data = np.zeros((len(keys), 3, C2.H, C2.W), dtype=np.float32)
+
+    for i, k in enumerate(keys):
+        image, optface = quicker_load(k, id_frames, which_data)
+        if optface[1] > 456 or optface[3] > 256:
+            print(k.split('.mp4')[0], optface)
+            image = np.transpose(image[0], (1, 2, 0))
+            img = Image.fromarray(image, mode='RGB')
+            p = '/home/gabras/deployed/deepimpression2/chalearn30/wrongs'
+            img.save('%s/%s.jpg' %(p, k.split('.mp4')[0]))
+
+            # !! turns out that the face rectangle has to be a square so if the face is near bottom of screen, the
+            # square will spill over the height limit

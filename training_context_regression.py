@@ -75,7 +75,7 @@ id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, which_data):
     assert(which in ['train', 'test', 'val'])
-    assert(which_data in ['all', 'face', 'face'])
+    assert(which_data in ['all', 'bg', 'face'])
 
     if which == 'train':
         which_batch_size = C.TRAIN_BATCH_SIZE
@@ -137,13 +137,13 @@ for e in range(epochs):
     # ----------------------------------------------------------------------------
     run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
-        loss_saving=train_loss, which_data='face')
+        loss_saving=train_loss, which_data='bg')
     # ----------------------------------------------------------------------------
     # validation
     # ----------------------------------------------------------------------------
     run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
-        loss_saving=val_loss, which_data='face')
+        loss_saving=val_loss, which_data='bg')
 
 
     # save model
