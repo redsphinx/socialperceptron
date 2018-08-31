@@ -195,7 +195,15 @@ def get_labels_collapsed(labels_h5, left_keys, right_keys, xe='sigmoid'):
 
 
 def get_frame(num_frames):
-    num = randint(0, num_frames - 1)
+    # TODO: fix issues with 1 frames?
+    try:
+        num = randint(0, num_frames - 1)
+    except ValueError:
+        print('---------------------------------------------------------')
+        print(num_frames)
+        print('---------------------------------------------------------')
+        return 0
+
     return num
 
 

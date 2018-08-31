@@ -44,10 +44,10 @@ my_model = Deepimpression()
 
 load_model = True
 if load_model:
-    p = os.path.join(P.MODELS, 'epoch_49_20')
+    p = os.path.join(P.MODELS, 'epoch_29_22')
     chainer.serializers.load_npz(p, my_model)
     print('model loaded')
-    continuefrom = 10
+    continuefrom = 0
 else:
     continuefrom = 0
 
@@ -87,6 +87,7 @@ id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 
 def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, which_data):
+    print('steps: ', steps)
     assert(which in ['train', 'test', 'val'])
     assert(which_data in ['all', 'bg', 'face'])
 
@@ -104,6 +105,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
     ts = time.time()
     for s in range(steps):
+        print(s)
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
         labels, data = D.load_data(labels_selected, which_labels, frames, which_data)
@@ -147,7 +149,7 @@ print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
     train_on = 'face'
     validate_on = 'face'
-    test_on = 'all'
+    test_on = 'bg'
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
@@ -163,9 +165,10 @@ for e in range(continuefrom, epochs):
     # ----------------------------------------------------------------------------
     # test
     # ----------------------------------------------------------------------------
-    run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
-        model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
-        loss_saving=test_loss, which_data=test_on)
+    for i in range(3):
+        run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
+            model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
+            loss_saving=test_loss, which_data=test_on)
     # best val 'all': epoch_49_20
     # best val 'bg': epoch_79_21
     # best val 'face': epoch_29_22

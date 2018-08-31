@@ -1,11 +1,11 @@
 import numpy as np
 
-DEVICE = 0
+DEVICE = 1
 ON_GPU = True
 
 # training
 EPOCHS = 100
 TRAIN_BATCH_SIZE = 32 # 32
-TEST_BATCH_SIZE = 32
-VAL_BATCH_SIZE = 1
+TEST_BATCH_SIZE = 1
+VAL_BATCH_SIZE = 32
 SEED = 6
