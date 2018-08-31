@@ -235,3 +235,6 @@ def check_saved_faces():
 
             # !! turns out that the face rectangle has to be a square so if the face is near bottom of screen, the
             # square will spill over the height limit
+
+# def find_best_val():
+#     

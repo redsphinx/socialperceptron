@@ -12,11 +12,11 @@ __________________________________________
 |    |_______| face  | BG    | BG + face |
 | train      |       |       |           |
 |------------|-------|-------|-----------|
-| face       |       |       |           |
+| face       |   x   |       |           |
 |------------|-------|-------|-----------|
-| BG         |       |       |           |
+| BG         |       |   x   |           |
 |------------|-------|-------|-----------|
-| BG + face  |       |       |           |
+| BG + face  |       |       |     x     |
 ------------------------------------------
 
 '''
@@ -147,18 +147,29 @@ for e in range(continuefrom, epochs):
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
-    run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
-        model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
-        loss_saving=train_loss, which_data=train_on)
+    # run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
+    #     model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
+    #     loss_saving=train_loss, which_data=train_on)
     # ----------------------------------------------------------------------------
     # validation
     # ----------------------------------------------------------------------------
-    run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
+    # run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
+    #     model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
+    #     loss_saving=val_loss, which_data=validate_on)
+    # ----------------------------------------------------------------------------
+    # test
+    # ----------------------------------------------------------------------------
+    run(which='test', steps=val_steps, which_labels=val_labels, frames=id_frames,
         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
         loss_saving=val_loss, which_data=validate_on)
+    # best val 'all': epoch__20
+    # best val 'bg': epoch__21
+    # best val 'face': epoch__22
 
-    # save model
-    if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_22' % e)
-        chainer.serializers.save_npz(name, my_model)
+
+
+    # # save model
+    # if ((e + 1) % 10) == 0:
+    #     name = os.path.join(P.MODELS, 'epoch_%d_22' % e)
+    #     chainer.serializers.save_npz(name, my_model)
 
