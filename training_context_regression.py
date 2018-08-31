@@ -44,7 +44,7 @@ my_model = Deepimpression()
 
 load_model = True
 if load_model:
-    p = os.path.join(P.MODELS, 'epoch_9_22')
+    p = os.path.join(P.MODELS, 'epoch_49_20')
     chainer.serializers.load_npz(p, my_model)
     print('model loaded')
     continuefrom = 10
@@ -61,13 +61,12 @@ if C.ON_GPU:
 print('Initializing')
 print('model initialized with %d parameters' % my_model.count_params())
 
-which_data_train = 'all'
-
-epochs = C.EPOCHS
-# epochs = 10
+# epochs = C.EPOCHS
+epochs = 1
 
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
+test_labels = h5.File(P.CHALEARN_TEST_LABELS_20, 'r')
 
 train_loss = []
 pred_diff_train = np.zeros((epochs, 5), float)
@@ -75,8 +74,12 @@ pred_diff_train = np.zeros((epochs, 5), float)
 val_loss = []
 pred_diff_val = np.zeros((epochs, 5), float)
 
+test_loss = []
+pred_diff_test = np.zeros((epochs, 5), float)
+
 training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
 val_steps = len(val_labels) // C.VAL_BATCH_SIZE
+test_steps = len(val_labels) // C.TEST_BATCH_SIZE
 # training_steps = 10
 # val_steps = 10
 
@@ -144,6 +147,7 @@ print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
     train_on = 'face'
     validate_on = 'face'
+    test_on = 'all'
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
@@ -159,13 +163,12 @@ for e in range(continuefrom, epochs):
     # ----------------------------------------------------------------------------
     # test
     # ----------------------------------------------------------------------------
-    run(which='test', steps=val_steps, which_labels=val_labels, frames=id_frames,
-        model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
-        loss_saving=val_loss, which_data=validate_on)
-    # best val 'all': epoch__20
-    # best val 'bg': epoch__21
-    # best val 'face': epoch__22
-
+    run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
+        model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
+        loss_saving=test_loss, which_data=test_on)
+    # best val 'all': epoch_49_20
+    # best val 'bg': epoch_79_21
+    # best val 'face': epoch_29_22
 
 
     # # save model

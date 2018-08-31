@@ -236,5 +236,33 @@ def check_saved_faces():
             # !! turns out that the face rectangle has to be a square so if the face is near bottom of screen, the
             # square will spill over the height limit
 
-# def find_best_val():
-#     
+
+def find_best_val():
+    log20 = P.LOG_BASE + 'val_%d.txt' % (20)
+    log21 = P.LOG_BASE + 'val_%d.txt' % (21)
+    log22 = P.LOG_BASE + 'val_%d.txt' % (22)
+
+    logs = [log20, log21, log22]
+
+    for l in logs:
+        print(l)
+        best = np.genfromtxt(l, 'float', delimiter=',')
+        best = np.transpose(best, (1, 0))[0]
+        # get loss every 10 epochs
+        tmp_best = []
+        r = []
+        for e in range(0, 110, 10):
+            i = e
+            if e != 0:
+                i -= 1
+                r.append(i)
+                tmp_best.append(best[i])
+
+
+        tmp_best = np.asarray(tmp_best)
+        print(tmp_best)
+        print('worst = ', r[np.argmax(tmp_best, axis=0)])
+        print('best = ', r[np.argmin(tmp_best, axis=0)])
+
+
+# find_best_val()
