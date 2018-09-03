@@ -101,7 +101,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
     ts = time.time()
     for s in range(steps):
-        print(s)
+        # print(s)
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
         labels, data = D.load_data(labels_selected, which_labels, frames, which_data, resize=True)
@@ -143,8 +143,9 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
 print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
-    train_on = 'all'
-    validate_on = 'all'
+    train_on = 'face'
+    validate_on = 'face'
+    print('trained on: %s val on: %s' % (train_on, validate_on))
     # test_on = 'bg'
     # ----------------------------------------------------------------------------
     # training
@@ -171,6 +172,6 @@ for e in range(continuefrom, epochs):
 
     # # save model
     if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_32' % e)
+        name = os.path.join(P.MODELS, 'epoch_%d_34' % e)
         chainer.serializers.save_npz(name, my_model)
 
