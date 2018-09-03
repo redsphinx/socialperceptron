@@ -79,6 +79,6 @@ CHALEARN_VAL_ORIGINAL = '/scratch/users/gabras/data/chalearn10/original_val'
 # chalearn30
 CHALEARN30_ALL_DATA = '/scratch/users/gabras/data/chalearn30/all_data'
 
-# train
-# test
-# val
+# -------------------------------------------------------------------------------------------------
+# list of encountered h5 that have zero frames
+ZERO_FRAMES = '/scratch/users/gabras/data/misc/zero_frames.txt'

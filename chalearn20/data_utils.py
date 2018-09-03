@@ -195,16 +195,18 @@ def get_labels_collapsed(labels_h5, left_keys, right_keys, xe='sigmoid'):
 
 
 def get_frame(num_frames):
-    # TODO: fix issues with 1 frames?
+    # TODO: fix issues with 1 frames? on it, documenting which ones have no frames. will fix after we get the full list
+    zero_frames = False
     try:
         num = randint(0, num_frames - 1)
     except ValueError:
         print('---------------------------------------------------------')
         print(num_frames)
         print('---------------------------------------------------------')
-        return 0
+        num = 0
+        zero_frames = True
 
-    return num
+    return num, zero_frames
 
 
 def reading_test():

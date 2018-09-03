@@ -81,7 +81,12 @@ def quicker_load(k, id_frames, which_data):
     h5_path = os.path.join(P.CHALEARN30_ALL_DATA, '%s.h5' % k)
     v = h5.File(h5_path, 'r')
 
-    n = D.get_frame(id_frames[k][0])
+    n, zero_frames = D.get_frame(id_frames[k][0])
+
+    if zero_frames:
+        with open(P.ZERO_FRAMES, 'a') as my_file:
+            my_file.write('%s\n' % v)
+
     try:
         fe = v[str(n)][:]  # shape=(1, c, h, w)
     except KeyError:
