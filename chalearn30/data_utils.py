@@ -139,7 +139,7 @@ def quicker_load_resize(k, id_frames, which_data):
         print('KeyError: %d does not exist in %s' % (n, k))
         real_len = len(v.keys()) - 1
         print('total len of h5 file is %d' % (real_len))
-        n = D.get_frame(real_len)
+        n, zero_frames = D.get_frame(real_len)
         fe = v[str(n)][:]
 
     if which_data == 'bg':
@@ -149,7 +149,6 @@ def quicker_load_resize(k, id_frames, which_data):
 
     v.close()
     return fe, optface
-
 
 
 def fill_average(image, which_data, optface, resize=False):
@@ -172,7 +171,7 @@ def fill_average(image, which_data, optface, resize=False):
                 img = Image.fromarray(image, mode='RGB')
                 img = img.crop((100, 0, 356, 256))  # left, upper, right, and lower
                 # save image to see if good
-                img.save('/home/gabras/deployed/deepimpression2/chalearn30/crops/crop_all.jpg')
+                # img.save('/home/gabras/deployed/deepimpression2/chalearn30/crops/crop_all.jpg')
                 img = np.array(img)
                 image = np.transpose(img, (2, 0, 1))
                 image = np.expand_dims(image, 0)
@@ -210,7 +209,7 @@ def fill_average(image, which_data, optface, resize=False):
                 img = Image.fromarray(image, mode='RGB')
                 img = img.crop((left, 0, right, 256))  # left, upper, right, and lower
                 # save image to see if good
-                img.save('/home/gabras/deployed/deepimpression2/chalearn30/crops/crop_bg.jpg')
+                # img.save('/home/gabras/deployed/deepimpression2/chalearn30/crops/crop_bg.jpg')
                 img = np.array(img)
                 image = np.transpose(img, (2, 0, 1))
                 image = np.expand_dims(image, 0)
@@ -227,7 +226,7 @@ def fill_average(image, which_data, optface, resize=False):
                 img = Image.fromarray(image, mode='RGB')
                 img = img.resize((C2.RESIDE, C2.RESIDE))
                 # save image to see if good
-                img.save('/home/gabras/deployed/deepimpression2/chalearn30/crops/crop_face.jpg')
+                # img.save('/home/gabras/deployed/deepimpression2/chalearn30/crops/crop_face.jpg')
                 img = np.array(img)
                 image = np.transpose(img, (2, 0, 1))
                 image = np.expand_dims(image, 0)

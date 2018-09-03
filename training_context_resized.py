@@ -57,8 +57,8 @@ if C.ON_GPU:
 print('Initializing')
 print('model initialized with %d parameters' % my_model.count_params())
 
-# epochs = C.EPOCHS
-epochs = 1
+epochs = C.EPOCHS
+# epochs = 1
 
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
@@ -73,11 +73,11 @@ pred_diff_val = np.zeros((epochs, 5), float)
 test_loss = []
 pred_diff_test = np.zeros((epochs, 5), float)
 
-# training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
-# val_steps = len(val_labels) // C.VAL_BATCH_SIZE
+training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
+val_steps = len(val_labels) // C.VAL_BATCH_SIZE
 # test_steps = len(val_labels) // C.TEST_BATCH_SIZE
-training_steps = 10
-val_steps = 10
+# training_steps = 10
+# val_steps = 10
 
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
@@ -138,13 +138,13 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
           ' pred diff OCEAS: ', pred_diff[e],
           ' time: ', time.time() - ts)
 
-    # U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
+    U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
 
 
 print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
-    train_on = 'face'
-    validate_on = 'face'
+    train_on = 'all'
+    validate_on = 'all'
     # test_on = 'bg'
     # ----------------------------------------------------------------------------
     # training
@@ -170,7 +170,7 @@ for e in range(continuefrom, epochs):
     # best val 'face':
 
     # # save model
-    # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_32' % e)
-    #     chainer.serializers.save_npz(name, my_model)
+    if ((e + 1) % 10) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_32' % e)
+        chainer.serializers.save_npz(name, my_model)
 
