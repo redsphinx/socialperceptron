@@ -168,13 +168,14 @@ def fill_average(image, which_data, optface, resize=False):
     if which_data == 'all':
         if optface is None:
             if resize:  # crop
-                image = np.transpose(image, (1, 2, 0))
+                image = np.transpose(image[0], (1, 2, 0))
                 img = Image.fromarray(image, mode='RGB')
                 img = img.crop((100, 0, 356, 256))  # left, upper, right, and lower
                 # save image to see if good
                 img.save('/home/gabras/deployed/deepimpression2/chalearn30/crops/crop_all.jpg')
                 img = np.array(img)
                 image = np.transpose(img, (2, 0, 1))
+                image = np.expand_dims(image, 0)
 
             return image
         else:
@@ -182,7 +183,7 @@ def fill_average(image, which_data, optface, resize=False):
             return None
 
     else:
-        h, w = image.shape[2], image.shape[3]  # data is transposed before save
+        # h, w = image.shape[2], image.shape[3]  # data is transposed before save
 
         if which_data == 'bg':
             px_mean = np.mean(image, 2)
@@ -198,13 +199,21 @@ def fill_average(image, which_data, optface, resize=False):
             image = image.astype(np.uint8)
 
             if resize:
-                image = np.transpose(image, (1, 2, 0))
+                if optface[0] > (456 - optface[2]):
+                    left = 0
+                    right = 256
+                else:
+                    left = 200
+                    right = 456
+
+                image = np.transpose(image[0], (1, 2, 0))
                 img = Image.fromarray(image, mode='RGB')
-                img = img.resize((C2.RESIDE, C2.RESIDE))
+                img = img.crop((left, 0, right, 256))  # left, upper, right, and lower
                 # save image to see if good
                 img.save('/home/gabras/deployed/deepimpression2/chalearn30/crops/crop_bg.jpg')
                 img = np.array(img)
                 image = np.transpose(img, (2, 0, 1))
+                image = np.expand_dims(image, 0)
 
             # img1 = Image.fromarray(np.transpose(image[0], (1, 2, 0)), mode='RGB')
             # p = '/home/gabras/deployed/deepimpression2/chalearn30/bg'
@@ -221,6 +230,7 @@ def fill_average(image, which_data, optface, resize=False):
                 img.save('/home/gabras/deployed/deepimpression2/chalearn30/crops/crop_face.jpg')
                 img = np.array(img)
                 image = np.transpose(img, (2, 0, 1))
+                image = np.expand_dims(image, 0)
 
                 return image
 
