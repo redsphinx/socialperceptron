@@ -104,7 +104,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         print(s)
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
-        labels, data = D.load_data(labels_selected, which_labels, frames, which_data)
+        labels, data = D.load_data(labels_selected, which_labels, frames, which_data, resize=True)
 
         if C.ON_GPU:
             data = to_gpu(data, device=C.DEVICE)

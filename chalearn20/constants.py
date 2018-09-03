@@ -11,3 +11,6 @@ SIDE = 208
 # data size after [bg, face, all] split
 W = 456
 H = 256
+
+# data size after resize
+RESIDE = 256

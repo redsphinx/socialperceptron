@@ -47,43 +47,43 @@ id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 print('Enter training loop with validation')
 for e in range(C.EPOCHS): # C.EPOCHS
-    # loss_tmp = []
-    # pd_tmp = np.zeros((training_steps, 5), dtype=float)
-    # _tr_labs = list(train_labels)
-    # shuffle(_tr_labs)
-    #
-    # ts = time.time()
-    # for s in range(training_steps):  # training_steps
-    #     train_labels_selected = _tr_labs[s*C.TRAIN_BATCH_SIZE:(s+1)*C.TRAIN_BATCH_SIZE]
-    #     assert(len(train_labels_selected) == C.TRAIN_BATCH_SIZE)
-    #     labels, data = D.load_data_sanity(train_labels_selected, train_labels, id_frames)
-    #
-    #     if C.ON_GPU:
-    #         data = to_gpu(data, device=C.DEVICE)
-    #         labels = to_gpu(labels, device=C.DEVICE)
-    #
-    #     # training
-    #     with cp.cuda.Device(C.DEVICE):
-    #         with chainer.using_config('train', True):
-    #             model.cleargrads()
-    #             prediction = model(data)
-    #
-    #             loss = mean_absolute_error(prediction, labels)
-    #
-    #             loss.backward()
-    #             optimizer.update()
-    #
-    #     loss_tmp.append(float(loss.data))
-    #
-    #     pd_tmp[s] = U.pred_diff_trait(to_cpu(prediction.data), to_cpu(labels))
-    #
-    #
-    # pred_diff_train[e] = np.mean(pd_tmp, axis=0)
-    # loss_tmp_mean = np.mean(loss_tmp, axis=0)
-    # train_loss.append(loss_tmp_mean)
-    # print('E %d. train loss: ' % e, loss_tmp_mean,
-    #       ' pred diff OCEAS: ', pred_diff_train[e],
-    #       ' time: ', time.time() - ts)
+    loss_tmp = []
+    pd_tmp = np.zeros((training_steps, 5), dtype=float)
+    _tr_labs = list(train_labels)
+    shuffle(_tr_labs)
+
+    ts = time.time()
+    for s in range(training_steps):  # training_steps
+        train_labels_selected = _tr_labs[s*C.TRAIN_BATCH_SIZE:(s+1)*C.TRAIN_BATCH_SIZE]
+        assert(len(train_labels_selected) == C.TRAIN_BATCH_SIZE)
+        labels, data = D.load_data_sanity(train_labels_selected, train_labels, id_frames)
+
+        if C.ON_GPU:
+            data = to_gpu(data, device=C.DEVICE)
+            labels = to_gpu(labels, device=C.DEVICE)
+
+        # training
+        with cp.cuda.Device(C.DEVICE):
+            with chainer.using_config('train', True):
+                model.cleargrads()
+                prediction = model(data)
+
+                loss = mean_absolute_error(prediction, labels)
+
+                loss.backward()
+                optimizer.update()
+
+        loss_tmp.append(float(loss.data))
+
+        pd_tmp[s] = U.pred_diff_trait(to_cpu(prediction.data), to_cpu(labels))
+
+
+    pred_diff_train[e] = np.mean(pd_tmp, axis=0)
+    loss_tmp_mean = np.mean(loss_tmp, axis=0)
+    train_loss.append(loss_tmp_mean)
+    print('E %d. train loss: ' % e, loss_tmp_mean,
+          ' pred diff OCEAS: ', pred_diff_train[e],
+          ' time: ', time.time() - ts)
 
     # U.record_loss_sanity('train', loss_tmp_mean, pred_diff_train[e])
 
