@@ -1,24 +1,20 @@
-# TODO: for training with chalearn30, different background modes and regression individual traits
 # Q: what is the influence of background on personality prediction?
 
 '''
-TODO s
-
-- make data utils in order to get the data
-- make this file in same nature as sanity_check training
-- setup experiments like in my notes:
+Results:
 __________________________________________
 |_____ test  |       |       |           |
 |    |_______| face  | BG    | BG + face |
 | train      |       |       |           |
 |------------|-------|-------|-----------|
-| face       |   x   |       |           |
+| face       | 0.115 | 0.219 |   0.225   |
 |------------|-------|-------|-----------|
-| BG         |       |   x   |           |
+| BG         | 0.178 | 0.125 |   0.125   |
 |------------|-------|-------|-----------|
-| BG + face  |       |       |     x     |
+| BG + face  | 0.174 | 0.127 |   0.126   |
 ------------------------------------------
-
+Conclusion:     results are inconclusive. Background comprises of many more pixels than
+                the face. Therefor we can't say that background info is more relevant.
 '''
 
 import chainer
