@@ -142,7 +142,7 @@ class Deepimpression(chainer.Chain):
         return ans
 
     def __call__(self, x):
-        h = self.b1(x)  # (32, 256, 1, 1)
+        h = self.b1(x)  # (32, 256, 1, 1) !!extract here!!
         h = self.fc(h)
         h = tanh(h)
         h = self.scale(h)

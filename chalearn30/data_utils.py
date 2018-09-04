@@ -307,6 +307,11 @@ def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False):
     return labels, data
 
 
+def load_video(labels_selected, which_labels, which_data):
+    # TODO
+    pass
+
+
 def check_saved_faces():
     val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
     _labs = list(val_labels)
@@ -338,11 +343,11 @@ def check_saved_faces():
 
 
 def find_best_val():
-    log32 = P.LOG_BASE + 'val_%d.txt' % (32)
-    log33 = P.LOG_BASE + 'val_%d.txt' % (33)
-    log34 = P.LOG_BASE + 'val_%d.txt' % (34)
+    log14 = P.LOG_BASE + 'val_%d.txt' % (14)
+    # log33 = P.LOG_BASE + 'val_%d.txt' % (33)
+    # log34 = P.LOG_BASE + 'val_%d.txt' % (34)
 
-    logs = [log32, log33, log34]
+    logs = [log14] #, log33, log34]
 
     for l in logs:
         print(l)
@@ -363,5 +368,3 @@ def find_best_val():
         print('worst = ', r[np.argmax(tmp_best, axis=0)])
         print('best = ', r[np.argmin(tmp_best, axis=0)])
 
-
-# find_best_val()

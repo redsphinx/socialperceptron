@@ -1,5 +1,4 @@
 # Q: what is the influence of background on personality prediction?
-# Resize the images to overcome the effects of a larger background
 
 '''
 Results:
@@ -8,13 +7,12 @@ __________________________________________
 |    |_______| face  | BG    | BG + face |
 | train      |       |       |           |
 |------------|-------|-------|-----------|
-| face       | 0.114 | 0.16  |   0.159   | 0.046, 0.045
+| face       |   x   |       |           |
 |------------|-------|-------|-----------|
-| BG         | 0.137 | 0.126 |   0.128   | 0.011, 0.009
+| BG         |       |   x   |           |
 |------------|-------|-------|-----------|
-| BG + face  | 0.147 | 0.135 |   0.123   | 0.024, 0.012
+| BG + face  |       |       |     x     |
 ------------------------------------------
-Conclusion: it seems that the network is learning that face has a structure
 '''
 
 import chainer
@@ -36,20 +34,28 @@ from chainer.functions import expand_dims
 from random import shuffle
 
 
+'''
+get model
+for each video, load all frames
+pass each frame through the network and extract 
+for each frame
+extract feature after h = self.b1(x)
+take the mean of this feature
+pass it through the rest
+record this loss
+'''
+
 my_model = Deepimpression()
 
 load_model = True
 if load_model:
-    p = os.path.join(P.MODELS, 'epoch_29_34')
+    p = os.path.join(P.MODELS, 'epoch_29_22')
     chainer.serializers.load_npz(p, my_model)
     print('model loaded')
     continuefrom = 0
 else:
     continuefrom = 0
 
-# optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.0001)
-my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
-my_optimizer.setup(my_model)
 
 if C.ON_GPU:
     my_model = my_model.to_gpu(device=C.DEVICE)
@@ -60,24 +66,12 @@ print('model initialized with %d parameters' % my_model.count_params())
 # epochs = C.EPOCHS
 epochs = 1
 
-train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
-val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
 test_labels = h5.File(P.CHALEARN_TEST_LABELS_20, 'r')
-
-train_loss = []
-pred_diff_train = np.zeros((epochs, 5), float)
-
-val_loss = []
-pred_diff_val = np.zeros((epochs, 5), float)
-
 test_loss = []
 pred_diff_test = np.zeros((epochs, 5), float)
 
-training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
-val_steps = len(val_labels) // C.VAL_BATCH_SIZE
 test_steps = len(test_labels) // C.TEST_BATCH_SIZE
-# training_steps = 10
-# val_steps = 10
+# test_steps = 1
 
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
@@ -101,31 +95,31 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
     ts = time.time()
     for s in range(steps):
-        # print(s)
+        print(s)
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
-        labels, data = D.load_data(labels_selected, which_labels, frames, which_data, resize=True)
+        # labels, data = D.load_data(labels_selected, which_labels, frames, which_data)
+        # TODO: make sure number of frames is at index 0 of data.shapes
+        labels, data = D.load_video(labels_selected, which_labels, which_data)
 
         if C.ON_GPU:
             data = to_gpu(data, device=C.DEVICE)
             labels = to_gpu(labels, device=C.DEVICE)
 
         with cp.cuda.Device(C.DEVICE):
-            if which == 'train':
-                config = True
-            else:
-                config = False
+            config = False
 
-            with chainer.using_config('train', config):
-                if which == 'train':
-                    model.cleargrads()
-                prediction = model(data)
+            frames = data.shape[0]
 
-                loss = mean_absolute_error(prediction, labels)
+            for f in range(frames):
+                with chainer.using_config('train', config):
+                    frame = np.expand_dims(frames[f], 0)
+                    prediction = model(frame)
+                    # TODO: extract
 
-                if which == 'train':
-                    loss.backward()
-                    optimizer.update()
+
+                    # loss = mean_absolute_error(prediction, labels)
+
 
         loss_tmp.append(float(loss.data))
 
@@ -144,11 +138,9 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
     train_on = 'face'
-    # validate_on = 'face'
-    # print('trained on: %s val on: %s' % (train_on, validate_on))
+    validate_on = 'face'
     test_on = 'bg'
-    print('trained on: %s test on %s' % (train_on, test_on))
-    # -------------------------------------------epoch_99_32---------------------------------
+    # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
     # run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
@@ -163,16 +155,17 @@ for e in range(continuefrom, epochs):
     # ----------------------------------------------------------------------------
     # test
     # ----------------------------------------------------------------------------
-    for i in range(3):
+    for i in range(1):
         run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
             model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
             loss_saving=test_loss, which_data=test_on)
-    # best val 'all': epoch_99_32
-    # best val 'bg': epoch_89_33
-    # best val 'face': epoch_29_34
+    # best val 'all': epoch_49_20
+    # best val 'bg': epoch_79_21
+    # best val 'face': epoch_29_22
+
 
     # # save model
     # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_34' % e)
+    #     name = os.path.join(P.MODELS, 'epoch_%d_22' % e)
     #     chainer.serializers.save_npz(name, my_model)
 

@@ -158,7 +158,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
     U.record_loss('val', loss_tmp_mean, confusion_matrix_train[e], np.mean(bs_tmp, axis=1))
 
     # save model
-    # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_13' % e)
-    #     chainer.serializers.save_npz(name, model)
+    if ((e + 1) % 10) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_44' % e)
+        chainer.serializers.save_npz(name, model)
 

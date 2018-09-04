@@ -75,7 +75,7 @@ pred_diff_test = np.zeros((epochs, 5), float)
 
 training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
 val_steps = len(val_labels) // C.VAL_BATCH_SIZE
-test_steps = len(val_labels) // C.TEST_BATCH_SIZE
+test_steps = len(test_labels) // C.TEST_BATCH_SIZE
 # training_steps = 10
 # val_steps = 10
 
@@ -161,7 +161,7 @@ for e in range(continuefrom, epochs):
     # ----------------------------------------------------------------------------
     # test
     # ----------------------------------------------------------------------------
-    for i in range(3):
+    for i in range(1):
         run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
             model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
             loss_saving=test_loss, which_data=test_on)
