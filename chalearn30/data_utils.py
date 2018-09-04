@@ -338,11 +338,11 @@ def check_saved_faces():
 
 
 def find_best_val():
-    log20 = P.LOG_BASE + 'val_%d.txt' % (20)
-    log21 = P.LOG_BASE + 'val_%d.txt' % (21)
-    log22 = P.LOG_BASE + 'val_%d.txt' % (22)
+    log32 = P.LOG_BASE + 'val_%d.txt' % (32)
+    log33 = P.LOG_BASE + 'val_%d.txt' % (33)
+    log34 = P.LOG_BASE + 'val_%d.txt' % (34)
 
-    logs = [log20, log21, log22]
+    logs = [log32, log33, log34]
 
     for l in logs:
         print(l)
@@ -357,7 +357,6 @@ def find_best_val():
                 i -= 1
                 r.append(i)
                 tmp_best.append(best[i])
-
 
         tmp_best = np.asarray(tmp_best)
         print(tmp_best)

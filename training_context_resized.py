@@ -38,9 +38,9 @@ from random import shuffle
 
 my_model = Deepimpression()
 
-load_model = False
+load_model = True
 if load_model:
-    p = os.path.join(P.MODELS, '')
+    p = os.path.join(P.MODELS, 'epoch_29_34')
     chainer.serializers.load_npz(p, my_model)
     print('model loaded')
     continuefrom = 0
@@ -57,8 +57,8 @@ if C.ON_GPU:
 print('Initializing')
 print('model initialized with %d parameters' % my_model.count_params())
 
-epochs = C.EPOCHS
-# epochs = 1
+# epochs = C.EPOCHS
+epochs = 1
 
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
@@ -75,7 +75,7 @@ pred_diff_test = np.zeros((epochs, 5), float)
 
 training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
 val_steps = len(val_labels) // C.VAL_BATCH_SIZE
-# test_steps = len(val_labels) // C.TEST_BATCH_SIZE
+test_steps = len(val_labels) // C.TEST_BATCH_SIZE
 # training_steps = 10
 # val_steps = 10
 
@@ -144,34 +144,35 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
     train_on = 'face'
-    validate_on = 'face'
-    print('trained on: %s val on: %s' % (train_on, validate_on))
-    # test_on = 'bg'
-    # ----------------------------------------------------------------------------
+    # validate_on = 'face'
+    # print('trained on: %s val on: %s' % (train_on, validate_on))
+    test_on = 'bg'
+    print('trained on: %s test on %s' % (train_on, test_on))
+    # -------------------------------------------epoch_99_32---------------------------------
     # training
     # ----------------------------------------------------------------------------
-    run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
-        model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
-        loss_saving=train_loss, which_data=train_on)
+    # run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
+    #     model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
+    #     loss_saving=train_loss, which_data=train_on)
     # ----------------------------------------------------------------------------
     # validation
     # ----------------------------------------------------------------------------
-    run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
-        model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
-        loss_saving=val_loss, which_data=validate_on)
+    # run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
+    #     model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
+    #     loss_saving=val_loss, which_data=validate_on)
     # ----------------------------------------------------------------------------
     # test
     # ----------------------------------------------------------------------------
-    # for i in range(3):
-    #     run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
-    #         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
-    #         loss_saving=test_loss, which_data=test_on)
-    # best val 'all':
-    # best val 'bg':
-    # best val 'face':
+    for i in range(3):
+        run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
+            model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
+            loss_saving=test_loss, which_data=test_on)
+    # best val 'all': epoch_99_32
+    # best val 'bg': epoch_89_33
+    # best val 'face': epoch_29_34
 
     # # save model
-    if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_34' % e)
-        chainer.serializers.save_npz(name, my_model)
+    # if ((e + 1) % 10) == 0:
+    #     name = os.path.join(P.MODELS, 'epoch_%d_34' % e)
+    #     chainer.serializers.save_npz(name, my_model)
 
