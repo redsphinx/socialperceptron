@@ -101,6 +101,8 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         # labels, data = D.load_data(labels_selected, which_labels, frames, which_data)
         # TODO: make sure number of frames is at index 0 of data.shapes
         labels, data = D.load_video(labels_selected, which_labels, which_data)
+        # TODO: what is the difference between averaging activations vs. averaging predictions?
+        activations = np.zeros((data.shape[0], 256))
 
         if C.ON_GPU:
             data = to_gpu(data, device=C.DEVICE)
@@ -114,11 +116,16 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
             for f in range(frames):
                 with chainer.using_config('train', config):
                     frame = np.expand_dims(frames[f], 0)
-                    prediction = model(frame)
                     # TODO: extract
+                    prediction, activation = model(frame)
+                    # TODO: fix activation type to np
+                    activations[f] = activation
 
-
-                    # loss = mean_absolute_error(prediction, labels)
+            activations = np.mean(activations, axis=0)
+            # TODO: fix activations to cupy
+            # TODO: pass activations to last part of the model
+            prediction = model(activations)
+            loss = mean_absolute_error(prediction, labels)
 
 
         loss_tmp.append(float(loss.data))
