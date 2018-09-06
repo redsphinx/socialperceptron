@@ -40,7 +40,7 @@ my_model = Deepimpression()
 
 load_model = True
 if load_model:
-    p = os.path.join(P.MODELS, 'epoch_29_34')
+    p = os.path.join(P.MODELS, 'epoch_99_32')
     chainer.serializers.load_npz(p, my_model)
     print('model loaded')
     continuefrom = 0
@@ -82,7 +82,8 @@ test_steps = len(test_labels) // C.TEST_BATCH_SIZE
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 
-def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, which_data):
+def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, which_data, ordered=False,
+        save_all_results=False):
     print('steps: ', steps)
     assert(which in ['train', 'test', 'val'])
     assert(which_data in ['all', 'bg', 'face'])
@@ -97,14 +98,15 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
     loss_tmp = []
     pd_tmp = np.zeros((steps, 5), dtype=float)
     _labs = list(which_labels)
-    shuffle(_labs)
+    if not ordered:
+        shuffle(_labs)
 
     ts = time.time()
     for s in range(steps):
-        # print(s)
+        print(s)
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
-        labels, data = D.load_data(labels_selected, which_labels, frames, which_data, resize=True)
+        labels, data = D.load_data(labels_selected, which_labels, frames, which_data, resize=True, ordered=ordered)
 
         if C.ON_GPU:
             data = to_gpu(data, device=C.DEVICE)
@@ -140,15 +142,18 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
     U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
 
+    if which == 'test' and save_all_results:
+        U.record_loss_all_test(loss_tmp)
+
 
 print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
-    train_on = 'face'
+    train_on = 'all'
     # validate_on = 'face'
     # print('trained on: %s val on: %s' % (train_on, validate_on))
-    test_on = 'bg'
+    test_on = 'face'
     print('trained on: %s test on %s' % (train_on, test_on))
-    # -------------------------------------------epoch_99_32---------------------------------
+    # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
     # run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
@@ -163,10 +168,18 @@ for e in range(continuefrom, epochs):
     # ----------------------------------------------------------------------------
     # test
     # ----------------------------------------------------------------------------
-    for i in range(3):
+    times = 1
+    for i in range(1):
+        if times == 1:
+            ordered = True
+            save_all_results = True
+        else:
+            ordered = False
+            save_all_results = False
+
         run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
             model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
-            loss_saving=test_loss, which_data=test_on)
+            loss_saving=test_loss, which_data=test_on, ordered=ordered, save_all_results=save_all_results)
     # best val 'all': epoch_99_32
     # best val 'bg': epoch_89_33
     # best val 'face': epoch_29_34
