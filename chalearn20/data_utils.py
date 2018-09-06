@@ -194,17 +194,25 @@ def get_labels_collapsed(labels_h5, left_keys, right_keys, xe='sigmoid'):
     return all_one_hot_labels
 
 
-def get_frame(num_frames):
+def get_frame(num_frames, ordered=False):
     # TODO: fix issues with 1 frames? on it, documenting which ones have no frames. will fix after we get the full list
     zero_frames = False
-    try:
-        num = randint(0, num_frames - 1)
-    except ValueError:
-        print('---------------------------------------------------------')
-        print(num_frames)
-        print('---------------------------------------------------------')
+
+    if num_frames > 12:
+        num = C2.ORDERED_FRAME
+    else:
         num = 0
-        zero_frames = True
+
+    if not ordered:
+        try:
+            num = randint(0, num_frames - 1)
+
+        except ValueError:
+            print('---------------------------------------------------------')
+            print(num_frames)
+            print('---------------------------------------------------------')
+            num = 0
+            zero_frames = True
 
     return num, zero_frames
 

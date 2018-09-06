@@ -106,7 +106,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         print(s)
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
-        labels, data = D.load_data(labels_selected, which_labels, frames, which_data, ordered)
+        labels, data = D.load_data(labels_selected, which_labels, frames, which_data, ordered=ordered)
 
         if C.ON_GPU:
             data = to_gpu(data, device=C.DEVICE)
@@ -150,7 +150,7 @@ print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
     train_on = 'all'
     # validate_on = 'face'
-    test_on = 'all'
+    test_on = 'face'
     print('trained on: %s test on %s' % (train_on, test_on))
     # ----------------------------------------------------------------------------
     # training

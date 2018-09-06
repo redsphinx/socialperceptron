@@ -14,3 +14,5 @@ H = 256
 
 # data size after resize
 RESIDE = 256
+
+ORDERED_FRAME = 10
