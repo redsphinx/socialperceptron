@@ -291,12 +291,13 @@ def get_data(keys, id_frames, which_data, resize=False):
     return data
 
 
-def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False):
+def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False, ordered=False):
     assert(which_data in ['bg', 'face', 'all'])
 
     labels = np.zeros((len(labs_selected), 5), dtype=np.float32)
 
-    shuffle(labs_selected)
+    if not ordered:
+        shuffle(labs_selected)
     keys = []
     for i in range(len(labs_selected)):
         k = labs_selected[i]
@@ -307,20 +308,20 @@ def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False):
     return labels, data
 
 # TODO
-def load_video(labels_selected, which_labels, which_data):
-    assert (which_data in ['bg', 'face', 'all'])
-
-    labels = np.zeros((len(labs_selected), 5), dtype=np.float32)
-
-    shuffle(labs_selected)
-    keys = []
-    for i in range(len(labs_selected)):
-        k = labs_selected[i]
-        keys.append(k)
-        labels[i] = labs_h5[k][0:5]
-
-    data = get_data(keys, id_frames, which_data, resize)
-    return labels, data
+# def load_video(labels_selected, which_labels, which_data):
+#     assert (which_data in ['bg', 'face', 'all'])
+#
+#     labels = np.zeros((len(labs_selected), 5), dtype=np.float32)
+#
+#     shuffle(labs_selected)
+#     keys = []
+#     for i in range(len(labs_selected)):
+#         k = labs_selected[i]
+#         keys.append(k)
+#         labels[i] = labs_h5[k][0:5]
+#
+#     data = get_data(keys, id_frames, which_data, resize)
+#     return labels, data
 
 
 def check_saved_faces():

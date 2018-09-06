@@ -70,6 +70,15 @@ def record_loss_sanity(which, loss, pred_diff):
         mf.write('%s,%s\n' % (str(loss)[0:6], line))
 
 
+def record_loss_all_test(loss_tmp):
+    num = P.TEST_LOG.split('_')[-1].split('.')[0]
+    path = os.path.join(P.LOG_BASE, 'testall_%s.txt' % num)
+    with open(path, 'a') as my_file:
+        for i in loss_tmp:
+            line = '%f\n' % (i)
+            my_file.write(line)
+
+
 def pred_diff_trait(prediction, labels):
     # OCEAS
     diff = np.abs(prediction - labels)
