@@ -35,6 +35,7 @@ from chainer.functions import expand_dims
 from random import shuffle
 
 
+
 '''
 get model
 for each video, load all frames
@@ -47,8 +48,11 @@ record this loss
 '''
 
 
+# train_23 = epoch_49_20
+# train_35 = epoch_99_32
+
 load_model = True
-p = os.path.join(P.MODELS, 'epoch_29_22')
+p = os.path.join(P.MODELS, 'epoch_99_32')
 my_model = D.load_model(Deepimpression(), p, load_model)
 my_other_model = D.load_last_layers(LastLayers(), my_model, load_model)
 
@@ -90,29 +94,39 @@ def run(which, steps, all_labels, model, model2, pred_diff, loss_saving, which_d
         video = h5.File(video_path, 'r')
 
         video_keys = list(video.keys())
-        frames = len(video_keys) - 1
-        label = all_labels[video_keys[s]][:5]
-
-        if C.ON_GPU:
-            label = to_gpu(label, device=C.DEVICE)
+        # frames = len(video_keys) - 1
+        frames = 10
+        label = all_labels[video_names[s]][:5].astype(np.float32)
 
         activations = np.zeros((frames, 256))
 
-        for f in range(frames):
-            data = video[str(f)]
+        if C.ON_GPU:
+            label = to_gpu(label, device=C.DEVICE)
+            activations = to_gpu(activations, device=C.DEVICE)
+
+        # for f in range(frames):
+        for f in range(10):
+            data = video[str(f)][:]
+            data = data.astype(np.float32)
 
             if C.ON_GPU:
                 data = to_gpu(data, device=C.DEVICE)
 
             with cp.cuda.Device(C.DEVICE):
                 with chainer.using_config('train', False):
-                    frame = np.expand_dims(data, 0)
-                    _, activation = model(frame)
-                    activations[f] = activation
+                    # frame = np.expand_dims(data, 0)
+                    _, activation = model(data)
+                    activations[f] = activation.data
 
+        activations = to_cpu(activations)
         activations = np.mean(activations, axis=0)
+        activations = np.expand_dims(activations, 0).astype(np.float32)
+
+        if C.ON_GPU:
+            activations = to_gpu(activations, device=C.DEVICE)
+
         prediction = model2(activations)
-        loss = mean_absolute_error(prediction, label)
+        loss = mean_absolute_error(prediction[0], label)
 
         loss_tmp.append(float(loss.data))
 
@@ -125,10 +139,10 @@ def run(which, steps, all_labels, model, model2, pred_diff, loss_saving, which_d
           ' pred diff OCEAS: ', pred_diff[e],
           ' time: ', time.time() - ts)
 
-    # U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
+    U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
 
-    # if which == 'test' and save_all_results:
-    #     U.record_loss_all_test(loss_tmp)
+    if which == 'test' and save_all_results:
+        U.record_loss_all_test(loss_tmp)
 
 
 print('Enter training loop with validation')
@@ -145,6 +159,6 @@ for e in range(continuefrom, epochs):
 
         run(which='test', steps=test_steps, all_labels=test_labels, model=my_model, model2=my_other_model,
             pred_diff=pred_diff_test, loss_saving=test_loss, which_data=test_on, save_all_results=save_all_results)
-    # best val 'all': epoch_49_20
-    # best val 'bg': epoch_79_21
-    # best val 'face': epoch_29_22
+
+# train_23 = epoch_49_20
+# train_35 = epoch_99_32

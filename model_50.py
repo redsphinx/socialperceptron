@@ -1,7 +1,7 @@
 import chainer
 from chainer.links import Convolution2D, BatchNormalization, Linear
 from chainer.initializers import HeNormal, GlorotUniform, Zero, One
-from chainer.functions import relu, average_pooling_2d, max_pooling_2d, concat, tanh
+from chainer.functions import relu, average_pooling_2d, max_pooling_2d, concat, tanh, flatten
 import numpy as np
 
 # model works with MSE and predicting 5 trait numbers
@@ -143,8 +143,8 @@ class Deepimpression(chainer.Chain):
         return ans
 
     def __call__(self, x):
-        h = self.b1(x)  # (32, 256, 1, 1) !!extract here!!
-        list_h = h  # return this
+        h = self.b1(x)  # (batch, 256, 1, 1) !!extract here!!
+        list_h = flatten(h)  # return this
         h = self.fc(h)
         h = tanh(h)
         h = self.scale(h)
