@@ -4,7 +4,8 @@ from chainer.initializers import HeNormal, GlorotUniform, Zero, One
 from chainer.functions import relu, average_pooling_2d, max_pooling_2d, concat, tanh
 import numpy as np
 
-# model for sanity check. works with MSE and predicting 5 trait numbers
+# model works with MSE and predicting 5 trait numbers
+# returns fea
 
 which_initializer = 1
 initial = None
@@ -143,7 +144,27 @@ class Deepimpression(chainer.Chain):
 
     def __call__(self, x):
         h = self.b1(x)  # (32, 256, 1, 1) !!extract here!!
+        list_h = h  # return this
         h = self.fc(h)
+        h = tanh(h)
+        h = self.scale(h)
+        return h, list_h
+
+
+class LastLayers(chainer.Chain):
+    def __init__(self):
+        super(LastLayers, self).__init__()
+        with self.init_scope():
+            self.fc = Linear(in_size=256, out_size=5)
+
+    @staticmethod
+    def scale(x):
+        # scale between 0-1
+        ans = (x + 1) / 2
+        return ans
+
+    def __call__(self, x):
+        h = self.fc(x)
         h = tanh(h)
         h = self.scale(h)
         return h

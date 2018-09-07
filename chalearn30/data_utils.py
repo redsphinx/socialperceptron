@@ -1,4 +1,4 @@
-# TODO: utils for chalearn30 that depending on the mode only get face, bg or bg+face
+# utils for chalearn30
 import deepimpression2.paths as P
 import os
 import skvideo.io
@@ -9,6 +9,7 @@ import numpy as np
 from random import shuffle
 import deepimpression2.chalearn20.constants as C2
 from PIL import Image
+import chainer
 
 
 def mp4_to_arr(video_path):
@@ -103,18 +104,6 @@ def quicker_load(k, id_frames, which_data, ordered=False):
 
     v.close()
     return fe, optface
-
-
-# unused
-# # loading chalearn20
-# def quicker_load_tmp(k, id_frames):
-#     k = k.split('.mp4')[0]
-#     h5_path = os.path.join(P.CHALEARN_ALL_DATA_20_2, '%s.h5' % k)
-#     v = h5.File(h5_path, 'r')
-#     n = get_frame(id_frames[k][0])
-#     fe = v[str(n)][:]
-#     v.close()
-#     return fe
 
 
 def quicker_load_resize(k, id_frames, which_data, ordered=False):
@@ -307,22 +296,6 @@ def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False, order
     data = get_data(keys, id_frames, which_data, resize, ordered)
     return labels, data
 
-# TODO
-# def load_video(labels_selected, which_labels, which_data):
-#     assert (which_data in ['bg', 'face', 'all'])
-#
-#     labels = np.zeros((len(labs_selected), 5), dtype=np.float32)
-#
-#     shuffle(labs_selected)
-#     keys = []
-#     for i in range(len(labs_selected)):
-#         k = labs_selected[i]
-#         keys.append(k)
-#         labels[i] = labs_h5[k][0:5]
-#
-#     data = get_data(keys, id_frames, which_data, resize)
-#     return labels, data
-
 
 def check_saved_faces():
     val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
@@ -379,4 +352,24 @@ def find_best_val():
         print(tmp_best)
         print('worst = ', r[np.argmax(tmp_best, axis=0)])
         print('best = ', r[np.argmin(tmp_best, axis=0)])
+
+
+def load_model(model, path_to_weights, load_weights=False):
+    if load_weights:
+        chainer.serializers.load_npz(path_to_weights, model)
+
+    return model
+
+
+def load_last_layers(model_to, model_from, load_weights=False):
+    my_model = model_to
+
+    if load_weights:
+        fc_b = model_from.__getattribute__('fc').b
+        fc_w = model_from.__getattribute__('fc').W
+
+        my_model.__getattribute__('fc').__setattr__('b', fc_b)
+        my_model.__getattribute__('fc').__setattr__('W', fc_w)
+
+    return my_model
 
