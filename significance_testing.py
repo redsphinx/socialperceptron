@@ -50,15 +50,24 @@ def plot_both():
         plt.savefig('%s/%s.png' % (save_path, 'test_%d' % i))
 
 
+def normalize_data(arr):
+    mn = np.min(arr)
+    arr -= mn
+    mx = np.max(arr)
+    arr /= mx
+    return arr
+
+
 def compare_diff_to_normal():
-    for i in num_list_1:
-        ref = '/scratch/users/gabras/data/loss/testall_44.txt'
+    for i in num_list_2:
+        ref = '/scratch/users/gabras/data/loss/testall_47.txt'
         path = '/scratch/users/gabras/data/loss/testall_%d.txt' % i
 
         ref_load = np.genfromtxt(ref, 'float')
         path_load = np.genfromtxt(path, 'float')
 
         diff = path_load - ref_load
+        diff = normalize_data(diff)
 
         alpha = 0.05
         norm = np.random.normal(0, 1, size=diff.shape[0])
@@ -75,6 +84,9 @@ def compare_diff_to_normal():
             print('maybe?')
 
 
+# compare_diff_to_normal()
+
+
 def plot_diff_norm():
     for i in num_list_2:
         ref = '/scratch/users/gabras/data/loss/testall_47.txt'
@@ -84,6 +96,8 @@ def plot_diff_norm():
         path_load = np.genfromtxt(path, 'float')
 
         diff = path_load - ref_load
+        diff = normalize_data(diff)
+        print(diff.shape)
 
         save_path = os.path.join(P.FIGURES, 'train_%s' % i)
         if not os.path.exists(save_path):
@@ -99,22 +113,25 @@ def plot_diff_norm():
             lab = 'face'
 
         plt.title('histogram dif %s' % lab)
-        plt.savefig('%s/%s.png' % (save_path, 'histdiff_%d' % i))
+        plt.savefig('%s/%s.png' % (save_path, 'histdiff_%d_2' % i))
+
+
+# plot_diff_norm()
 
 
 # lets assume that these are normally distributed
 
 def calculate_mean_var():
-    ref = '/scratch/users/gabras/data/loss/testall_44.txt'
-    path45 = '/scratch/users/gabras/data/loss/testall_45.txt'
-    path46 = '/scratch/users/gabras/data/loss/testall_46.txt'
+    ref = '/scratch/users/gabras/data/loss/testall_47.txt'
+    path45 = '/scratch/users/gabras/data/loss/testall_48.txt'
+    path46 = '/scratch/users/gabras/data/loss/testall_49.txt'
 
     ref_load = np.genfromtxt(ref, 'float')
     path45_load = np.genfromtxt(path45, 'float')
     path46_load = np.genfromtxt(path46, 'float')
 
-    diff45 = path45_load - ref_load
-    diff46 = path46_load - ref_load
+    diff45 = normalize_data(path45_load - ref_load)
+    diff46 = normalize_data(path46_load - ref_load)
 
     mean45 = np.mean(diff45)
     mean46 = np.mean(diff46)
@@ -123,19 +140,26 @@ def calculate_mean_var():
     var46 = np.var(diff46)
 
     print(mean45, var45, ' and ', mean46, var46)
+    # 45 46 -- not cropped
+    # 0.41189869252511124 0.011381779310396646  and  0.5415425225184934 0.02147196975321762
+    # 47 48 -- cropped
+    # 0.4273576817938818 0.01963095162241388  and  0.47092922809647225 0.015323876850164547
+
+
+# calculate_mean_var()
 
 
 def significance_test():
-    _all = '/scratch/users/gabras/data/loss/testall_47.txt'
-    path_bg = '/scratch/users/gabras/data/loss/testall_48.txt'
-    path_face = '/scratch/users/gabras/data/loss/testall_49.txt'
+    _all = '/scratch/users/gabras/data/loss/testall_44.txt'
+    path_bg = '/scratch/users/gabras/data/loss/testall_45.txt'
+    path_face = '/scratch/users/gabras/data/loss/testall_46.txt'
 
     ref_load = np.genfromtxt(_all, 'float')
     path_bg_load = np.genfromtxt(path_bg, 'float')
     path_face_load = np.genfromtxt(path_face, 'float')
 
-    diff_bg = path_bg_load - ref_load
-    diff_face = path_face_load - ref_load
+    diff_bg = normalize_data(path_bg_load - ref_load)
+    diff_face = normalize_data(path_face_load - ref_load)
 
     value, pvalue = stats.ttest_ind(diff_bg, diff_face, equal_var=False)
     print(value, pvalue)
@@ -152,5 +176,48 @@ def significance_test():
     # p = 1.1189541618826393e-08
     # Samples are likely drawn from different distributions
 
+    # normalized diff
+
+    # cropped bg vs. face
+    # p = 2.7322686025278617e-21
+    # Samples are likely drawn from different distributions
+
+    # non-cropped bg vs. face
+    # p = 2.7011427057418338e-166
+    # Samples are likely drawn from different distributions
+
 
 # significance_test()
+
+# Let's assume data is not from normal distribution, which is probably the case given the results of normaltest
+
+
+def kolmogorov_smirnov():
+    _all = '/scratch/users/gabras/data/loss/testall_47.txt'
+    path_bg = '/scratch/users/gabras/data/loss/testall_48.txt'
+    path_face = '/scratch/users/gabras/data/loss/testall_49.txt'
+
+    ref_load = np.genfromtxt(_all, 'float')
+    path_bg_load = np.genfromtxt(path_bg, 'float')
+    path_face_load = np.genfromtxt(path_face, 'float')
+
+    diff_bg = normalize_data(path_bg_load - ref_load)
+    diff_face = normalize_data(path_face_load - ref_load)
+
+    value, pvalue = stats.ks_2samp(diff_bg, diff_face)
+
+    print(value, pvalue)
+    if pvalue > 0.05:
+        print('Samples are likely drawn from the same distributions')
+    else:
+        print('Samples are likely drawn from different distributions')
+
+    # normalized diff
+    # 45, 46 -- not cropped
+    # p = 2.864512141804348e-167
+    # Samples are likely drawn from different distributions
+    # 48, 49 -- cropped
+    # p = 4.9692098719771285e-28
+    # Samples are likely drawn from different distributions
+
+# kolmogorov_smirnov()
