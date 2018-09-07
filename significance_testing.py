@@ -201,8 +201,8 @@ def kolmogorov_smirnov():
     path_bg_load = np.genfromtxt(path_bg, 'float')
     path_face_load = np.genfromtxt(path_face, 'float')
 
-    diff_bg = normalize_data(path_bg_load - ref_load)
-    diff_face = normalize_data(path_face_load - ref_load)
+    diff_bg = np.abs(path_bg_load - ref_load)
+    diff_face = np.abs(path_face_load - ref_load)
 
     value, pvalue = stats.ks_2samp(diff_bg, diff_face)
 
@@ -221,3 +221,35 @@ def kolmogorov_smirnov():
     # Samples are likely drawn from different distributions
 
 # kolmogorov_smirnov()
+
+
+def kruskal_wallis():
+    _all = '/scratch/users/gabras/data/loss/testall_45.txt'
+    path_bg = '/scratch/users/gabras/data/loss/testall_46.txt'
+    path_face = '/scratch/users/gabras/data/loss/testall_47.txt'
+
+    ref_load = np.genfromtxt(_all, 'float')
+    path_bg_load = np.genfromtxt(path_bg, 'float')
+    path_face_load = np.genfromtxt(path_face, 'float')
+
+    diff_bg = path_bg_load - ref_load
+    diff_face = path_face_load - ref_load
+
+    value, pvalue = stats.kruskal(diff_bg, diff_face)
+
+    print(value, pvalue)
+    if pvalue > 0.05:
+        print('Samples are likely drawn from the same distributions')
+    else:
+        print('Samples are likely drawn from different distributions')
+
+    # 45, 46 -- not cropped
+    # p = 1.7734549853960672e-75
+    # Samples are likely drawn from different distributions
+
+    # 48, 49 -- cropped
+    # p = 1.937016396570183e-10
+    # Samples are likely drawn from different distributions
+
+
+# kruskal_wallis()
