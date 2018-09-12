@@ -260,17 +260,29 @@ def fill_average(image, which_data, optface, resize=False):
                 return image
 
 
-def get_data(keys, id_frames, which_data, resize=False, ordered=False):
+def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream=False):
     if resize:
-        data = np.zeros((len(keys), 3, C2.RESIDE, C2.RESIDE), dtype=np.float32)
+        if twostream:
+            data = np.zeros((len(keys), 6, C2.RESIDE, C2.RESIDE), dtype=np.float32)
+        else:
+            data = np.zeros((len(keys), 3, C2.RESIDE, C2.RESIDE), dtype=np.float32)
     else:
         data = np.zeros((len(keys), 3, C2.H, C2.W), dtype=np.float32)
 
     if resize:
-        for i, k in enumerate(keys):
-            image, optface = quicker_load_resize(k, id_frames, which_data, ordered)
-            image = fill_average(image, which_data, optface, resize)
-            data[i] = image
+        if twostream:
+            if which_data == 'all':
+                for i, k in enumerate(keys):
+                    bg, optface = quicker_load_resize(k, id_frames, 'bg', ordered)
+                    bg = fill_average(bg, which_data, optface, resize)
+                    face, optface = quicker_load_resize(k, id_frames, 'face', ordered)
+                    data[i] = np.concatenate((bg, face), axis=1)
+        else:
+            for i, k in enumerate(keys):
+                image, optface = quicker_load_resize(k, id_frames, which_data, ordered)
+                image = fill_average(image, which_data, optface, resize)
+                data[i] = image
+
     else:
         for i, k in enumerate(keys):
             image, optface = quicker_load(k, id_frames, which_data, ordered)
@@ -280,7 +292,7 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False):
     return data
 
 
-def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False, ordered=False):
+def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False, ordered=False, twostream=False):
     assert(which_data in ['bg', 'face', 'all'])
 
     labels = np.zeros((len(labs_selected), 5), dtype=np.float32)
@@ -293,7 +305,7 @@ def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False, order
         keys.append(k)
         labels[i] = labs_h5[k][0:5]
 
-    data = get_data(keys, id_frames, which_data, resize, ordered)
+    data = get_data(keys, id_frames, which_data, resize, ordered, twostream)
     return labels, data
 
 
