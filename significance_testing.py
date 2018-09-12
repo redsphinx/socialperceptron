@@ -224,9 +224,9 @@ def kolmogorov_smirnov():
 
 
 def kruskal_wallis():
-    _all = '/scratch/users/gabras/data/loss/testall_45.txt'
-    path_bg = '/scratch/users/gabras/data/loss/testall_46.txt'
-    path_face = '/scratch/users/gabras/data/loss/testall_47.txt'
+    _all = '/scratch/users/gabras/data/loss/testall_47.txt'
+    path_bg = '/scratch/users/gabras/data/loss/testall_48.txt'
+    path_face = '/scratch/users/gabras/data/loss/testall_49.txt'
 
     ref_load = np.genfromtxt(_all, 'float')
     path_bg_load = np.genfromtxt(path_bg, 'float')
@@ -244,7 +244,7 @@ def kruskal_wallis():
         print('Samples are likely drawn from different distributions')
 
     # 45, 46 -- not cropped
-    # p = 1.7734549853960672e-75
+    # p = 5.53712529445153e-75
     # Samples are likely drawn from different distributions
 
     # 48, 49 -- cropped
@@ -253,3 +253,40 @@ def kruskal_wallis():
 
 
 # kruskal_wallis()
+
+
+def kruskal_wallis_random():
+    # compare with the random baseline
+    # is the difference between face-baseline and bg-baseline and all-baseline significant?
+    # not cropped: 44, 45, 46
+    # cropped: 47, 48, 49
+    rrnd = '/scratch/users/gabras/data/loss/testall_52.txt'
+
+    _all = '/scratch/users/gabras/data/loss/testall_47.txt'
+    path_bg = '/scratch/users/gabras/data/loss/testall_48.txt'
+    path_face = '/scratch/users/gabras/data/loss/testall_49.txt'
+
+    random_load = np.genfromtxt(rrnd, 'float')
+    ref_load = np.genfromtxt(_all, 'float')
+    path_bg_load = np.genfromtxt(path_bg, 'float')
+    path_face_load = np.genfromtxt(path_face, 'float')
+
+    value, pvalue = stats.kruskal(random_load, path_bg_load)
+
+    print(value, pvalue)
+    if pvalue > 0.05:
+        print('Samples are likely drawn from the same distributions')
+    else:
+        print('Samples are likely drawn from different distributions')
+
+    # not cropped
+    # 44: p=0.0
+    # 45: p=0.0
+    # 46: p=6.52618061570611e-271
+
+    # cropped
+    # 47: p=0.0
+    # 48: p=0.0
+    # 49: p=0.0
+
+# kruskal_wallis_random()
