@@ -373,3 +373,20 @@ def load_last_layers(model_to, model_from, load_weights=False):
 
     return my_model
 
+
+def basic_load_personality_labels(which):
+    assert(which in ['test', 'train', 'val'])
+
+    if which == 'test':
+        labels = h5.File(P.CHALEARN_TEST_LABELS_20, 'r')
+    elif which == 'train':
+        labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
+    else:
+        labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
+
+    final_labels = np.zeros((len(list(labels)), 5), dtype=np.float32)
+
+    for i, k in enumerate(list(labels)):
+        final_labels[i] = labels[k][:][:5]
+
+    return final_labels
