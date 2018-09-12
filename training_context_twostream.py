@@ -83,7 +83,7 @@ id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, which_data, ordered=False,
         save_all_results=False, twostream=False):
-    # print('steps: ', steps)
+    print('steps: ', steps)
     assert(which in ['train', 'test', 'val'])
     assert(which_data in ['all', 'bg', 'face'])
 
@@ -102,7 +102,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
     ts = time.time()
     for s in range(steps):
-        print(s)
+        # print(s)
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
         labels, data = D.load_data(labels_selected, which_labels, frames, which_data, resize=True, ordered=ordered,
