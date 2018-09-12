@@ -83,7 +83,7 @@ id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, which_data, ordered=False,
         save_all_results=False, twostream=False):
-    print('steps: ', steps)
+    # print('steps: ', steps)
     assert(which in ['train', 'test', 'val'])
     assert(which_data in ['all', 'bg', 'face'])
 
@@ -150,9 +150,9 @@ print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
     train_on = 'all'
     validate_on = 'all'
-    # print('trained on: %s val on: %s' % (train_on, validate_on))
+    print('trained on: %s val on: %s' % (train_on, validate_on))
     test_on = 'all'
-    print('trained on: %s test on %s' % (train_on, test_on))
+    # print('trained on: %s test on %s' % (train_on, test_on))
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
