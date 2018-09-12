@@ -274,8 +274,9 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
             if which_data == 'all':
                 for i, k in enumerate(keys):
                     bg, optface = quicker_load_resize(k, id_frames, 'bg', ordered)
-                    bg = fill_average(bg, which_data, optface, resize)
+                    bg = fill_average(bg, 'bg', optface, resize)
                     face, optface = quicker_load_resize(k, id_frames, 'face', ordered)
+                    face = fill_average(face, 'face', optface, resize)
                     data[i] = np.concatenate((bg, face), axis=1)
         else:
             for i, k in enumerate(keys):

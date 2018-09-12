@@ -18,7 +18,7 @@ __________________________________________
 
 import chainer
 import numpy as np
-from deepimpression2.model_16 import Deepimpression
+from deepimpression2.model_53 import Deepimpression
 import deepimpression2.constants as C
 from chainer.functions import sigmoid_cross_entropy, mean_absolute_error, softmax_cross_entropy
 from chainer.optimizers import Adam
