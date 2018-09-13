@@ -10,24 +10,11 @@ See 95th percentile on each side
 See if test losses are outside or not
 '''
 
-import chainer
 import numpy as np
-from deepimpression2.model_50 import Deepimpression
-from deepimpression2.model_50 import LastLayers
-import deepimpression2.constants as C
-from chainer.functions import sigmoid_cross_entropy, mean_absolute_error, softmax_cross_entropy
-from chainer.optimizers import Adam
-import h5py as h5
 import deepimpression2.paths as P
-# import deepimpression2.chalearn20.data_utils as D
 import deepimpression2.chalearn30.data_utils as D
-import time
-from chainer.backends.cuda import to_gpu, to_cpu
 import deepimpression2.util as U
 import os
-import cupy as cp
-from chainer.functions import expand_dims
-from random import shuffle
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
@@ -54,7 +41,7 @@ for i, s in enumerate(seeds):
 
 all_diff = np.mean(all_diff, axis=0)
 # U.record_loss_all_test(all_diff)
-
+#
 # save_path = os.path.join(P.FIGURES, 'train_52')
 # U.safe_mkdir(save_path)
 #

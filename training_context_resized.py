@@ -38,7 +38,7 @@ from random import shuffle
 
 my_model = Deepimpression()
 
-load_model = True
+load_model = False
 if load_model:
     p = os.path.join(P.MODELS, 'epoch_99_32')
     chainer.serializers.load_npz(p, my_model)
@@ -148,10 +148,10 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
 print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
-    train_on = 'all'
+    train_on = 'none' # TODO: figure out why nan when model is not trained, remove logs 55
     # validate_on = 'face'
     # print('trained on: %s val on: %s' % (train_on, validate_on))
-    test_on = 'face'
+    test_on = 'all'
     print('trained on: %s test on %s' % (train_on, test_on))
     # ----------------------------------------------------------------------------
     # training
