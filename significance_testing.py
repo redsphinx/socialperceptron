@@ -290,3 +290,14 @@ def kruskal_wallis_random():
     # 49: p=0.0
 
 # kruskal_wallis_random()
+
+
+def any_calculate_mean_var(p):
+    load = np.genfromtxt(p, 'float')
+    mean = np.mean(load)
+    var = np.var(load)
+    print(mean, var)
+
+
+# p = '/scratch/users/gabras/data/loss/testall_52.txt'
+# any_calculate_mean_var(p)
