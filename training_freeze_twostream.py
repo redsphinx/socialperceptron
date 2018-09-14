@@ -125,8 +125,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         labels, bg_data = D.load_data(labels_selected, which_labels, frames, which_data, resize=True, ordered=ordered,
                                    twostream=twostream)
 
-
-
+        # TODO: get activations from both streams and push to network
 
         if C.ON_GPU:
             data = to_gpu(data, device=C.DEVICE)
