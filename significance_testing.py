@@ -260,18 +260,19 @@ def kruskal_wallis_random():
     # is the difference between face-baseline and bg-baseline and all-baseline significant?
     # not cropped: 44, 45, 46
     # cropped: 47, 48, 49
-    rrnd = '/scratch/users/gabras/data/loss/testall_52.txt'
+    # rrnd = '/scratch/users/gabras/data/loss/testall_52.txt' # chance
+    rrnd = '/scratch/users/gabras/data/loss/testall_56.txt' # avg train
 
-    _all = '/scratch/users/gabras/data/loss/testall_47.txt'
-    path_bg = '/scratch/users/gabras/data/loss/testall_48.txt'
-    path_face = '/scratch/users/gabras/data/loss/testall_49.txt'
+    _all = '/scratch/users/gabras/data/loss/testall_44.txt'
+    path_bg = '/scratch/users/gabras/data/loss/testall_45.txt'
+    path_face = '/scratch/users/gabras/data/loss/testall_46.txt'
 
     random_load = np.genfromtxt(rrnd, 'float')
     ref_load = np.genfromtxt(_all, 'float')
     path_bg_load = np.genfromtxt(path_bg, 'float')
     path_face_load = np.genfromtxt(path_face, 'float')
 
-    value, pvalue = stats.kruskal(random_load, path_bg_load)
+    value, pvalue = stats.kruskal(random_load, path_face_load)
 
     print(value, pvalue)
     if pvalue > 0.05:
@@ -279,15 +280,15 @@ def kruskal_wallis_random():
     else:
         print('Samples are likely drawn from different distributions')
 
-    # not cropped
-    # 44: p=0.0
-    # 45: p=0.0
-    # 46: p=6.52618061570611e-271
+    # not cropped, chance, avg train
+    # 44: p=0.0 p=0.0157
+    # 45: p=0.0 p=0.00548
+    # 46: p=6.52618061570611e-271 p=3.0034918737488883e-78
 
-    # cropped
-    # 47: p=0.0
-    # 48: p=0.0
-    # 49: p=0.0
+    # cropped, chance, avg train
+    # 47: p=0.0     p=0.106
+    # 48: p=0.0     p=7.3931979121337195e-09
+    # 49: p=0.0     p=8.683701146900212e-29
 
 # kruskal_wallis_random()
 
