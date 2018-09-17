@@ -95,7 +95,7 @@ id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 
 def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, ordered=False,
-        save_all_results=False, twostream=False):
+        save_all_results=False, twostream=False, same_frame=False):
     print('steps: ', steps)
     assert(which in ['train', 'test', 'val'])
 
@@ -122,11 +122,19 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         # labels, data = D.load_data(labels_selected, which_labels, frames, which_data, resize=True, ordered=ordered,
         #                            twostream=twostream)
         labels_bg, bg_data, frame_num = D.load_data(labels_selected, which_labels, frames, which_data='bg', resize=True,
-                                         ordered=ordered, twostream=twostream)
+                                         ordered=ordered, twostream=twostream, same_frame=same_frame)
         labels_face, face_data, _ = D.load_data(labels_selected, which_labels, frames, which_data='face', resize=True,
-                                             ordered=ordered, twostream=twostream, frame_num=frame_num)
+                                             ordered=ordered, twostream=twostream, frame_num=frame_num, same_frame=same_frame)
 
-        assert(labels_bg == labels_face)
+        assert(np.mean(labels_bg == labels_face) == 1.0)
+
+        # shuffle data and labels in same order
+        shuf = np.arange(32)
+        shuffle(shuf)
+        bg_data = bg_data[shuf]
+        face_data = face_data[shuf]
+        labels_bg = labels_bg[shuf]
+
 
         if C.ON_GPU:
             bg_data = to_gpu(bg_data, device=C.DEVICE)
@@ -144,7 +152,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
                 prediction_face, face_activations = face_model(face_data)
 
             with chainer.using_config('train', config):
-                if config == 'train':
+                if config:
                     model.cleargrads()
                 prediction = model(bg_activations, face_activations)
 
@@ -183,13 +191,13 @@ for e in range(continuefrom, epochs):
     # ----------------------------------------------------------------------------
     run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
-        loss_saving=train_loss)
+        loss_saving=train_loss, same_frame=True)
     # ----------------------------------------------------------------------------
     # validation
     # ----------------------------------------------------------------------------
     run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
-        loss_saving=val_loss)
+        loss_saving=val_loss, same_frame=True)
     # ----------------------------------------------------------------------------
     # test
     # ----------------------------------------------------------------------------

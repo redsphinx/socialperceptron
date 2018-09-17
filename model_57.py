@@ -19,6 +19,7 @@ class LastLayers(chainer.Chain):
 
     def __call__(self, x1, x2):
         h = concat((x1, x2), axis=1)
+        # h = chainer.functions.expand_dims(h, 0)
         h = self.fc(h)
         h = tanh(h)
         h = self.scale(h)

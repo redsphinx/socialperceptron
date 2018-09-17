@@ -291,6 +291,7 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
                     frames.append(n)
                     image = fill_average(image, which_data, optface, resize)
                     data[i] = image
+                n = frames
             else:
                 for i, k in enumerate(keys):
                     image, optface, n = quicker_load_resize(k, id_frames, which_data, ordered, frame_num[i])
@@ -308,13 +309,14 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
 
 
 def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False, ordered=False, twostream=False,
-              frame_num=None):
+              frame_num=None, same_frame=False):
     assert(which_data in ['bg', 'face', 'all'])
 
     labels = np.zeros((len(labs_selected), 5), dtype=np.float32)
 
-    if not ordered:
+    if not ordered and not same_frame:
         shuffle(labs_selected)
+
     keys = []
     for i in range(len(labs_selected)):
         k = labs_selected[i]
