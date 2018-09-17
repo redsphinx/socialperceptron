@@ -106,7 +106,7 @@ def quicker_load(k, id_frames, which_data, ordered=False):
     return fe, optface
 
 
-def quicker_load_resize(k, id_frames, which_data, ordered=False):
+def quicker_load_resize(k, id_frames, which_data, ordered=False, frame_num=None):
     k = k.split('.mp4')[0]
 
     if which_data == 'face':
@@ -116,7 +116,10 @@ def quicker_load_resize(k, id_frames, which_data, ordered=False):
 
     v = h5.File(h5_path, 'r')
 
-    n, zero_frames = D.get_frame(id_frames[k][0], ordered)
+    if frame_num is None:
+        n, zero_frames = D.get_frame(id_frames[k][0], ordered)
+    else:
+        n, zero_frames = frame_num, False
 
     if zero_frames:
         with open(P.ZERO_FRAMES, 'a') as my_file:
@@ -137,7 +140,7 @@ def quicker_load_resize(k, id_frames, which_data, ordered=False):
         optface = None
 
     v.close()
-    return fe, optface
+    return fe, optface, n
 
 
 def fill_average(image, which_data, optface, resize=False):
@@ -260,7 +263,7 @@ def fill_average(image, which_data, optface, resize=False):
                 return image
 
 
-def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream=False):
+def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream=False, frame_num=None):
     if resize:
         if twostream:
             data = np.zeros((len(keys), 6, C2.RESIDE, C2.RESIDE), dtype=np.float32)
@@ -269,18 +272,20 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
     else:
         data = np.zeros((len(keys), 3, C2.H, C2.W), dtype=np.float32)
 
+    n = None
+
     if resize:
         if twostream:
             if which_data == 'all':
                 for i, k in enumerate(keys):
-                    bg, optface = quicker_load_resize(k, id_frames, 'bg', ordered)
+                    bg, optface, n = quicker_load_resize(k, id_frames, 'bg', ordered)
                     bg = fill_average(bg, 'bg', optface, resize)
-                    face, optface = quicker_load_resize(k, id_frames, 'face', ordered)
+                    face, optface, n = quicker_load_resize(k, id_frames, 'face', ordered)
                     face = fill_average(face, 'face', optface, resize)
                     data[i] = np.concatenate((bg, face), axis=1)
         else:
             for i, k in enumerate(keys):
-                image, optface = quicker_load_resize(k, id_frames, which_data, ordered)
+                image, optface, n = quicker_load_resize(k, id_frames, which_data, ordered, frame_num)
                 image = fill_average(image, which_data, optface, resize)
                 data[i] = image
 
@@ -290,10 +295,11 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
             image = fill_average(image, which_data, optface)
             data[i] = image
 
-    return data
+    return data, n
 
 
-def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False, ordered=False, twostream=False):
+def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False, ordered=False, twostream=False,
+              frame_num=None):
     assert(which_data in ['bg', 'face', 'all'])
 
     labels = np.zeros((len(labs_selected), 5), dtype=np.float32)
@@ -306,8 +312,8 @@ def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False, order
         keys.append(k)
         labels[i] = labs_h5[k][0:5]
 
-    data = get_data(keys, id_frames, which_data, resize, ordered, twostream)
-    return labels, data
+    data, n = get_data(keys, id_frames, which_data, resize, ordered, twostream, frame_num)
+    return labels, data, n
 
 
 def check_saved_faces():

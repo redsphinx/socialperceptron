@@ -94,11 +94,10 @@ test_steps = len(test_labels) // C.TEST_BATCH_SIZE
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 
-def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, which_data, ordered=False,
+def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, ordered=False,
         save_all_results=False, twostream=False):
     print('steps: ', steps)
     assert(which in ['train', 'test', 'val'])
-    assert(which_data in ['all', 'bg', 'face'])
 
     if which == 'train':
         which_batch_size = C.TRAIN_BATCH_SIZE
@@ -116,20 +115,23 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
     ts = time.time()
     for s in range(steps):
         # HERE
-        print(s)
+        # print(s)
         # HERE
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
         # labels, data = D.load_data(labels_selected, which_labels, frames, which_data, resize=True, ordered=ordered,
         #                            twostream=twostream)
-        labels, bg_data = D.load_data(labels_selected, which_labels, frames, which_data, resize=True, ordered=ordered,
-                                   twostream=twostream)
+        labels_bg, bg_data, frame_num = D.load_data(labels_selected, which_labels, frames, which_data='bg', resize=True,
+                                         ordered=ordered, twostream=twostream)
+        labels_face, face_data, _ = D.load_data(labels_selected, which_labels, frames, which_data='face', resize=True,
+                                             ordered=ordered, twostream=twostream, frame_num=frame_num)
 
-        # TODO: get activations from both streams and push to network
+        assert(labels_bg == labels_face)
 
         if C.ON_GPU:
-            data = to_gpu(data, device=C.DEVICE)
-            labels = to_gpu(labels, device=C.DEVICE)
+            bg_data = to_gpu(bg_data, device=C.DEVICE)
+            face_data = to_gpu(face_data, device=C.DEVICE)
+            labels = to_gpu(labels_bg, device=C.DEVICE)
 
         with cp.cuda.Device(C.DEVICE):
             if which == 'train':
@@ -137,10 +139,14 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
             else:
                 config = False
 
+            with chainer.using_config('train', False):
+                prediction_bg, bg_activations = bg_model(bg_data)
+                prediction_face, face_activations = face_model(face_data)
+
             with chainer.using_config('train', config):
-                if which == 'train':
+                if config == 'train':
                     model.cleargrads()
-                prediction = model(data)
+                prediction = model(bg_activations, face_activations)
 
                 loss = mean_absolute_error(prediction, labels)
 
@@ -175,34 +181,34 @@ for e in range(continuefrom, epochs):
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
-    # run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
-    #     model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
-    #     loss_saving=train_loss, which_data=train_on, twostream=True)
+    run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
+        model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
+        loss_saving=train_loss)
     # ----------------------------------------------------------------------------
     # validation
     # ----------------------------------------------------------------------------
-    # run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
-    #     model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
-    #     loss_saving=val_loss, which_data=validate_on, twostream=True)
+    run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
+        model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
+        loss_saving=val_loss)
     # ----------------------------------------------------------------------------
     # test
     # ----------------------------------------------------------------------------
-    times = 1
-    for i in range(1):
-        if times == 1:
-            ordered = True
-            save_all_results = True
-        else:
-            ordered = False
-            save_all_results = False
-
-        run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
-            model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
-            loss_saving=test_loss, which_data=test_on, ordered=ordered, save_all_results=save_all_results,
-            twostream=True)
+    # times = 1
+    # for i in range(1):
+    #     if times == 1:
+    #         ordered = True
+    #         save_all_results = True
+    #     else:
+    #         ordered = False
+    #         save_all_results = False
+    #
+    #     run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
+    #         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
+    #         loss_saving=test_loss, which_data=test_on, ordered=ordered, save_all_results=save_all_results,
+    #         twostream=False)
         # best val: epoch_9_53
 
     # save model
-    # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_53' % e)
-    #     chainer.serializers.save_npz(name, my_model)
+    if ((e + 1) % 10) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_57' % e)
+        chainer.serializers.save_npz(name, my_model)
