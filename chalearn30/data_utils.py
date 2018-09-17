@@ -284,10 +284,19 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
                     face = fill_average(face, 'face', optface, resize)
                     data[i] = np.concatenate((bg, face), axis=1)
         else:
-            for i, k in enumerate(keys):
-                image, optface, n = quicker_load_resize(k, id_frames, which_data, ordered, frame_num)
-                image = fill_average(image, which_data, optface, resize)
-                data[i] = image
+            if frame_num is None:
+                frames = []
+                for i, k in enumerate(keys):
+                    image, optface, n = quicker_load_resize(k, id_frames, which_data, ordered)
+                    frames.append(n)
+                    image = fill_average(image, which_data, optface, resize)
+                    data[i] = image
+            else:
+                for i, k in enumerate(keys):
+                    image, optface, n = quicker_load_resize(k, id_frames, which_data, ordered, frame_num[i])
+                    image = fill_average(image, which_data, optface, resize)
+                    data[i] = image
+                n = frame_num
 
     else:
         for i, k in enumerate(keys):

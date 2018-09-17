@@ -175,7 +175,7 @@ print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
     train_on = 'all'
     validate_on = 'all'
-    # print('trained on: %s val on: %s' % (train_on, validate_on))
+    print('trained on: %s val on: %s' % (train_on, validate_on))
     test_on = 'all'
     # print('trained on: %s test on %s' % (train_on, test_on))
     # ----------------------------------------------------------------------------
