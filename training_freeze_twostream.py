@@ -39,11 +39,11 @@ from random import shuffle
 print('Initializing')
 
 my_model = LastLayers()
-load_model = False
+load_model = True
 if load_model:
-    p = os.path.join(P.MODELS, '')
+    p = os.path.join(P.MODELS, 'epoch_9_57')
     chainer.serializers.load_npz(p, my_model)
-    print('model loaded')
+    print('my_model loaded')
     continuefrom = 0
 else:
     continuefrom = 0
@@ -126,6 +126,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         labels_face, face_data, _ = D.load_data(labels_selected, which_labels, frames, which_data='face', resize=True,
                                              ordered=ordered, twostream=twostream, frame_num=frame_num, same_frame=same_frame)
 
+        # confirm that labels are the same
         assert(np.mean(labels_bg == labels_face) == 1.0)
 
         # shuffle data and labels in same order
@@ -134,7 +135,6 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         bg_data = bg_data[shuf]
         face_data = face_data[shuf]
         labels_bg = labels_bg[shuf]
-
 
         if C.ON_GPU:
             bg_data = to_gpu(bg_data, device=C.DEVICE)
@@ -183,38 +183,39 @@ print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
     train_on = 'all'
     validate_on = 'all'
-    print('trained on: %s val on: %s' % (train_on, validate_on))
+    # print('trained on: %s val on: %s' % (train_on, validate_on))
     test_on = 'all'
-    # print('trained on: %s test on %s' % (train_on, test_on))
+    print('trained on: %s test on %s' % (train_on, test_on))
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
-    run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
-        model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
-        loss_saving=train_loss, same_frame=True)
+    # run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
+    #     model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
+    #     loss_saving=train_loss, same_frame=True)
     # ----------------------------------------------------------------------------
     # validation
     # ----------------------------------------------------------------------------
-    run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
-        model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
-        loss_saving=val_loss, same_frame=True)
+    # run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
+    #     model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
+    #     loss_saving=val_loss, same_frame=True)
     # ----------------------------------------------------------------------------
     # test
     # ----------------------------------------------------------------------------
-    # times = 1
-    # for i in range(1):
-    #     if times == 1:
-    #         ordered = True
-    #         save_all_results = True
-    #     else:
-    #         ordered = False
-    #         save_all_results = False
-    #
-    #     run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
-    #         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
-    #         loss_saving=test_loss, which_data=test_on, ordered=ordered, save_all_results=save_all_results,
-    #         twostream=False)
-        # best val: epoch_9_53
+    times = 1
+    for i in range(1):
+        if times == 1:
+            ordered = True
+            save_all_results = True
+        else:
+            ordered = False
+            save_all_results = False
+
+        # TODO: check the if same frame is being selected
+        run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
+            model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
+            loss_saving=test_loss, ordered=ordered, save_all_results=save_all_results,
+            twostream=False, same_frame=True)
+        # best val: epoch_9_57
 
     # save model
     if ((e + 1) % 10) == 0:

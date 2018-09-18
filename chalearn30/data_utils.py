@@ -358,7 +358,7 @@ def check_saved_faces():
 
 
 def find_best_val():
-    log14 = P.LOG_BASE + 'val_%d.txt' % (53)
+    log14 = P.LOG_BASE + 'val_%d.txt' % (57)
     # log33 = P.LOG_BASE + 'val_%d.txt' % (33)
     # log34 = P.LOG_BASE + 'val_%d.txt' % (34)
 
@@ -384,7 +384,7 @@ def find_best_val():
         print('best = ', r[np.argmin(tmp_best, axis=0)])
 
 
-# find_best_val()
+find_best_val()
 
 
 def load_model(model, path_to_weights, load_weights=False):
