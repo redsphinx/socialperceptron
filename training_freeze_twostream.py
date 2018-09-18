@@ -115,7 +115,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
     ts = time.time()
     for s in range(steps):
         # HERE
-        # print(s)
+        print(s)
         # HERE
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
@@ -130,11 +130,12 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         assert(np.mean(labels_bg == labels_face) == 1.0)
 
         # shuffle data and labels in same order
-        shuf = np.arange(32)
-        shuffle(shuf)
-        bg_data = bg_data[shuf]
-        face_data = face_data[shuf]
-        labels_bg = labels_bg[shuf]
+        if which != 'test':
+            shuf = np.arange(which_batch_size)
+            shuffle(shuf)
+            bg_data = bg_data[shuf]
+            face_data = face_data[shuf]
+            labels_bg = labels_bg[shuf]
 
         if C.ON_GPU:
             bg_data = to_gpu(bg_data, device=C.DEVICE)
@@ -210,7 +211,6 @@ for e in range(continuefrom, epochs):
             ordered = False
             save_all_results = False
 
-        # TODO: check the if same frame is being selected
         run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
             model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
             loss_saving=test_loss, ordered=ordered, save_all_results=save_all_results,
@@ -218,6 +218,6 @@ for e in range(continuefrom, epochs):
         # best val: epoch_9_57
 
     # save model
-    if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_57' % e)
-        chainer.serializers.save_npz(name, my_model)
+    # if ((e + 1) % 10) == 0:
+    #     name = os.path.join(P.MODELS, 'epoch_%d_57' % e)
+    #     chainer.serializers.save_npz(name, my_model)
