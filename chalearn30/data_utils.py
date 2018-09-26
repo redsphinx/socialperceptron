@@ -327,6 +327,29 @@ def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False, order
     return labels, data, n
 
 
+def load_data_single(labs_selected, labs_h5, id_frames, which_data, trait, resize=False, ordered=False, twostream=False,
+                     frame_num=None, same_frame=False):
+    all_traits = ['O', 'C', 'E', 'A', 'S']
+    assert(which_data in ['bg', 'face', 'all'])
+    assert (trait in all_traits)
+
+    labels = np.zeros((len(labs_selected), 1), dtype=np.float32)
+
+    if not ordered and not same_frame:
+        shuffle(labs_selected)
+
+    t = all_traits.index(trait)
+
+    keys = []
+    for i in range(len(labs_selected)):
+        k = labs_selected[i]
+        keys.append(k)
+        labels[i] = labs_h5[k][t]
+
+    data, n = get_data(keys, id_frames, which_data, resize, ordered, twostream, frame_num)
+    return labels, data, n
+
+
 def check_saved_faces():
     val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
     _labs = list(val_labels)
