@@ -407,7 +407,7 @@ def find_best_val():
         print('best = ', r[np.argmin(tmp_best, axis=0)])
 
 
-find_best_val()
+# find_best_val()
 
 
 def load_model(model, path_to_weights, load_weights=False):

@@ -62,6 +62,9 @@ training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
 val_steps = len(val_labels) // C.VAL_BATCH_SIZE
 test_steps = len(test_labels) // C.TEST_BATCH_SIZE
 
+# training_steps = 10
+# val_steps = 10
+
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 
@@ -80,17 +83,20 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         which_batch_size = C.TEST_BATCH_SIZE
 
     loss_tmp = []
-    pd_tmp = np.zeros((steps, 5), dtype=float)
+    pd_tmp = np.zeros((steps, 1), dtype=float)
     _labs = list(which_labels)
     if not ordered:
         shuffle(_labs)
 
     ts = time.time()
     for s in range(steps):
-        print(s)
+        # HERE
+        if which == 'test':
+            print(s)
+        # HERE
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
-        labels, data = D.load_data_single(labels_selected, which_labels, frames, which_data, resize=True,
+        labels, data, _ = D.load_data_single(labels_selected, which_labels, frames, which_data, resize=True,
                                           ordered=ordered, trait=trait)
 
         if C.ON_GPU:
@@ -106,7 +112,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
             with chainer.using_config('train', config):
                 if which == 'train':
                     model.cleargrads()
-                prediction = model(data)
+                prediction, _ = model(data)
 
                 loss = mean_absolute_error(prediction, labels)
 
@@ -118,7 +124,6 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
         pd_tmp[s] = U.pred_diff_trait(to_cpu(prediction.data), to_cpu(labels))
 
-    # TODO: no more mean?
     pred_diff[e] = np.mean(pd_tmp, axis=0)
     loss_tmp_mean = np.mean(loss_tmp, axis=0)
     loss_saving.append(loss_tmp_mean)
@@ -134,7 +139,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
 print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
-    which_trait = 'O'
+    which_trait = 'O'  # O C E A N
     train_on = 'face'
     validate_on = 'face'
     print('trained on: %s val on: %s' % (train_on, validate_on))
