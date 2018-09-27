@@ -257,6 +257,18 @@ def mk_plots(which, num):
 # mk_plots('train', n)
 # mk_plots('val', n)
 #
-# n = '57'
+# n = '59_C'
 # mk_plots('train', n)
 # mk_plots('val', n)
+#
+# n = '59_E'
+# mk_plots('train', n)
+# mk_plots('val', n)
+#
+# n = '59_A'
+# mk_plots('train', n)
+# mk_plots('val', n)
+
+n = '59_S'
+mk_plots('train', n)
+mk_plots('val', n)

@@ -139,10 +139,10 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
 print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
-    which_trait = 'O'  # O C E A N
+    which_trait = 'S'  # O C E A N
     train_on = 'face'
     validate_on = 'face'
-    print('trained on: %s val on: %s' % (train_on, validate_on))
+    print('trained on: %s val on: %s for trait %s' % (train_on, validate_on, which_trait))
     # test_on = 'face'
     # print('trained on: %s test on %s' % (train_on, test_on))
     # ----------------------------------------------------------------------------
