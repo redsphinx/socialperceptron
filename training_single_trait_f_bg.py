@@ -139,9 +139,9 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
 print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
-    which_trait = 'S'  # O C E A N
-    train_on = 'face'
-    validate_on = 'face'
+    which_trait = 'S'  # O C E A S
+    train_on = 'bg'
+    validate_on = 'bg'
     print('trained on: %s val on: %s for trait %s' % (train_on, validate_on, which_trait))
     # test_on = 'face'
     # print('trained on: %s test on %s' % (train_on, test_on))
@@ -177,6 +177,6 @@ for e in range(continuefrom, epochs):
 
     # save model
     if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_59_%s' % (e, which_trait))
+        name = os.path.join(P.MODELS, 'epoch_%d_60_%s' % (e, which_trait))
         chainer.serializers.save_npz(name, my_model)
 

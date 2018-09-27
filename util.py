@@ -6,6 +6,8 @@ import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import math
+from deepimpression2.savitzky_golay_filter import savitzky_golay
+from scipy.signal import savgol_filter
 
 
 def sigmoid(x):
@@ -219,6 +221,12 @@ def mk_plots(which, num):
     plt.figure()
     # cross entropy loss plot
     y = data[:, 0]
+    # smoothing
+    smooth = False
+    if smooth:
+        # y_hat = savitzky_golay(y, 31, 3)  # window size, polynomial order
+        y_hat = savgol_filter(y, 31, 3)
+        y = y_hat
     # y = data
     plt.plot(x, y, 'r')
     plt.title('%s mean absolute error loss' % which)
@@ -269,6 +277,18 @@ def mk_plots(which, num):
 # mk_plots('train', n)
 # mk_plots('val', n)
 
-n = '59_S'
-mk_plots('train', n)
-mk_plots('val', n)
+# n = '60_O'
+# # mk_plots('train', n)
+# mk_plots('val', n)
+# n = '60_C'
+# # mk_plots('train', n)
+# mk_plots('val', n)
+# n = '60_E'
+# # mk_plots('train', n)
+# mk_plots('val', n)
+# n = '60_A'
+# # mk_plots('train', n)
+# mk_plots('val', n)
+# n = '60_S'
+# # mk_plots('train', n)
+# mk_plots('val', n)
