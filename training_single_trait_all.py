@@ -1,10 +1,12 @@
 # Q: will the model be able to predict single traits at a time better than all 5 traits at the same time?
 # train models on each trait
-# only for face and bg. NOT all
+# only all, initialize network like the two freeze stream network
+
 
 import chainer
 import numpy as np
 from deepimpression2.model_59 import Deepimpression
+from deepimpression2.model_59 import LastLayers
 import deepimpression2.constants as C
 from chainer.functions import sigmoid_cross_entropy, mean_absolute_error, softmax_cross_entropy
 from chainer.optimizers import Adam
@@ -21,16 +23,25 @@ from chainer.functions import expand_dims
 from random import shuffle
 
 
-my_model = Deepimpression()
-
-load_model = True
+my_model = LastLayers()
+load_model = False
 if load_model:
-    p = os.path.join(P.MODELS, 'epoch_89_60_S')
+    p = os.path.join(P.MODELS, '')
     chainer.serializers.load_npz(p, my_model)
-    print('model loaded')
+    print('my_model loaded')
     continuefrom = 0
 else:
     continuefrom = 0
+
+bg_model = Deepimpression()
+p = os.path.join(P.MODELS, 'epoch_59_60_O')
+chainer.serializers.load_npz(p, bg_model)
+print('bg model loaded')
+
+face_model = Deepimpression()
+p = os.path.join(P.MODELS, 'epoch_39_59_O')
+chainer.serializers.load_npz(p, face_model)
+print('face model loaded')
 
 # optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.0001)
 my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
@@ -38,12 +49,14 @@ my_optimizer.setup(my_model)
 
 if C.ON_GPU:
     my_model = my_model.to_gpu(device=C.DEVICE)
+    bg_model = bg_model.to_gpu(device=C.DEVICE)
+    face_model = face_model.to_gpu(device=C.DEVICE)
 
 print('Initializing')
 print('model initialized with %d parameters' % my_model.count_params())
 
-# epochs = C.EPOCHS
-epochs = 1
+epochs = C.EPOCHS
+# epochs = 1
 
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
@@ -68,11 +81,10 @@ test_steps = len(test_labels) // C.TEST_BATCH_SIZE
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 
-def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, which_data, trait, ordered=False,
-        save_all_results=False):
+def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, trait, ordered=False,
+        save_all_results=False, twostream=False, same_frame=False):
     print('steps: ', steps)
     assert(which in ['train', 'test', 'val'])
-    assert(which_data in ['bg', 'face'])
     assert(trait in ['O', 'C', 'E', 'A', 'S'])
 
     if which == 'train':
@@ -96,12 +108,26 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         # HERE
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
-        labels, data, _ = D.load_data_single(labels_selected, which_labels, frames, which_data, resize=True,
-                                          ordered=ordered, trait=trait)
+
+        labels_bg, bg_data, frame_num = D.load_data_single(labels_selected, which_labels, frames, which_data='bg',
+                                                           resize=True, ordered=ordered, twostream=twostream,
+                                                           same_frame=same_frame, trait=trait)
+        labels_face, face_data, _ = D.load_data_single(labels_selected, which_labels, frames, which_data='face',
+                                                       resize=True, ordered=ordered, twostream=twostream,
+                                                       frame_num=frame_num, same_frame=same_frame, trait=trait)
+
+        # shuffle data and labels in same order
+        if which != 'test':
+            shuf = np.arange(which_batch_size)
+            shuffle(shuf)
+            bg_data = bg_data[shuf]
+            face_data = face_data[shuf]
+            labels_bg = labels_bg[shuf]
 
         if C.ON_GPU:
-            data = to_gpu(data, device=C.DEVICE)
-            labels = to_gpu(labels, device=C.DEVICE)
+            bg_data = to_gpu(bg_data, device=C.DEVICE)
+            face_data = to_gpu(face_data, device=C.DEVICE)
+            labels = to_gpu(labels_bg, device=C.DEVICE)
 
         with cp.cuda.Device(C.DEVICE):
             if which == 'train':
@@ -109,10 +135,14 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
             else:
                 config = False
 
+            with chainer.using_config('train', False):
+                prediction_bg, bg_activations = bg_model(bg_data)
+                prediction_face, face_activations = face_model(face_data)
+
             with chainer.using_config('train', config):
-                if which == 'train':
+                if config:
                     model.cleargrads()
-                prediction, _ = model(data)
+                prediction = model(bg_activations, face_activations)
 
                 loss = mean_absolute_error(prediction, labels)
 
@@ -139,45 +169,41 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
 print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
-    which_trait = 'S'  # O C E A S
-    train_on = 'bg'
-    validate_on = 'bg'
-    # print('trained on: %s val on: %s for trait %s' % (train_on, validate_on, which_trait))
-    test_on = 'bg'
-    print('trained on: %s test on %s for trait %s' % (train_on, test_on, which_trait))
+    which_trait = 'O'  # O C E A S
+    train_on = 'all'
+    validate_on = 'all'
+    print('trained on: %s val on: %s for trait %s' % (train_on, validate_on, which_trait))
+    test_on = 'all'
+    # print('trained on: %s test on %s for trait %s' % (train_on, test_on, which_trait))
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
-    # run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
-    #     model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
-    #     loss_saving=train_loss, which_data=train_on, trait=which_trait)
+    run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames, model=my_model,
+        optimizer=my_optimizer, pred_diff=pred_diff_train, loss_saving=train_loss, trait=which_trait, same_frame=True)
     # ----------------------------------------------------------------------------
     # validation
     # ----------------------------------------------------------------------------
-    # run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
-    #     model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
-    #     loss_saving=val_loss, which_data=validate_on, trait=which_trait)
+    run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames, model=my_model,
+        optimizer=my_optimizer, pred_diff=pred_diff_val, loss_saving=val_loss, trait=which_trait, same_frame=True)
     # ----------------------------------------------------------------------------
     # test
     # ----------------------------------------------------------------------------
-    times = 1
-    for i in range(1):
-        if times == 1:
-            ordered = True
-            save_all_results = True
-        else:
-            ordered = False
-            save_all_results = False
-
-        run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
-            model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
-            loss_saving=test_loss, which_data=test_on, ordered=ordered, save_all_results=save_all_results,
-            trait=which_trait)
-    # best val 'bg': epoch_59_60_O, epoch_79_60_C, epoch_89_60_E, epoch_89_60_A, epoch_89_60_S
-    # best val 'face' OCEAS: epoch_39_59_O, epoch_49_59_C, epoch_99_59_E, epoch_89_59_A, epoch_19_59_S
+    # times = 1
+    # for i in range(1):
+    #     if times == 1:
+    #         ordered = True
+    #         save_all_results = True
+    #     else:
+    #         ordered = False
+    #         save_all_results = False
+    #
+    #     run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
+    #         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
+    #         loss_saving=test_loss, which_data=test_on, ordered=ordered, save_all_results=save_all_results,
+    #         trait=which_trait)
+    # best val 'all':
 
     # save model
-    # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_60_%s' % (e, which_trait))
-    #     chainer.serializers.save_npz(name, my_model)
-
+    if ((e + 1) % 10) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_61_%s' % (e, which_trait))
+        chainer.serializers.save_npz(name, my_model)
