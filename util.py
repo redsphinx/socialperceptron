@@ -72,8 +72,11 @@ def record_loss_sanity(which, loss, pred_diff):
         mf.write('%s,%s\n' % (str(loss)[0:6], line))
 
 
-def record_loss_all_test(loss_tmp):
-    num = P.TEST_LOG.split('_')[-1].split('.')[0]
+def record_loss_all_test(loss_tmp, trait=False):
+    if trait:
+        num = P.TEST_LOG.split('test_')[-1].split('.')[0]
+    else:
+        num = P.TEST_LOG.split('_')[-1].split('.')[0]
     path = os.path.join(P.LOG_BASE, 'testall_%s.txt' % num)
     with open(path, 'a') as my_file:
         for i in loss_tmp:
@@ -229,7 +232,11 @@ def mk_plots(which, num):
         y = y_hat
     # y = data
     plt.plot(x, y, 'r')
-    plt.title('%s mean absolute error loss' % which)
+    trait = True
+    if trait:
+        plt.title('%s mean absolute error loss trait %s' % (which, list(num)[-1]))
+    else:
+        plt.title('%s mean absolute error loss' % which)
     plt.xlabel('epochs')
     plt.savefig('%s/%s.png' % (save_path, which))
 
@@ -278,17 +285,17 @@ def mk_plots(which, num):
 # mk_plots('val', n)
 
 # n = '60_O'
-# # mk_plots('train', n)
+# mk_plots('train', n)
 # mk_plots('val', n)
 # n = '60_C'
-# # mk_plots('train', n)
+# mk_plots('train', n)
 # mk_plots('val', n)
 # n = '60_E'
-# # mk_plots('train', n)
+# mk_plots('train', n)
 # mk_plots('val', n)
 # n = '60_A'
-# # mk_plots('train', n)
+# mk_plots('train', n)
 # mk_plots('val', n)
 # n = '60_S'
-# # mk_plots('train', n)
+# mk_plots('train', n)
 # mk_plots('val', n)

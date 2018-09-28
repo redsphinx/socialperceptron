@@ -235,7 +235,8 @@ def kruskal_wallis():
     diff_bg = path_bg_load - ref_load
     diff_face = path_face_load - ref_load
 
-    value, pvalue = stats.kruskal(diff_bg, diff_face)
+    # value, pvalue = stats.kruskal(diff_bg, diff_face)
+    value, pvalue = stats.kruskal(path_face_load, path_bg_load)
 
     print(value, pvalue)
     if pvalue > 0.05:
@@ -252,7 +253,7 @@ def kruskal_wallis():
     # Samples are likely drawn from different distributions
 
 
-# kruskal_wallis()
+kruskal_wallis()
 
 
 def kruskal_wallis_random():
