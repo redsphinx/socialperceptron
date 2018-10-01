@@ -4,7 +4,7 @@ from chainer.initializers import HeNormal, GlorotUniform, Zero, One
 from chainer.functions import relu, average_pooling_2d, max_pooling_2d, concat, tanh
 import numpy as np
 
-# model for sanity check. works with MSE and predicting 5 trait numbers
+# model for sanity check. works with MAE and predicting 5 trait numbers
 
 which_initializer = 1
 initial = None

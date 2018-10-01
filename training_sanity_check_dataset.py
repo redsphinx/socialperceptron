@@ -85,7 +85,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
           ' pred diff OCEAS: ', pred_diff_train[e],
           ' time: ', time.time() - ts)
 
-    # U.record_loss_sanity('train', loss_tmp_mean, pred_diff_train[e])
+    U.record_loss_sanity('train', loss_tmp_mean, pred_diff_train[e])
 
     # validation
     loss_tmp = []
@@ -99,18 +99,18 @@ for e in range(C.EPOCHS): # C.EPOCHS
         assert (len(val_labels_selected) == C.VAL_BATCH_SIZE)
         labels, data = D.load_data_sanity(val_labels_selected, val_labels, id_frames)
 
-        # if C.ON_GPU:
-        #     data = to_gpu(data, device=C.DEVICE)
-        #     labels = to_gpu(labels, device=C.DEVICE)
+        if C.ON_GPU:
+            data = to_gpu(data, device=C.DEVICE)
+            labels = to_gpu(labels, device=C.DEVICE)
 
         # training
         with cp.cuda.Device(C.DEVICE):
             with chainer.using_config('train', False):
-                # model.cleargrads()
-                # prediction = model(data)
+                model.cleargrads()
+                prediction = model(data)
 
-                # for train_18, guess 0.5
-                prediction = chainer.Variable(np.ones((C.VAL_BATCH_SIZE, 5), dtype=np.float32) * 0.5)
+                # # for train_18, guess 0.5
+                # prediction = chainer.Variable(np.ones((C.VAL_BATCH_SIZE, 5), dtype=np.float32) * 0.5)
 
                 loss = mean_absolute_error(prediction, labels)
 
@@ -129,7 +129,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
     U.record_loss_sanity('val', loss_tmp_mean, pred_diff_val[e])
 
     # save model
-    # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_16' % e)
-    #     chainer.serializers.save_npz(name, model)
+    if ((e + 1) % 10) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_16' % e)
+        chainer.serializers.save_npz(name, model)
 

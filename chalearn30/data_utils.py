@@ -380,9 +380,10 @@ def check_saved_faces():
             # square will spill over the height limit
 
 
-def find_best_val():
+def find_best_val(nam):
+    print(nam)
     # log14 = P.LOG_BASE + 'val_%d.txt' % (57)
-    log14 = P.LOG_BASE + 'val_%s.txt' % ('61_S')
+    log14 = P.LOG_BASE + 'val_%s.txt' % (nam)
     # log33 = P.LOG_BASE + 'val_%d.txt' % (33)
     # log34 = P.LOG_BASE + 'val_%d.txt' % (34)
 
@@ -408,7 +409,12 @@ def find_best_val():
         print('best = ', r[np.argmin(tmp_best, axis=0)])
 
 
-# find_best_val()
+# find_best_val('60_O')
+# find_best_val('60_C')
+# find_best_val('60_E')
+# find_best_val('60_A')
+# find_best_val('60_S')
+
 
 
 def load_model(model, path_to_weights, load_weights=False):

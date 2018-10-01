@@ -253,28 +253,45 @@ def kruskal_wallis():
     # Samples are likely drawn from different distributions
 
 
-kruskal_wallis()
+# kruskal_wallis()
 
 
-def kruskal_wallis_random():
+def kruskal_wallis_random(nam):
     # compare with the random baseline
     # is the difference between face-baseline and bg-baseline and all-baseline significant?
     # not cropped: 44, 45, 46
     # cropped: 47, 48, 49
     # rrnd = '/scratch/users/gabras/data/loss/testall_52.txt' # chance
-    rrnd = '/scratch/users/gabras/data/loss/testall_56.txt' # avg train
+    rrnd = '/scratch/users/gabras/data/loss/testall_62_%s.txt' % nam # avg train
 
-    _all = '/scratch/users/gabras/data/loss/testall_44.txt'
-    path_bg = '/scratch/users/gabras/data/loss/testall_45.txt'
-    path_face = '/scratch/users/gabras/data/loss/testall_46.txt'
+    _all = '/scratch/users/gabras/data/loss/testall_61_%s.txt' % nam
+    path_bg = '/scratch/users/gabras/data/loss/testall_60_%s.txt' % nam
+    path_face = '/scratch/users/gabras/data/loss/testall_59_%s.txt' % nam
 
     random_load = np.genfromtxt(rrnd, 'float')
     ref_load = np.genfromtxt(_all, 'float')
     path_bg_load = np.genfromtxt(path_bg, 'float')
     path_face_load = np.genfromtxt(path_face, 'float')
 
-    value, pvalue = stats.kruskal(random_load, path_face_load)
 
+    print('all')
+    value, pvalue = stats.kruskal(random_load, ref_load)
+    print(value, pvalue)
+    if pvalue > 0.05:
+        print('Samples are likely drawn from the same distributions')
+    else:
+        print('Samples are likely drawn from different distributions')
+
+    print('face')
+    value, pvalue = stats.kruskal(random_load, path_face_load)
+    print(value, pvalue)
+    if pvalue > 0.05:
+        print('Samples are likely drawn from the same distributions')
+    else:
+        print('Samples are likely drawn from different distributions')
+
+    print('bg')
+    value, pvalue = stats.kruskal(random_load, path_bg_load)
     print(value, pvalue)
     if pvalue > 0.05:
         print('Samples are likely drawn from the same distributions')
@@ -291,7 +308,68 @@ def kruskal_wallis_random():
     # 48: p=0.0     p=7.3931979121337195e-09
     # 49: p=0.0     p=8.683701146900212e-29
 
-# kruskal_wallis_random()
+    # single trait O, avg train
+    # all:      0.017478315712775676 *
+    # face:     0.08856113619832962
+    # bg:       0.6984833140171955
+    # single trait C, avg train
+    # all:      1.573681176472284e-05 *
+    # face:     3.9433060996943704e-07 *
+    # bg:       0.1228061601932074
+    # single trait E, avg train
+    # all:      0.008003239245212037 *
+    # face:     0.00046253241516373324 *
+    # bg:       0.5045562228670757
+    # single trait A, avg train
+    # all:      0.3951223320065298
+    # face:     0.8242363130275407
+    # bg:       0.16444856065934194
+    # single trait S, avg train
+    # all:      0.25445698364755176
+    # face:     0.01843581698280407 *
+    # bg:       0.9778875421287562
+
+
+# kruskal_wallis_random('S')
+
+
+def kruskal_wallis_random_between(nam):
+    # compare with the random baseline
+    # is the difference between face-baseline and bg-baseline and all-baseline significant?
+    # not cropped: 44, 45, 46
+    # cropped: 47, 48, 49
+    # rrnd = '/scratch/users/gabras/data/loss/testall_52.txt' # chance
+    rrnd = '/scratch/users/gabras/data/loss/testall_62_%s.txt' % nam # avg train
+
+    _all = '/scratch/users/gabras/data/loss/testall_61_%s.txt' % nam
+    path_bg = '/scratch/users/gabras/data/loss/testall_60_%s.txt' % nam
+    path_face = '/scratch/users/gabras/data/loss/testall_59_%s.txt' % nam
+
+    random_load = np.genfromtxt(rrnd, 'float')
+    ref_load = np.genfromtxt(_all, 'float')
+    path_bg_load = np.genfromtxt(path_bg, 'float')
+    path_face_load = np.genfromtxt(path_face, 'float')
+
+    diff_all = np.abs(random_load - ref_load)
+    diff_face = np.abs(random_load - path_face_load)
+
+    print('all vs face')
+    value, pvalue = stats.kruskal(diff_all, diff_face)
+    print(value, pvalue)
+    if pvalue > 0.05:
+        print('Samples are likely drawn from the same distributions')
+    else:
+        print('Samples are likely drawn from different distributions')
+
+    # O     p=0.05104840525884535
+    # C     p=9.645119500327745e-09  *
+    # E     p=2.5024293031449985e-13 *
+    # A     p=8.361516816329688e-07 *
+    # S     p=3.469432646720448e-09 *
+
+kruskal_wallis_random_between('S')
+
+
 
 
 def any_calculate_mean_var(p):

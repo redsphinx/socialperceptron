@@ -131,10 +131,10 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
           ' pred diff %s: ' % trait, pred_diff[e],
           ' time: ', time.time() - ts)
 
-    U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
+    # U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
 
     if which == 'test' and save_all_results:
-        U.record_loss_all_test(loss_tmp)
+        U.record_loss_all_test(loss_tmp, trait=True)
 
 
 print('Enter training loop with validation')

@@ -1,6 +1,6 @@
 import numpy as np
 
-DEVICE = 0
+DEVICE = 1
 ON_GPU = True
 
 # training
