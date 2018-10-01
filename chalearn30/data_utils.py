@@ -382,7 +382,7 @@ def check_saved_faces():
 
 def find_best_val():
     # log14 = P.LOG_BASE + 'val_%d.txt' % (57)
-    log14 = P.LOG_BASE + 'val_%s.txt' % ('60_S')
+    log14 = P.LOG_BASE + 'val_%s.txt' % ('61_S')
     # log33 = P.LOG_BASE + 'val_%d.txt' % (33)
     # log34 = P.LOG_BASE + 'val_%d.txt' % (34)
 
