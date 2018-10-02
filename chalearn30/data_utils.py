@@ -76,6 +76,17 @@ def only_names_check_which_not_done(which, b, e):
 # for loading data
 # -----------------------------------
 
+def get_luminance(img):
+    # Y = 0.2126 R + 0.7152 G + 0.0722 B
+    luminance = 0
+    img = np.transpose(img, (1, 2, 0))
+    for i in img.shape[0]:
+        for j in img.shape[1]:
+            luminance += sum(np.array([0.2126, 0.7152, 0.0722], dtype=img.dtype))
+
+    luminance /= (img.shape[0] * img.shape[1])
+    return luminance
+
 
 def quicker_load(k, id_frames, which_data, ordered=False):
     k = k.split('.mp4')[0]
@@ -263,14 +274,18 @@ def fill_average(image, which_data, optface, resize=False):
                 return image
 
 
-def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream=False, frame_num=None):
+def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream=False, frame_num=None,
+             use_luminance=False):
     if resize:
         if twostream:
             data = np.zeros((len(keys), 6, C2.RESIDE, C2.RESIDE), dtype=np.float32)
         else:
             data = np.zeros((len(keys), 3, C2.RESIDE, C2.RESIDE), dtype=np.float32)
     else:
-        data = np.zeros((len(keys), 3, C2.H, C2.W), dtype=np.float32)
+        if use_luminance:
+            data = np.zeros((len(keys), 1), dtype=np.float32)
+        else:
+            data = np.zeros((len(keys), 3, C2.H, C2.W), dtype=np.float32)
 
     n = None
 
@@ -303,7 +318,10 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
         for i, k in enumerate(keys):
             image, optface = quicker_load(k, id_frames, which_data, ordered)
             image = fill_average(image, which_data, optface)
-            data[i] = image
+            if use_luminance:
+                data[i] = get_luminance(image)
+            else:
+                data[i] = image
 
     return data, n
 
@@ -335,6 +353,7 @@ def load_data_single(labs_selected, labs_h5, id_frames, which_data, trait, resiz
 
     labels = np.zeros((len(labs_selected), 1), dtype=np.float32)
 
+    # shuffles if ordered=False and same_frame=False
     if not ordered and not same_frame:
         shuffle(labs_selected)
 
@@ -347,6 +366,28 @@ def load_data_single(labs_selected, labs_h5, id_frames, which_data, trait, resiz
         labels[i] = labs_h5[k][t]
 
     data, n = get_data(keys, id_frames, which_data, resize, ordered, twostream, frame_num)
+    return labels, data, n
+
+
+def load_data_luminance(labs_selected, labs_h5, id_frames, trait, ordered=False):
+    all_traits = ['O', 'C', 'E', 'A', 'S']
+    if trait is not None:
+        assert (trait in all_traits)
+
+    labels = np.zeros((len(labs_selected), 1), dtype=np.float32)
+
+    t = all_traits.index(trait)
+
+    keys = []
+    for i in range(len(labs_selected)):
+        k = labs_selected[i]
+        keys.append(k)
+        if trait is not None:
+            labels[i] = labs_h5[k][t]
+        else:
+            labels[i] = labs_h5[k][:5]
+
+    data, n = get_data(keys, id_frames, which_data='all', ordered=ordered, use_luminance=True)
     return labels, data, n
 
 

@@ -199,7 +199,8 @@ for e in range(continuefrom, epochs):
 
         run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
             model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
-            loss_saving=test_loss, ordered=ordered, save_all_results=save_results, trait=which_trait)
+            loss_saving=test_loss, ordered=ordered, save_all_results=save_results, trait=which_trait) # ordered=True so will not shuffle
+
     # best val 'all': epoch_79_61_O, epoch_89_61_C, epoch_69_61_E, epoch_29_61_A, epoch_29_61_S
 
     # best val 'bg': epoch_59_60_O, epoch_79_60_C, epoch_89_60_E, epoch_89_60_A, epoch_89_60_S
