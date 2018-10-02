@@ -56,7 +56,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
     for s in range(training_steps):  # training_steps
         train_labels_selected = _tr_labs[s*C.TRAIN_BATCH_SIZE:(s+1)*C.TRAIN_BATCH_SIZE]
         assert(len(train_labels_selected) == C.TRAIN_BATCH_SIZE)
-        labels, data = D.load_data_sanity(train_labels_selected, train_labels, id_frames)
+        labels, data = D.load_data_sanity(train_labels_selected, train_labels, id_frames, crop=True, flip=True)
 
         if C.ON_GPU:
             data = to_gpu(data, device=C.DEVICE)
@@ -76,7 +76,6 @@ for e in range(C.EPOCHS): # C.EPOCHS
         loss_tmp.append(float(loss.data))
 
         pd_tmp[s] = U.pred_diff_trait(to_cpu(prediction.data), to_cpu(labels))
-
 
     pred_diff_train[e] = np.mean(pd_tmp, axis=0)
     loss_tmp_mean = np.mean(loss_tmp, axis=0)
@@ -130,6 +129,6 @@ for e in range(C.EPOCHS): # C.EPOCHS
 
     # save model
     if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_16' % e)
+        name = os.path.join(P.MODELS, 'epoch_%d_63' % e)
         chainer.serializers.save_npz(name, model)
 

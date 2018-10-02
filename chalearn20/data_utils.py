@@ -257,13 +257,38 @@ def all_data_reading():
             #     img = mf[str(i)]
 
 
-def quicker_load(k, id_frames):
+def quicker_load(k, id_frames, crop=False, flip=False):
     k = k.split('.mp4')[0]
-    h5_path = os.path.join(P.CHALEARN_ALL_DATA_20_2, '%s.h5' % k)
+    # h5_path = os.path.join(P.CHALEARN_ALL_DATA_20_2, '%s.h5' % k)  # faces only, cropped 208x208
+    h5_path = os.path.join(P.CHALEARN30_ALL_DATA, '%s.h5' % k)  # full image shape (1, 3, 256, 456)
     v = h5.File(h5_path, 'r')
-    n = get_frame(id_frames[k][0])
-    fe = v[str(n)][:]
+    n, _ = get_frame(id_frames[k][0])
+    try:
+        fe = v[str(n)][:]  # shape=(1, c, h, w)
+    except KeyError:
+        print('KeyError: %d does not exist in %s' % (n, k))
+        real_len = len(v.keys()) - 1
+        print('total len of h5 file is %d' % (real_len))
+        n = get_frame(real_len)
+        fe = v[str(n)][:]
     v.close()
+
+    # fe.shape = (3, 208, 208)
+
+    if crop:
+        y = np.random.choice(232)  # 456 - 224
+        x = np.random.choice(32)  # 256 - 224
+        fe = fe[0, :, x:x+C2.SIZE, y:y+C2.SIZE]  # channels first
+        assert(fe.shape == (3, C2.SIZE, C2.SIZE))
+    if flip:
+        flip = bool(np.random.choice(2))
+        if flip:
+            fe = np.transpose(fe, (1, 2, 0))
+            fe = np.flip(fe, axis=1)
+            fe = np.transpose(fe, (2, 0, 1))
+
+    fe = np.expand_dims(fe, 0)
+
     return fe
 
 
@@ -291,16 +316,16 @@ def load_data(which, uid_keys_map, labs, id_frames, trait_mode='all'):
     return labels, left_data, right_data
 
 
-def get_data_sanity(keys, id_frames):
-    data = np.zeros((len(keys), 3, C2.SIDE, C2.SIDE), dtype=np.float32)
+def get_data_sanity(keys, id_frames, crop=False, flip=False):
+    data = np.zeros((len(keys), 3, C2.SIZE, C2.SIZE), dtype=np.float32)
 
     for i, k in enumerate(keys):
-        data[i] = quicker_load(k, id_frames)
+        data[i] = quicker_load(k, id_frames, crop, flip)
 
     return data
 
 
-def load_data_sanity(labs_selected, labs_h5, id_frames):
+def load_data_sanity(labs_selected, labs_h5, id_frames, crop=False, flip=False):
     # keep track of which UID seen in main file, send selected labs based on batch
     labels = np.zeros((len(labs_selected), 5), dtype=np.float32)
 
@@ -316,7 +341,7 @@ def load_data_sanity(labs_selected, labs_h5, id_frames):
         labels[i] = labs_h5[k][0:5]
 
     # get data
-    data = get_data_sanity(keys, id_frames)
+    data = get_data_sanity(keys, id_frames, crop, flip)
 
     # return labels, data
     return labels, data
