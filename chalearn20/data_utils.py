@@ -269,7 +269,7 @@ def quicker_load(k, id_frames, crop=False, flip=False):
         print('KeyError: %d does not exist in %s' % (n, k))
         real_len = len(v.keys()) - 1
         print('total len of h5 file is %d' % (real_len))
-        n = get_frame(real_len)
+        n, _ = get_frame(real_len)
         fe = v[str(n)][:]
     v.close()
 
@@ -317,7 +317,10 @@ def load_data(which, uid_keys_map, labs, id_frames, trait_mode='all'):
 
 
 def get_data_sanity(keys, id_frames, crop=False, flip=False):
-    data = np.zeros((len(keys), 3, C2.SIZE, C2.SIZE), dtype=np.float32)
+    if crop:
+        data = np.zeros((len(keys), 3, C2.SIZE, C2.SIZE), dtype=np.float32)
+    else:
+        data = np.zeros((len(keys), 3, C2.H, C2.W), dtype=np.float32)
 
     for i, k in enumerate(keys):
         data[i] = quicker_load(k, id_frames, crop, flip)
