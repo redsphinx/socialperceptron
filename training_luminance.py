@@ -76,7 +76,10 @@ def run(epoch, which, steps, which_labels, frames, model, optimizer, pred_diff, 
         which_batch_size = C.TEST_BATCH_SIZE
 
     loss_tmp = []
-    pd_tmp = np.zeros((steps, 1), dtype=float)
+    if trait is not None:
+        pd_tmp = np.zeros((steps, 1), dtype=float)
+    else:
+        pd_tmp = np.zeros((steps, 5), dtype=float)
     _labs = list(which_labels)
     if not ordered:
         shuffle(_labs)
@@ -90,7 +93,7 @@ def run(epoch, which, steps, which_labels, frames, model, optimizer, pred_diff, 
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
 
-        labels, data = D.load_data_luminance(labels_selected, which_labels, frames, trait, ordered)
+        labels, data, _ = D.load_data_luminance(labels_selected, which_labels, frames, trait, ordered)
 
         if C.ON_GPU:
             data = to_gpu(data, device=C.DEVICE)
@@ -132,7 +135,7 @@ def run(epoch, which, steps, which_labels, frames, model, optimizer, pred_diff, 
 
 print('Enter training loop with validation')
 for e in range(epochs):
-    which_trait = None  # [O C E A S]  or  None
+    which_trait = 'O'  # [O C E A S]  or  None
     if which_trait is None:
         print('trained on luminance, for all 5 traits')
     else:

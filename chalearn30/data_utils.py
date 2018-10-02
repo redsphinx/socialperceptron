@@ -78,13 +78,11 @@ def only_names_check_which_not_done(which, b, e):
 
 def get_luminance(img):
     # Y = 0.2126 R + 0.7152 G + 0.0722 B
-    luminance = 0
-    img = np.transpose(img, (1, 2, 0))
-    for i in img.shape[0]:
-        for j in img.shape[1]:
-            luminance += sum(np.array([0.2126, 0.7152, 0.0722], dtype=img.dtype))
+    img = np.transpose(img[0], (1, 2, 0))  # shape after transpose (256, 456, 3)
 
-    luminance /= (img.shape[0] * img.shape[1])
+    luminance = img * np.array([0.2126, 0.7152, 0.0722], dtype=np.float32)
+    luminance = np.sum(luminance, axis=2).mean()
+
     return luminance
 
 
@@ -373,10 +371,10 @@ def load_data_luminance(labs_selected, labs_h5, id_frames, trait, ordered=False)
     all_traits = ['O', 'C', 'E', 'A', 'S']
     if trait is not None:
         assert (trait in all_traits)
-
-    labels = np.zeros((len(labs_selected), 1), dtype=np.float32)
-
-    t = all_traits.index(trait)
+        t = all_traits.index(trait)
+        labels = np.zeros((len(labs_selected), 1), dtype=np.float32)
+    else:
+        labels = np.zeros((len(labs_selected), 5), dtype=np.float32)
 
     keys = []
     for i in range(len(labs_selected)):
