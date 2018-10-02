@@ -19,8 +19,10 @@ import deepimpression2.util as U
 all_traits = True
 
 if all_traits:
+    output = 5
     my_model = SimpleAll()
 else:
+    output = 1
     my_model = SimpleOne()
 
 load_model = False
@@ -46,13 +48,13 @@ val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
 test_labels = h5.File(P.CHALEARN_TEST_LABELS_20, 'r')
 
 train_loss = []
-pred_diff_train = np.zeros((epochs, 1), float)
+pred_diff_train = np.zeros((epochs, output), float)
 
 val_loss = []
-pred_diff_val = np.zeros((epochs, 1), float)
+pred_diff_val = np.zeros((epochs, output), float)
 
 test_loss = []
-pred_diff_test = np.zeros((epochs, 1), float)
+pred_diff_test = np.zeros((epochs, output), float)
 
 training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
 val_steps = len(val_labels) // C.VAL_BATCH_SIZE
@@ -135,7 +137,10 @@ def run(epoch, which, steps, which_labels, frames, model, optimizer, pred_diff, 
 
 print('Enter training loop with validation')
 for e in range(epochs):
-    which_trait = 'O'  # [O C E A S]  or  None
+    if all_traits:
+        which_trait = None
+    else:
+        which_trait = 'O'  # [O C E A S]  or  None
     if which_trait is None:
         print('trained on luminance, for all 5 traits')
     else:

@@ -200,7 +200,7 @@ def make_confusion_matrix(prediction, labels, trait_mode='all', xe='sigmoid'):
         return [tl, fl, tr, fr]
 
 
-def mk_plots(which, num):
+def mk_plots(which, num, trait=False):
     assert(which in ['train', 'val', 'test'])
 
     if which == 'train':
@@ -232,7 +232,6 @@ def mk_plots(which, num):
         y = y_hat
     # y = data
     plt.plot(x, y, 'r')
-    trait = True
     if trait:
         plt.title('%s mean absolute error loss trait %s' % (which, list(num)[-1]))
     else:
@@ -263,10 +262,10 @@ def mk_plots(which, num):
     #
     #     plt.savefig('%s/cm_%s_%s.png' % (save_path, traits[i], which))
 
-#
-# n = '32'
-# mk_plots('train', n)
-# mk_plots('val', n)
+
+n = '63'
+mk_plots('train', n)
+mk_plots('val', n)
 #
 # n = '33'
 # mk_plots('train', n)

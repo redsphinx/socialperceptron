@@ -103,7 +103,7 @@ def quicker_load(k, id_frames, which_data, ordered=False):
         print('KeyError: %d does not exist in %s' % (n, k))
         real_len = len(v.keys()) - 1
         print('total len of h5 file is %d' % (real_len))
-        n = D.get_frame(real_len)
+        n, _ = D.get_frame(real_len)
         fe = v[str(n)][:]
 
     if which_data in ['face', 'bg']:
@@ -367,7 +367,7 @@ def load_data_single(labs_selected, labs_h5, id_frames, which_data, trait, resiz
     return labels, data, n
 
 
-def load_data_luminance(labs_selected, labs_h5, id_frames, trait, ordered=False):
+def load_data_luminance(labs_selected, labs_h5, id_frames, trait=None, ordered=False):
     all_traits = ['O', 'C', 'E', 'A', 'S']
     if trait is not None:
         assert (trait in all_traits)

@@ -90,7 +90,7 @@ for e in range(C.EPOCHS): # C.EPOCHS
     loss_tmp = []
     pd_tmp = np.zeros((val_steps, 5), dtype=float)
     _v_labs = list(val_labels)
-    shuffle(_v_labs)
+    # shuffle(_v_labs)
 
     ts = time.time()
     for vs in range(val_steps):  # val_steps
