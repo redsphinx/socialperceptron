@@ -263,7 +263,7 @@ def mk_plots(which, num, trait=False):
     #     plt.savefig('%s/cm_%s_%s.png' % (save_path, traits[i], which))
 
 
-n = '63'
+n = '64'
 mk_plots('train', n)
 mk_plots('val', n)
 #

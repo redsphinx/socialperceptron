@@ -262,41 +262,44 @@ def kruskal_wallis_random(nam):
     # not cropped: 44, 45, 46
     # cropped: 47, 48, 49
     # rrnd = '/scratch/users/gabras/data/loss/testall_52.txt' # chance
-    rrnd = '/scratch/users/gabras/data/loss/testall_62_%s.txt' % nam # avg train
+    rrnd_1 = '/scratch/users/gabras/data/loss/testall_62_%s.txt' % nam # avg train
+    rrnd_2 = '/scratch/users/gabras/data/loss/testall_66_%s.txt' % nam  # luminance lin reg
 
-    _all = '/scratch/users/gabras/data/loss/testall_61_%s.txt' % nam
-    path_bg = '/scratch/users/gabras/data/loss/testall_60_%s.txt' % nam
-    path_face = '/scratch/users/gabras/data/loss/testall_59_%s.txt' % nam
+    # _all = '/scratch/users/gabras/data/loss/testall_61_%s.txt' % nam
+    # path_bg = '/scratch/users/gabras/data/loss/testall_60_%s.txt' % nam
+    # path_face = '/scratch/users/gabras/data/loss/testall_59_%s.txt' % nam
 
-    random_load = np.genfromtxt(rrnd, 'float')
-    ref_load = np.genfromtxt(_all, 'float')
-    path_bg_load = np.genfromtxt(path_bg, 'float')
-    path_face_load = np.genfromtxt(path_face, 'float')
+    random_load_1 = np.genfromtxt(rrnd_1, 'float')
+    random_load_2 = np.genfromtxt(rrnd_2, 'float')
+
+    # ref_load = np.genfromtxt(_all, 'float')
+    # path_bg_load = np.genfromtxt(path_bg, 'float')
+    # path_face_load = np.genfromtxt(path_face, 'float')
 
 
     print('all')
-    value, pvalue = stats.kruskal(random_load, ref_load)
+    value, pvalue = stats.kruskal(random_load_1, random_load_2)
     print(value, pvalue)
     if pvalue > 0.05:
         print('Samples are likely drawn from the same distributions')
     else:
         print('Samples are likely drawn from different distributions')
 
-    print('face')
-    value, pvalue = stats.kruskal(random_load, path_face_load)
-    print(value, pvalue)
-    if pvalue > 0.05:
-        print('Samples are likely drawn from the same distributions')
-    else:
-        print('Samples are likely drawn from different distributions')
-
-    print('bg')
-    value, pvalue = stats.kruskal(random_load, path_bg_load)
-    print(value, pvalue)
-    if pvalue > 0.05:
-        print('Samples are likely drawn from the same distributions')
-    else:
-        print('Samples are likely drawn from different distributions')
+    # print('face')
+    # value, pvalue = stats.kruskal(random_load, path_face_load)
+    # print(value, pvalue)
+    # if pvalue > 0.05:
+    #     print('Samples are likely drawn from the same distributions')
+    # else:
+    #     print('Samples are likely drawn from different distributions')
+    #
+    # print('bg')
+    # value, pvalue = stats.kruskal(random_load, path_bg_load)
+    # print(value, pvalue)
+    # if pvalue > 0.05:
+    #     print('Samples are likely drawn from the same distributions')
+    # else:
+    #     print('Samples are likely drawn from different distributions')
 
     # not cropped, chance, avg train
     # 44: p=0.0 p=0.0157
@@ -308,33 +311,38 @@ def kruskal_wallis_random(nam):
     # 48: p=0.0     p=7.3931979121337195e-09
     # 49: p=0.0     p=8.683701146900212e-29
 
-    # single trait O, avg train
-    # all:      0.017478315712775676 *
-    # face:     0.08856113619832962
-    # bg:       0.6984833140171955
-    # single trait C, avg train
-    # all:      1.573681176472284e-05 *
-    # face:     3.9433060996943704e-07 *
-    # bg:       0.1228061601932074
-    # single trait E, avg train
-    # all:      0.008003239245212037 *
-    # face:     0.00046253241516373324 *
-    # bg:       0.5045562228670757
-    # single trait A, avg train
-    # all:      0.3951223320065298
-    # face:     0.8242363130275407
-    # bg:       0.16444856065934194
-    # single trait S, avg train
-    # all:      0.25445698364755176
-    # face:     0.01843581698280407 *
-    # bg:       0.9778875421287562
+    # single trait O, avg train ,           luminance
+    # all:      0.017478315712775676 *      0.010746198174232571 *
+    # face:     0.08856113619832962         0.05553303271880753
+    # bg:       0.6984833140171955          0.8276628401245589
+    # single trait C, avg train             luminance
+    # all:      1.573681176472284e-05 *     6.53049634166552e-05 *
+    # face:     3.9433060996943704e-07 *    1.998446861864009e-06 *
+    # bg:       0.1228061601932074          0.22193827145310174
+    # single trait E, avg train             luminance
+    # all:      0.008003239245212037 *      0.008979161480908769 *
+    # face:     0.00046253241516373324 *    0.0006126204063795387 *
+    # bg:       0.5045562228670757          0.47560576204659044
+    # single trait A, avg train             luminance
+    # all:      0.3951223320065298          0.33208466461332287
+    # face:     0.8242363130275407          0.9737319508804226
+    # bg:       0.16444856065934194         0.22164797127834848
+    # single trait S, avg train             luminance
+    # all:      0.25445698364755176         0.25237743609781205
+    # face:     0.01843581698280407 *       0.016037983837817144 *
+    # bg:       0.9778875421287562          0.9803934968622353
 
+    # linreg and avg train are not significantly different from each other
 
-# kruskal_wallis_random('S')
+kruskal_wallis_random('O')
+kruskal_wallis_random('C')
+kruskal_wallis_random('E')
+kruskal_wallis_random('A')
+kruskal_wallis_random('S')
 
 
 def kruskal_wallis_random_between(nam):
-    # compare with the random baseline
+    # compare face vs all
     # is the difference between face-baseline and bg-baseline and all-baseline significant?
     # not cropped: 44, 45, 46
     # cropped: 47, 48, 49
@@ -367,7 +375,7 @@ def kruskal_wallis_random_between(nam):
     # A     p=8.361516816329688e-07 *
     # S     p=3.469432646720448e-09 *
 
-kruskal_wallis_random_between('S')
+# kruskal_wallis_random_between('S')
 
 
 
