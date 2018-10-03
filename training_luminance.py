@@ -25,9 +25,9 @@ else:
     output = 1
     my_model = SimpleOne()
 
-load_model = False
+load_model = True
 if load_model:
-    p = os.path.join(P.MODELS, '')
+    p = os.path.join(P.MODELS, 'epoch_99_64')
     chainer.serializers.load_npz(p, my_model)
     print('model loaded')
 
@@ -40,8 +40,8 @@ if C.ON_GPU:
 print('Initializing')
 print('model initialized with %d parameters' % my_model.count_params())
 
-epochs = C.EPOCHS
-# epochs = 1
+# epochs = C.EPOCHS
+epochs = 1
 
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
@@ -149,37 +149,37 @@ for e in range(epochs):
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
-    run(epoch=e, which='train', steps=training_steps, which_labels=train_labels, frames=id_frames, model=my_model,
-        optimizer=my_optimizer, pred_diff=pred_diff_train, loss_saving=train_loss, trait=which_trait)
+    # run(epoch=e, which='train', steps=training_steps, which_labels=train_labels, frames=id_frames, model=my_model,
+    #     optimizer=my_optimizer, pred_diff=pred_diff_train, loss_saving=train_loss, trait=which_trait)
     # ----------------------------------------------------------------------------
     # validation
     # ----------------------------------------------------------------------------
-    run(epoch=e, which='val', steps=val_steps, which_labels=val_labels, frames=id_frames, model=my_model,
-        optimizer=my_optimizer, pred_diff=pred_diff_val, loss_saving=val_loss, trait=which_trait)
+    # run(epoch=e, which='val', steps=val_steps, which_labels=val_labels, frames=id_frames, model=my_model,
+    #     optimizer=my_optimizer, pred_diff=pred_diff_val, loss_saving=val_loss, trait=which_trait)
     # ----------------------------------------------------------------------------
     # test
     # ----------------------------------------------------------------------------
-    # times = 1
-    # for i in range(1):
-    #     if times == 1:
-    #         ordered = True
-    #         save_results = True
-    #     else:
-    #         ordered = False
-    #         save_results = False
-    #
-    #     run(epoch=e, which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
-    #         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
-    #         loss_saving=test_loss, ordered=ordered, save_all_results=save_results, trait=which_trait)
+    times = 1
+    for i in range(1):
+        if times == 1:
+            ordered = True
+            save_results = True
+        else:
+            ordered = False
+            save_results = False
+
+        run(epoch=e, which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
+            model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
+            loss_saving=test_loss, ordered=ordered, save_all_results=save_results, trait=which_trait)
         # ordered=True so will not shuffle
 
-    # best val 5 traits:
+    # best val 5 traits: epoch_99_64
     # best val single traits OCEAS:
 
     # save model
-    if ((e + 1) % 10) == 0:
-        if which_trait is None:
-            name = os.path.join(P.MODELS, 'epoch_%d_64' % (e))
-        else:
-            name = os.path.join(P.MODELS, 'epoch_%d_64_%s' % (e, which_trait))
-        chainer.serializers.save_npz(name, my_model)
+    # if ((e + 1) % 10) == 0:
+    #     if which_trait is None:
+    #         name = os.path.join(P.MODELS, 'epoch_%d_64' % (e))
+    #     else:
+    #         name = os.path.join(P.MODELS, 'epoch_%d_64_%s' % (e, which_trait))
+    #     chainer.serializers.save_npz(name, my_model)

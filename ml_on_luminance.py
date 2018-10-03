@@ -1,20 +1,12 @@
-import numpy as np
 from sklearn.linear_model import LinearRegression
-import chainer
-from chainer.optimizers import Adam
-from chainer.functions import mean_absolute_error
 import numpy as np
-from deepimpression2.model_64 import SimpleAll, SimpleOne
 import deepimpression2.paths as P
 import os
-import deepimpression2.constants as C
 import h5py as h5
-from random import shuffle
-from time import time
 import deepimpression2.chalearn30.data_utils as D
-from chainer.backends.cuda import to_gpu, to_cpu
-import cupy as cp
-import deepimpression2.util as U
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
 
 
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
@@ -69,21 +61,45 @@ def linear_regression_single():
                 line = '%s\n' % str(loss[i])[0:6]
                 mf.write(line)
 
+    # for trait: O
+    # reg score:  0.009427910109708337
+    # loss:  0.118614726
+    # for trait: C
+    # reg score:  0.019465699450429197
+    # loss:  0.12812673
+    # for trait: E
+    # reg score:  0.014062835218046077
+    # loss:  0.12711206
+    # for trait: A
+    # reg score:  0.005144573433965238
+    # loss:  0.108449906
+    # for trait: S
+    # reg score:  0.009835833135908079
+    # loss:  0.12744974
+
+
 # linear_regression_single()
 
 
-# for trait: O
-# reg score:  0.009427910109708337
-# loss:  0.118614726
-# for trait: C
-# reg score:  0.019465699450429197
-# loss:  0.12812673
-# for trait: E
-# reg score:  0.014062835218046077
-# loss:  0.12711206
-# for trait: A
-# reg score:  0.005144573433965238
-# loss:  0.108449906
-# for trait: S
-# reg score:  0.009835833135908079
-# loss:  0.12744974
+def make_trait_lum_plot(num='68'):
+    labels_test, data_test, _ = D.load_data_luminance(list(test_labels), test_labels, id_frames, ordered=True)
+    print('data loaded')
+
+    traits = ['O', 'C', 'E', 'A', 'S']
+    for i, t in enumerate(traits):
+        labels = labels_test[:, i]
+        plt.figure()
+        x = data_test
+        y = labels
+        plt.scatter(x, y, s=1, alpha=0.8)
+        plt.title('trait %s as a function of frame luminance' % t)
+        plt.xlabel('frame luminance ')
+        plt.ylabel('trait intensity')
+
+        save_path = os.path.join(P.FIGURES, 'train_%s' % num)
+        if not os.path.exists(save_path):
+            os.mkdir(save_path)
+        plt.savefig('%s/luminance_%s.png' % (save_path, t))
+
+
+# make_trait_lum_plot()
