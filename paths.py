@@ -60,7 +60,7 @@ LOG_BASE = '/scratch/users/gabras/data/loss/'
 TRAIN_LOG = '/scratch/users/gabras/data/loss/train_64.txt'
 VAL_LOG = '/scratch/users/gabras/data/loss/val_64.txt'
 ##
-TEST_LOG = '/scratch/users/gabras/data/loss/test_67.txt'
+TEST_LOG = '/scratch/users/gabras/data/loss/test_71.txt'
 
 # -------------------------------------------------------------------------------------------------
 # models
@@ -69,6 +69,7 @@ MODELS = '/scratch/users/gabras/data/models'
 # -------------------------------------------------------------------------------------------------
 # figures
 FIGURES = '/home/gabras/deployed/deepimpression2/figures'
+PAPER_PLOTS = '/home/gabras/deployed/deepimpression2/paper_plots'
 
 # -------------------------------------------------------------------------------------------------
 # original dataset

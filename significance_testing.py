@@ -334,11 +334,11 @@ def kruskal_wallis_random(nam):
 
     # linreg and avg train are not significantly different from each other
 
-kruskal_wallis_random('O')
-kruskal_wallis_random('C')
-kruskal_wallis_random('E')
-kruskal_wallis_random('A')
-kruskal_wallis_random('S')
+# kruskal_wallis_random('O')
+# kruskal_wallis_random('C')
+# kruskal_wallis_random('E')
+# kruskal_wallis_random('A')
+# kruskal_wallis_random('S')
 
 
 def kruskal_wallis_random_between(nam):
@@ -378,8 +378,6 @@ def kruskal_wallis_random_between(nam):
 # kruskal_wallis_random_between('S')
 
 
-
-
 def any_calculate_mean_var(p):
     load = np.genfromtxt(p, 'float')
     mean = np.mean(load)
@@ -389,3 +387,77 @@ def any_calculate_mean_var(p):
 
 # p = '/scratch/users/gabras/data/loss/testall_52.txt'
 # any_calculate_mean_var(p)
+
+
+def nice_print(p):
+    if p > 0.05:
+        print('Samples are likely drawn from the same distributions')
+    else:
+        print('Samples are likely drawn from different distributions')
+
+
+def kruskal_wallis_mae_5_traits(t):
+    targets = ['uniform', 'avg_train', 'luminance']
+    assert(t in targets)
+
+    face_data = os.path.join(P.LOG_BASE, 'testall_69.txt')  # epoch_29_34, file: testall_69.txt
+    bg_data = os.path.join(P.LOG_BASE, 'testall_70.txt')  # epoch_89_33, file: testall_70.txt
+    all_data = os.path.join(P.LOG_BASE, 'testall_58.txt')  # epoch_9_57, file: testall_58.txt
+    uniform_data = os.path.join(P.LOG_BASE, 'testall_52.txt')  # train_52, file: testall_52.txt
+    avg_train_data = os.path.join(P.LOG_BASE, 'testall_56.txt')  # train_56, testall_56.txt
+    linreg_luminance_data = os.path.join(P.LOG_BASE, 'testall_65.txt')  # train_65, file: testall_65.txt
+
+    face_load = np.genfromtxt(face_data, 'float')
+    bg_load = np.genfromtxt(bg_data, 'float')
+    all_load = np.genfromtxt(all_data, 'float')
+    uniform_load = np.genfromtxt(uniform_data, 'float')
+    avg_train_load = np.genfromtxt(avg_train_data, 'float')
+    lum_load = np.genfromtxt(linreg_luminance_data, 'float')
+
+    target_names = [uniform_load, avg_train_load, lum_load]
+
+    which = ['face', 'bg', 'all']
+    var_names = [face_load, bg_load, all_load]
+
+    target = target_names[targets.index(t)]
+
+    # significantly different from avg. train?
+    print('--- significance testing for %s\n' % t)
+    for i, w in enumerate(which):
+        value, pvalue = stats.kruskal(var_names[i], target)
+        print('%s: p=%f' % (w, pvalue))
+        nice_print(pvalue)
+        print('--------------\n')
+    # --- significance testing for avg_train
+    # face: p=0.012610
+    # Samples are likely drawn from different distributions
+    # --------------
+    # bg: p=0.000594
+    # Samples are likely drawn from different distributions
+    # --------------
+    # all: p=0.661576
+    # Samples are likely drawn from the same distributions
+    # --------------
+    # --- significance testing for uniform
+    # face: p=0.000000
+    # Samples are likely drawn from different distributions
+    # --------------
+    # bg: p=0.000000
+    # Samples are likely drawn from different distributions
+    # --------------
+    # all: p=0.000000
+    # Samples are likely drawn from different distributions
+    # --------------
+    # --- significance testing for luminance
+    # face: p=0.016299
+    # Samples are likely drawn from different distributions
+    # --------------
+    # bg: p=0.000391
+    # Samples are likely drawn from different distributions
+    # --------------
+    # all: p=0.737995
+    # Samples are likely drawn from the same distributions
+    # --------------
+
+
+# kruskal_wallis_mae_5_traits('luminance')
