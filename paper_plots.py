@@ -107,34 +107,35 @@ def basic_mae_single_traits():
     # plt.figure()
     fig, ax = plt.subplots()
     x_pos = np.arange(len(traits))
-    w = 0.25
-    bar_face = ax.bar(x_pos+2*w, f, w)
+    w = 0.19
+    bar_face = ax.bar(x_pos+w, f, w)
     bar_bg = ax.bar(x_pos+2*w, b, w)
-    bar_all = ax.bar(x_pos+2*w, a, w)
-    bar_at = ax.bar(x_pos+2*w, at, w)
-    ax.set_xticks(x_pos + 2*w / 2)
+    bar_all = ax.bar(x_pos+3*w, a, w)
+    bar_at = ax.bar(x_pos+4*w, at, w)
+    ax.set_xticks(x_pos + 2.5*w)
     ax.set_xticklabels(('O', 'C', 'E', 'A', 'S'))
     # ax.autoscale_view()
 
     # plt.xticks(x_pos, traits)
     # plt.ylabel('mean absolute error')
-    plt.ylim((0.10, 0.135))
-    # plt.title('MAE averaged over all traits')
+    plt.ylabel('mean absolute error')
+    plt.ylim((0.10, 0.1325))
+    plt.title('MAE individual traits')
     # plt.subplots_adjust(bottom=0.2)
 
-    # all_bars = [baro, barc, bare, bara, bars]
+    all_bars = [bar_face, bar_bg, bar_all, bar_at]
 
-    # for barp in all_bars:
-    #     for i, rect in enumerate(barp):
-    #         if i in [0, 1]:
-    #             star = '*'
-    #         else:
-    #             star = ''
-    #         height = rect.get_height()
-    #         plt.text(rect.get_x() + rect.get_width() / 2.0,
-    #                  height,
-    #                  '%s%s' % (str(values[i]), star),
-    #                  ha='center', va='bottom')
+    for barp in all_bars:
+        for i, rect in enumerate(barp):
+            if i in [0, 1]:
+                star = '*'
+            else:
+                star = ''
+            height = rect.get_height()
+            plt.text(rect.get_x() + rect.get_width() / 2.0,
+                     height,
+                     '%s%s' % (str(f[i]), star),
+                     ha='center', va='bottom')
 
     plt.savefig('%s/%s.png' % (save_path, 'plt_mae_single_traits_basic'))
 

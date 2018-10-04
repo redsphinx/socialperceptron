@@ -224,7 +224,8 @@ def kolmogorov_smirnov():
 
 
 def kruskal_wallis():
-    _all = '/scratch/users/gabras/data/loss/testall_47.txt'
+    _all = '/scratch/users/gabras/data/loss/testall_59_O.txt'
+    rnd = '/scratch/users/gabras/data/loss/testall_62_O.txt'
     path_bg = '/scratch/users/gabras/data/loss/testall_48.txt'
     path_face = '/scratch/users/gabras/data/loss/testall_49.txt'
 
