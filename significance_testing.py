@@ -462,3 +462,57 @@ def kruskal_wallis_mae_5_traits(t):
 
 
 # kruskal_wallis_mae_5_traits('luminance')
+
+
+def significance_test_log(t):
+    # TODO
+    targets = ['uniform', 'avg_train', 'luminance']
+    assert (t in targets)
+
+    face_data = os.path.join(P.LOG_BASE, 'testall_69.txt')  # epoch_29_34, file: testall_69.txt
+    bg_data = os.path.join(P.LOG_BASE, 'testall_70.txt')  # epoch_89_33, file: testall_70.txt
+    all_data = os.path.join(P.LOG_BASE, 'testall_58.txt')  # epoch_9_57, file: testall_58.txt
+    uniform_data = os.path.join(P.LOG_BASE, 'testall_52.txt')  # train_52, file: testall_52.txt
+    avg_train_data = os.path.join(P.LOG_BASE, 'testall_56.txt')  # train_56, testall_56.txt
+    linreg_luminance_data = os.path.join(P.LOG_BASE, 'testall_65.txt')  # train_65, file: testall_65.txt
+
+    face_load = np.genfromtxt(face_data, 'float')
+    bg_load = np.genfromtxt(bg_data, 'float')
+    all_load = np.genfromtxt(all_data, 'float')
+    uniform_load = np.genfromtxt(uniform_data, 'float')
+    avg_train_load = np.genfromtxt(avg_train_data, 'float')
+    lum_load = np.genfromtxt(linreg_luminance_data, 'float')
+
+    target_names = [uniform_load, avg_train_load, lum_load]
+
+    which = ['face', 'bg', 'all']
+    var_names = [face_load, bg_load, all_load]
+
+    target = target_names[targets.index(t)]
+
+    # significantly different from avg. train?
+    print('--- significance testing for %s\n' % t)
+    for i, w in enumerate(which):
+        value, pvalue = stats.kruskal(var_names[i], target)
+        print('%s: p=%f' % (w, pvalue))
+        nice_print(pvalue)
+        print('--------------\n')
+
+    # -----------------------------------------------------------
+    _all = '/scratch/users/gabras/data/loss/testall_44.txt'
+    path_bg = '/scratch/users/gabras/data/loss/testall_45.txt'
+    path_face = '/scratch/users/gabras/data/loss/testall_46.txt'
+
+    ref_load = np.genfromtxt(_all, 'float')
+    path_bg_load = np.genfromtxt(path_bg, 'float')
+    path_face_load = np.genfromtxt(path_face, 'float')
+
+    diff_bg = normalize_data(path_bg_load - ref_load)
+    diff_face = normalize_data(path_face_load - ref_load)
+
+    value, pvalue = stats.ttest_ind(diff_bg, diff_face, equal_var=False)
+    print(value, pvalue)
+    if pvalue > 0.05:
+        print('Samples are likely drawn from the same distributions (fail to reject H0)')
+    else:
+        print('Samples are likely drawn from different distributions (reject H0)')
