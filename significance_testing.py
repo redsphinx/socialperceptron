@@ -423,12 +423,12 @@ def kruskal_wallis_mae_5_traits(t):
     target = target_names[targets.index(t)]
 
     # significantly different from avg. train?
-    print('--- significance testing for %s\n' % t)
-    for i, w in enumerate(which):
-        value, pvalue = stats.kruskal(var_names[i], target)
-        print('%s: p=%f' % (w, pvalue))
-        nice_print(pvalue)
-        print('--------------\n')
+    # print('--- significance testing for %s\n' % t)
+    # for i, w in enumerate(which):
+    #     value, pvalue = stats.kruskal(var_names[i], target)
+    #     print('%s: p=%f' % (w, pvalue))
+    #     nice_print(pvalue)
+    #     print('--------------\n')
     # --- significance testing for avg_train
     # face: p=0.012610
     # Samples are likely drawn from different distributions
@@ -458,6 +458,15 @@ def kruskal_wallis_mae_5_traits(t):
     # --------------
     # all: p=0.737995
     # Samples are likely drawn from the same distributions
+    # --------------
+
+    # significantly difference between face and all?
+    value, pvalue = stats.kruskal(face_load, all_load)
+    print('face vs. all: p=%f' % (pvalue))
+    nice_print(pvalue)
+    print('--------------\n')
+    # face vs. all: p=0.033373
+    # Samples are likely drawn from different distributions
     # --------------
 
 
