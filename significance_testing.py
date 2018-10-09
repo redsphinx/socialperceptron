@@ -464,55 +464,92 @@ def kruskal_wallis_mae_5_traits(t):
 # kruskal_wallis_mae_5_traits('luminance')
 
 
-def significance_test_log(t):
-    # TODO
+def effect_size():
+    # histogram face, bg, all, avg train
+    # get data
     targets = ['uniform', 'avg_train', 'luminance']
-    assert (t in targets)
 
     face_data = os.path.join(P.LOG_BASE, 'testall_69.txt')  # epoch_29_34, file: testall_69.txt
     bg_data = os.path.join(P.LOG_BASE, 'testall_70.txt')  # epoch_89_33, file: testall_70.txt
     all_data = os.path.join(P.LOG_BASE, 'testall_58.txt')  # epoch_9_57, file: testall_58.txt
-    uniform_data = os.path.join(P.LOG_BASE, 'testall_52.txt')  # train_52, file: testall_52.txt
+    # uniform_data = os.path.join(P.LOG_BASE, 'testall_52.txt')  # train_52, file: testall_52.txt
     avg_train_data = os.path.join(P.LOG_BASE, 'testall_56.txt')  # train_56, testall_56.txt
-    linreg_luminance_data = os.path.join(P.LOG_BASE, 'testall_65.txt')  # train_65, file: testall_65.txt
+    # linreg_luminance_data = os.path.join(P.LOG_BASE, 'testall_65.txt')  # train_65, file: testall_65.txt
 
     face_load = np.genfromtxt(face_data, 'float')
     bg_load = np.genfromtxt(bg_data, 'float')
     all_load = np.genfromtxt(all_data, 'float')
-    uniform_load = np.genfromtxt(uniform_data, 'float')
+    # uniform_load = np.genfromtxt(uniform_data, 'float')
     avg_train_load = np.genfromtxt(avg_train_data, 'float')
-    lum_load = np.genfromtxt(linreg_luminance_data, 'float')
+    # lum_load = np.genfromtxt(linreg_luminance_data, 'float')
+    log_all_data = [np.log(face_load), np.log(bg_load), np.log(all_load), np.log(avg_train_load)]
+    all_data = [face_load, bg_load, all_load, avg_train_load]
+    lab = ['face', 'bg', 'all', 'avg train']
 
-    target_names = [uniform_load, avg_train_load, lum_load]
+    # function to calculate Cohen's d for independent samples
+    def cohend(d1, d2):
+        d1 = np.log(d1)
+        d2 = np.log(d2)
+        # calculate the size of samples
+        n1, n2 = len(d1), len(d2)
+        # calculate the variance of the samples
+        s1, s2 = np.var(d1, ddof=1), np.var(d2, ddof=1)
+        # calculate the pooled standard deviation
+        s = np.sqrt(((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2))
+        # calculate the means of the samples
+        u1, u2 = np.mean(d1), np.mean(d2)
+        # calculate the effect size
+        return (u1 - u2) / s
 
-    which = ['face', 'bg', 'all']
-    var_names = [face_load, bg_load, all_load]
+    # --calculate cohen's D
+    # t = avg_train_load
+    # print('cohen D with avg train')
+    # print('face: ', cohend(face_load, t))
+    # print('bg: ', cohend(bg_load, t))
+    # print('all: ', cohend(all_load, t))
+    # results:
+    # face:  -0.09560733773340063
+    # bg:  0.07747790398956284
+    # all:  -0.04794049775976141
 
-    target = target_names[targets.index(t)]
+    # --calculate pearson's R
+    t = avg_train_load
+    print('face: ', stats.pearsonr(face_load, t)[0])
+    print('bg: ', stats.pearsonr(bg_load, t)[0])
+    print('all: ', stats.pearsonr(all_load, t)[0])
+    # face:  0.682139266276358
+    # bg:  0.8078117963181793
+    # all:  0.7949263619325648
+    # 0.0: No relationship.
+    # 0.3: Weak positive relationship
+    # 0.5: Moderate positive relationship
+    # 0.7: Strong positive relationship
+    # 1.0: Perfect positive relationship.
 
-    # significantly different from avg. train?
-    print('--- significance testing for %s\n' % t)
-    for i, w in enumerate(which):
-        value, pvalue = stats.kruskal(var_names[i], target)
-        print('%s: p=%f' % (w, pvalue))
-        nice_print(pvalue)
-        print('--------------\n')
+    # --plot histogram errors
+    # for i, d in enumerate(all_data):
+        # --test for normality
+        # print(lab[i])
+        # k2, p = stats.normaltest(d)
+        # print('%d p=%f' % (i, p))
+        # if p < 0.05:  # null hypothesis: x comes from a normal distribution
+        #     print('diff does not come from a normal distribution')
+        # else:
+        #     print('maybe?')
+        # face, p=0.235070, maybe?
+        # bg, p=0.006379, not normal
+        # all, p=0.547443, maybe?
+        # avg train, p=0.196442, maybe?
 
-    # -----------------------------------------------------------
-    _all = '/scratch/users/gabras/data/loss/testall_44.txt'
-    path_bg = '/scratch/users/gabras/data/loss/testall_45.txt'
-    path_face = '/scratch/users/gabras/data/loss/testall_46.txt'
+        # --plot
+        # plt.figure()
+        # n, bins, patches = plt.hist(d, 50, density=True, facecolor='g', alpha=0.75)
+        # plt.grid(True)
+        # plt.title('histogram error %s' % lab[i])
+        # save_path = os.path.join(P.PAPER_PLOTS, 'train_72')
+        # if not os.path.exists(save_path):
+        #     os.mkdir(save_path)
+        # plt.savefig('%s/log_hist_error_%s.png' % (save_path, lab[i]))
 
-    ref_load = np.genfromtxt(_all, 'float')
-    path_bg_load = np.genfromtxt(path_bg, 'float')
-    path_face_load = np.genfromtxt(path_face, 'float')
 
-    diff_bg = normalize_data(path_bg_load - ref_load)
-    diff_face = normalize_data(path_face_load - ref_load)
-
-    value, pvalue = stats.ttest_ind(diff_bg, diff_face, equal_var=False)
-    print(value, pvalue)
-    if pvalue > 0.05:
-        print('Samples are likely drawn from the same distributions (fail to reject H0)')
-    else:
-        print('Samples are likely drawn from different distributions (reject H0)')
+# effect_size()
