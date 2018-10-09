@@ -16,11 +16,11 @@ id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 
 def linear_regression_all():
-    labels, data, _ = D.load_data_luminance(list(train_labels), train_labels, id_frames)
+    labels, data, _ = D.load_data_special(list(train_labels), train_labels, id_frames)
     reg = LinearRegression().fit(data, labels)
     reg.score(data, labels)
     print('reg score: ', reg.score(data, labels))  # 0.011438774006662768, 0.01160391566097031, 0.011790330654130819
-    labels, data, _ = D.load_data_luminance(list(test_labels), test_labels, id_frames, ordered=True)
+    labels, data, _ = D.load_data_special(list(test_labels), test_labels, id_frames, ordered=True, use_luminance=True)
     prediction = reg.predict(data)
     loss = np.abs(prediction - labels)
     loss = np.mean(loss, axis=1)
@@ -39,8 +39,9 @@ def linear_regression_all():
 
 
 def linear_regression_single():
-    labels, data, _ = D.load_data_luminance(list(train_labels), train_labels, id_frames)
-    labels_test, data_test, _ = D.load_data_luminance(list(test_labels), test_labels, id_frames, ordered=True)
+    labels, data, _ = D.load_data_special(list(train_labels), train_labels, id_frames, use_luminance=True)
+    labels_test, data_test, _ = D.load_data_special(list(test_labels), test_labels, id_frames, ordered=True,
+                                                    use_luminance=True)
 
     traits = ['O', 'C', 'E', 'A', 'S']
     for i, t in enumerate(traits):
@@ -82,7 +83,8 @@ def linear_regression_single():
 
 
 def make_trait_lum_plot(num='68'):
-    labels_test, data_test, _ = D.load_data_luminance(list(test_labels), test_labels, id_frames, ordered=True)
+    labels_test, data_test, _ = D.load_data_special(list(test_labels), test_labels, id_frames, ordered=True,
+                                                    use_luminance=True)
     print('data loaded')
 
     traits = ['O', 'C', 'E', 'A', 'S']
