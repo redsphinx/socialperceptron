@@ -92,6 +92,18 @@ def get_color(img): # img.shape = (1, 3, 256, 456)
     return clr
 
 
+def get_everything(img):
+    # luminance, color
+    clr = img[0].sum(axis=1).sum(axis=1) / (256 * 456)
+
+    img = np.transpose(img[0], (1, 2, 0))  # shape after transpose (256, 456, 3)
+    luminance = img * np.array([0.2126, 0.7152, 0.0722], dtype=np.float32)
+    luminance = np.sum(luminance, axis=2).mean()
+
+    everything = np.array([luminance, clr[0], clr[1], clr[2]])
+    return everything
+
+
 def quicker_load(k, id_frames, which_data, ordered=False):
     k = k.split('.mp4')[0]
     h5_path = os.path.join(P.CHALEARN30_ALL_DATA, '%s.h5' % k)
@@ -279,7 +291,7 @@ def fill_average(image, which_data, optface, resize=False):
 
 
 def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream=False, frame_num=None,
-             use_luminance=False, use_color=False, use_gen_eth=False):
+             use_luminance=False, use_color=False, use_everything=False):
     if resize:
         if twostream:
             data = np.zeros((len(keys), 6, C2.RESIDE, C2.RESIDE), dtype=np.float32)
@@ -290,8 +302,8 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
             data = np.zeros((len(keys), 1), dtype=np.float32)
         elif use_color:
             data = np.zeros((len(keys), 3), dtype=np.float32)
-        elif use_gen_eth:
-            data = np.zeros((len(keys), 2), dtype=np.float32)
+        elif use_everything:
+            data = np.zeros((len(keys), 4), dtype=np.float32)
         else:
             data = np.zeros((len(keys), 3, C2.H, C2.W), dtype=np.float32)
 
@@ -331,6 +343,8 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
                 data[i] = get_luminance(image)
             elif use_color:
                 data[i] = get_color(image)
+            elif use_everything:
+                data[i] = get_everything(image)
             else:
                 data[i] = image
 
@@ -381,7 +395,7 @@ def load_data_single(labs_selected, labs_h5, id_frames, which_data, trait, resiz
 
 
 def load_data_special(labs_selected, labs_h5, id_frames, trait=None, ordered=False, use_luminance=False, use_color=False,
-                      use_gen_eth=False):
+                      use_everything=False):
     all_traits = ['O', 'C', 'E', 'A', 'S']
     if trait is not None:
         assert (trait in all_traits)
@@ -400,31 +414,19 @@ def load_data_special(labs_selected, labs_h5, id_frames, trait=None, ordered=Fal
             labels[i] = labs_h5[k][:5]
 
     data, n = get_data(keys, id_frames, which_data='all', ordered=ordered, use_luminance=use_luminance, use_color=use_color,
-                       use_gen_eth=use_gen_eth)
+                       use_everything=use_everything)
     return labels, data, n
 
 
-def load_data_color(labs_selected, labs_h5, id_frames, trait=None, ordered=False):
+def load_labels_only(labs_selected, labs_h5, trait=None):
     all_traits = ['O', 'C', 'E', 'A', 'S']
-    if trait is not None:
-        assert (trait in all_traits)
-        t = all_traits.index(trait)
-        labels = np.zeros((len(labs_selected), 1), dtype=np.float32)
-    else:
-        labels = np.zeros((len(labs_selected), 5), dtype=np.float32)
+    labels = np.zeros((len(labs_selected), 8), dtype=np.float32)
 
-    keys = []
     for i in range(len(labs_selected)):
         k = labs_selected[i]
-        keys.append(k)
-        if trait is not None:
-            labels[i] = labs_h5[k][t]
-        else:
-            labels[i] = labs_h5[k][:5]
+        labels[i] = labs_h5[k][:]
 
-    data, n = get_data(keys, id_frames, which_data='all', ordered=ordered, use_luminance=True)
-    return labels, data, n
-
+    return labels
 
 
 def check_saved_faces():
