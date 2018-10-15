@@ -40,7 +40,7 @@ my_model = Deepimpression()
 
 load_model = True
 if load_model:
-    p = os.path.join(P.MODELS, 'epoch_29_34')
+    p = os.path.join(P.MODELS, 'epoch_89_33')
     chainer.serializers.load_npz(p, my_model)
     print('model loaded')
     continuefrom = 0
@@ -158,10 +158,10 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
 print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
-    train_on = 'face'
+    train_on = 'bg'
     # validate_on = 'face'
     # print('trained on: %s val on: %s' % (train_on, validate_on))
-    test_on = 'face'
+    test_on = 'bg'
     print('trained on: %s test on %s' % (train_on, test_on))
     # ----------------------------------------------------------------------------
     # training
@@ -189,7 +189,8 @@ for e in range(continuefrom, epochs):
 
         run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
             model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
-            loss_saving=test_loss, which_data=test_on, ordered=ordered, save_all_results=save_all_results)
+            loss_saving=test_loss, which_data=test_on, ordered=ordered, save_all_results=save_all_results,
+            record_loss=False, record_predictions=True )
     # best val 'all': epoch_99_32
     # best val 'bg': epoch_89_33
     # best val 'face': epoch_29_34

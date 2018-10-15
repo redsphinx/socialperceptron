@@ -7,6 +7,7 @@ import deepimpression2.chalearn30.data_utils as D
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
+import deepimpression2.util as U
 
 
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
@@ -15,8 +16,8 @@ test_labels = h5.File(P.CHALEARN_TEST_LABELS_20, 'r')
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 
-def linear_regression_all():
-    labels, data, _ = D.load_data_special(list(train_labels), train_labels, id_frames)
+def linear_regression_all(record_predictions=False, record_loss=True):
+    labels, data, _ = D.load_data_special(list(train_labels), train_labels, id_frames, use_luminance=True)
     reg = LinearRegression().fit(data, labels)
     reg.score(data, labels)
     print('reg score: ', reg.score(data, labels))  # 0.011438774006662768, 0.01160391566097031, 0.011790330654130819
@@ -27,15 +28,18 @@ def linear_regression_all():
     # loss = np.mean(loss)
     print('loss: ', np.mean(loss))
 
-    num = P.TEST_LOG.split('_')[-1].split('.')[0]
-    save_path = os.path.join(P.LOG_BASE, 'testall_%s.txt' % num)
-    with open(save_path, 'a') as mf:
-        for i in range(len(loss)):
-            line = '%s\n' % str(loss[i])[0:6]
-            mf.write(line)
+    if record_loss:
+        num = P.TEST_LOG.split('_')[-1].split('.')[0]
+        save_path = os.path.join(P.LOG_BASE, 'testall_%s.txt' % num)
+        with open(save_path, 'a') as mf:
+            for i in range(len(loss)):
+                line = '%s\n' % str(loss[i])[0:6]
+                mf.write(line)
+    if record_predictions:
+        U.record_all_predictions(which='test', preds=prediction)
 
 
-# linear_regression_all()
+linear_regression_all(record_predictions=True, record_loss=False)
 
 
 def linear_regression_single():
