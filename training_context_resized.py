@@ -40,7 +40,7 @@ my_model = Deepimpression()
 
 load_model = True
 if load_model:
-    p = os.path.join(P.MODELS, 'epoch_89_33')
+    p = os.path.join(P.MODELS, 'epoch_29_34')
     chainer.serializers.load_npz(p, my_model)
     print('model loaded')
     continuefrom = 0
@@ -83,7 +83,7 @@ id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 
 def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, which_data, ordered=False,
-        save_all_results=False):
+        save_all_results=False, record_predictions=False, record_loss=True):
     print('steps: ', steps)
     assert(which in ['train', 'test', 'val'])
     assert(which_data in ['all', 'bg', 'face'])
@@ -98,12 +98,17 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
     loss_tmp = []
     pd_tmp = np.zeros((steps, 5), dtype=float)
     _labs = list(which_labels)
+
+    preds = np.zeros((steps, 5), dtype=float)
+
     if not ordered:
         shuffle(_labs)
 
     ts = time.time()
     for s in range(steps):
+        # HERE
         print(s)
+        # HERE
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
         labels, data, _ = D.load_data(labels_selected, which_labels, frames, which_data, resize=True, ordered=ordered)
@@ -129,29 +134,34 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
                     loss.backward()
                     optimizer.update()
 
-        loss_tmp.append(float(loss.data))
+        if record_loss:
+            loss_tmp.append(float(loss.data))
+            pd_tmp[s] = U.pred_diff_trait(to_cpu(prediction.data), to_cpu(labels))
+        if record_predictions and which == 'test':
+            preds[s] = to_cpu(prediction.data)
 
-        pd_tmp[s] = U.pred_diff_trait(to_cpu(prediction.data), to_cpu(labels))
+    if record_loss:
+        pred_diff[e] = np.mean(pd_tmp, axis=0)
+        loss_tmp_mean = np.mean(loss_tmp, axis=0)
+        loss_saving.append(loss_tmp_mean)
+        print('E %d. %s loss: ' %(e, which), loss_tmp_mean,
+              ' pred diff OCEAS: ', pred_diff[e],
+              ' time: ', time.time() - ts)
 
-    pred_diff[e] = np.mean(pd_tmp, axis=0)
-    loss_tmp_mean = np.mean(loss_tmp, axis=0)
-    loss_saving.append(loss_tmp_mean)
-    print('E %d. %s loss: ' %(e, which), loss_tmp_mean,
-          ' pred diff OCEAS: ', pred_diff[e],
-          ' time: ', time.time() - ts)
+        U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
 
-    U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
-
-    if which == 'test' and save_all_results:
-        U.record_loss_all_test(loss_tmp)
+        if which == 'test' and save_all_results:
+            U.record_loss_all_test(loss_tmp)
+    if record_predictions and which == 'test':
+        U.record_all_predictions(which, preds)
 
 
 print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
-    train_on = 'bg'
+    train_on = 'face'
     # validate_on = 'face'
     # print('trained on: %s val on: %s' % (train_on, validate_on))
-    test_on = 'bg'
+    test_on = 'face'
     print('trained on: %s test on %s' % (train_on, test_on))
     # ----------------------------------------------------------------------------
     # training
