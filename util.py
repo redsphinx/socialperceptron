@@ -84,6 +84,27 @@ def record_loss_all_test(loss_tmp, trait=False):
             my_file.write(line)
 
 
+def record_all_predictions(which, preds):
+    assert (which in ['test'])
+
+    path = P.PREDICTION_LOG
+
+    if len(preds.shape) == 2:
+        with open(path, 'a') as mf:
+            for i in range(preds.shape[0]):
+                line = ''
+                for j in range(preds.shape[1]):
+                    line = line + str(preds[i][j])[0:6] + ','
+                line = line[0:-1] + '\n'
+                mf.write(line)
+
+    else:
+        with open(path, 'a') as mf:
+            for i in range(preds.shape[0]):
+                line = str(preds[i])[0:6] + '\n'
+                mf.write(line)
+
+
 def pred_diff_trait(prediction, labels):
     # OCEAS
     diff = np.abs(prediction - labels)

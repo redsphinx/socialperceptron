@@ -1,20 +1,6 @@
 # Q: what is the influence of background on personality prediction?
 # Resize the images to overcome the effects of a larger background
 
-'''
-Results:
-__________________________________________
-|_____ test  |       |       |           |
-|    |_______| face  | BG    | BG + face |
-| train      |       |       |           |
-|------------|-------|-------|-----------|
-| face       |       |       |           |
-|------------|-------|-------|-----------|
-| BG         |       |       |           |
-|------------|-------|-------|-----------|
-| BG + face  |       |       |   0.119   |
-------------------------------------------
-'''
 
 import chainer
 import numpy as np
@@ -95,7 +81,7 @@ id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 
 def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, ordered=False,
-        save_all_results=False, twostream=False, same_frame=False):
+        save_all_results=False, twostream=False, same_frame=False, record_predictions=False, record_loss=True):
     print('steps: ', steps)
     assert(which in ['train', 'test', 'val'])
 
@@ -109,6 +95,9 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
     loss_tmp = []
     pd_tmp = np.zeros((steps, 5), dtype=float)
     _labs = list(which_labels)
+
+    preds = np.zeros((steps, 5), dtype=float)
+
     if not ordered:
         shuffle(_labs)
 
@@ -163,21 +152,33 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
                     loss.backward()
                     optimizer.update()
 
-        loss_tmp.append(float(loss.data))
+        if record_loss:
+            loss_tmp.append(float(loss.data))
+            pd_tmp[s] = U.pred_diff_trait(to_cpu(prediction.data), to_cpu(labels))
+        if record_predictions and which == 'test':
+            preds[s] = to_cpu(prediction.data)
 
-        pd_tmp[s] = U.pred_diff_trait(to_cpu(prediction.data), to_cpu(labels))
+    # pred_diff[e] = np.mean(pd_tmp, axis=0)
+    # loss_tmp_mean = np.mean(loss_tmp, axis=0)
+    # loss_saving.append(loss_tmp_mean)
+    # print('E %d. %s loss: ' %(e, which), loss_tmp_mean,
+    #       ' pred diff OCEAS: ', pred_diff[e],
+    #       ' time: ', time.time() - ts)
 
-    pred_diff[e] = np.mean(pd_tmp, axis=0)
-    loss_tmp_mean = np.mean(loss_tmp, axis=0)
-    loss_saving.append(loss_tmp_mean)
-    print('E %d. %s loss: ' %(e, which), loss_tmp_mean,
-          ' pred diff OCEAS: ', pred_diff[e],
-          ' time: ', time.time() - ts)
+    if record_loss:
+        pred_diff[e] = np.mean(pd_tmp, axis=0)
+        loss_tmp_mean = np.mean(loss_tmp, axis=0)
+        loss_saving.append(loss_tmp_mean)
+        print('E %d. %s loss: ' % (e, which), loss_tmp_mean,
+              ' pred diff OCEAS: ', pred_diff[e],
+              ' time: ', time.time() - ts)
+        U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
 
-    U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
+        if which == 'test' and save_all_results:
+            U.record_loss_all_test(loss_tmp)
 
-    if which == 'test' and save_all_results:
-        U.record_loss_all_test(loss_tmp)
+    if record_predictions and which == 'test':
+        U.record_all_predictions(which, preds)
 
 
 print('Enter training loop with validation')
@@ -214,7 +215,7 @@ for e in range(continuefrom, epochs):
         run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
             model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
             loss_saving=test_loss, ordered=ordered, save_all_results=save_all_results,
-            twostream=False, same_frame=True)
+            twostream=False, same_frame=True, record_loss=False, record_predictions=True)
         # best val: epoch_9_57
 
     # save model
