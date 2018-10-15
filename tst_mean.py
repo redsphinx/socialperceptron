@@ -106,4 +106,4 @@ def pearson_r(tr=None):
         # pearson correlation coef: -1.684251e-07
 
 
-pearson_r('O')
+# pearson_r('O')
