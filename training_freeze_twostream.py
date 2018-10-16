@@ -55,8 +55,8 @@ if C.ON_GPU:
 
 print('model initialized with %d parameters' % my_model.count_params())
 
-# epochs = C.EPOCHS
-epochs = 1
+epochs = C.EPOCHS
+# epochs = 1
 
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
@@ -158,13 +158,6 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
             pd_tmp[s] = U.pred_diff_trait(to_cpu(prediction.data), to_cpu(labels))
         if record_predictions and which == 'test':
             preds[s] = to_cpu(prediction.data)
-
-    # pred_diff[e] = np.mean(pd_tmp, axis=0)
-    # loss_tmp_mean = np.mean(loss_tmp, axis=0)
-    # loss_saving.append(loss_tmp_mean)
-    # print('E %d. %s loss: ' %(e, which), loss_tmp_mean,
-    #       ' pred diff OCEAS: ', pred_diff[e],
-    #       ' time: ', time.time() - ts)
 
     if record_loss:
         pred_diff[e] = np.mean(pd_tmp, axis=0)
