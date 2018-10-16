@@ -104,7 +104,8 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
     ts = time.time()
     for s in range(steps):
         # HERE
-        print(s)
+        if which == 'test':
+            print(s)
         # HERE
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)

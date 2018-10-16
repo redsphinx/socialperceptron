@@ -357,6 +357,9 @@ def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False, order
 
     labels = np.zeros((len(labs_selected), 5), dtype=np.float32)
 
+    # shuffles if ordered=False and same_frame=False
+    # two different variables because sometimes you want ordered but not same frame.
+    # Ordered keeps the order of the videos. Same frame says to use the same frame.
     if not ordered and not same_frame:
         shuffle(labs_selected)
 
