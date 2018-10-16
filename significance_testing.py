@@ -563,7 +563,7 @@ def effect_size():
 
 
 # effect_size()
-
+# TODO: rerun
 def pearson_r_all_traits():
     print('Initializing')
 
@@ -576,8 +576,11 @@ def pearson_r_all_traits():
     everyone = [all_predictions, face_predictions, bg_predictions, lum_predictions]
     everyone_txt = ['all', 'face', 'bg', 'lumi']
 
-    pt = ['E', 'A', 'C', 'N', 'O']
-    pt2 = ["E'", "A'", "C'", "N'", "O'"]
+    # pt = ['E', 'A', 'C', 'N', 'O']
+    # pt2 = ["E'", "A'", "C'", "N'", "O'"]
+
+    pt = ['O', 'C', 'E', 'A', 'S']
+    pt2 = ["O'", "C'", "E'", "A'", "S'"]
 
     for idx, e in enumerate(everyone):
         corr_mat = np.zeros((5, 5))
@@ -626,25 +629,112 @@ def pearson_r_all_traits():
         plt.savefig(os.path.join(P.PAPER_PLOTS, 'correlation_%s.png' % everyone_txt[idx]))
 
 
-pearson_r_all_traits()
+# pearson_r_all_traits()
 
 
-def pearson_r_single_traits(tr=None):
+def pearson_r_single_traits():
     print('Initializing')
 
-    which = tr
     test_labels = D.basic_load_personality_labels('test')
-    train_labels = D.basic_load_personality_labels('train')
+    test_label_order = ['O', 'C', 'E', 'A', 'S']
 
-    mean_label = np.mean(train_labels, axis=0)
-    prediction = np.tile(mean_label, (test_labels.shape[0], 1))
+    all_path = os.path.join(P.LOG_BASE, 'pred_84')
+    face_path = os.path.join(P.LOG_BASE, 'pred_85')
+    bg_path = os.path.join(P.LOG_BASE, 'pred_86')
+    lum_path = os.path.join(P.LOG_BASE, 'pred_87')
 
-    all_traits = ['O', 'C', 'E', 'A', 'S']
-    t = all_traits.index(which)
-    # U.record_loss_all_test(prediction, trait=True)
+    everyone_path = [all_path, face_path, bg_path, lum_path]
+    everyone_txt = ['all', 'face', 'bg', 'lumi']
 
-    # TODO: idk if pearson is the good test for this
-    # cor_coeff = stats.pearsonr(test_labels[:, t], prediction[:, t]*1.00000001)[0]
-    cor_coeff = np.corrcoef(test_labels[:, t], prediction[:, t])
+    pt = ['O', 'C', 'E', 'A', 'S']
+    pt2 = ["O'", "C'", "E'", "A'", "S'"]
 
-    print('pearson correlation coef trait %s: %f' % (tr, cor_coeff))
+
+    for idx, e in enumerate(everyone_path):
+        corr_mat = np.zeros(5)
+        for i in range(len(pt)):
+            path = e + '_%s.txt' % pt[i]
+            pred_vals = np.genfromtxt(path, delimiter=',', dtype='float')
+            test_vals = test_labels[:, i]
+
+            corr_mat[i] = stats.pearsonr(pred_vals, test_vals)[0]
+
+        if everyone_txt[idx] == 'lumi':
+            round_num = 5
+        else:
+            round_num = 2
+
+        corr_mat = np.round(corr_mat, decimals=round_num)
+        corr_mat = np.diag(corr_mat)
+
+        # ------------------- plot matrix -------------------
+
+        fig, ax = plt.subplots()
+        im = ax.imshow(corr_mat)
+
+        # We want to show all ticks...
+        ax.set_xticks(np.arange(len(pt)))
+        ax.set_yticks(np.arange(len(pt2)))
+        # ... and label them with the respective list entries
+        ax.set_xticklabels(pt)
+        ax.set_yticklabels(pt2)
+
+        # Rotate the tick labels and set their alignment.
+        plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+                 rotation_mode="anchor")
+
+        # Loop over data dimensions and create text annotations.
+        for i in range(len(pt2)):
+            for j in range(len(pt)):
+                text = ax.text(j, i, corr_mat[i][j],
+                               ha="center", va="center", color="w")
+
+        ax.set_title("correlation '%s' vs. ground truth" % everyone_txt[idx])
+        fig.tight_layout()
+        plt.savefig(os.path.join(P.PAPER_PLOTS, 'singles', 'correlation_%s.png' % everyone_txt[idx]))
+
+        # if everyone_txt[idx] == 'lumi':
+        #     print('holdup')
+        #
+        # for i in range(len(pt)):
+        #     for j in range(len(pt)):
+        #         p = e[:, i]
+        #         l = test_labels[:, j]
+        #         corr_mat[i][j] = stats.pearsonr(p, l)[0]
+        #         if everyone_txt[idx] == 'lumi':
+        #             print("%s-%s: %f" % (pt[i], pt2[j], corr_mat[i][j]))
+        #
+        # for i in range(5):
+        #     for j in range(5):
+        #         if everyone_txt[idx] == 'lumi':
+        #             round_num = 5
+        #         else:
+        #             round_num = 2
+        #         corr_mat[i][j] = round(corr_mat[i][j], round_num)
+        #
+        # fig, ax = plt.subplots()
+        # im = ax.imshow(corr_mat)
+        #
+        # # We want to show all ticks...
+        # ax.set_xticks(np.arange(len(pt)))
+        # ax.set_yticks(np.arange(len(pt2)))
+        # # ... and label them with the respective list entries
+        # ax.set_xticklabels(pt)
+        # ax.set_yticklabels(pt2)
+        #
+        # # Rotate the tick labels and set their alignment.
+        # plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+        #          rotation_mode="anchor")
+        #
+        # # Loop over data dimensions and create text annotations.
+        # for i in range(len(pt2)):
+        #     for j in range(len(pt)):
+        #         text = ax.text(j, i, corr_mat[i][j],
+        #                        ha="center", va="center", color="w")
+        #
+        # ax.set_title("correlation '%s' vs. ground truth" % everyone_txt[idx])
+        # fig.tight_layout()
+        # plt.savefig(os.path.join(P.PAPER_PLOTS, 'correlation_%s.png' % everyone_txt[idx]))
+
+
+pearson_r_single_traits()

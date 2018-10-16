@@ -25,7 +25,7 @@ from random import shuffle
 print('Initializing')
 
 my_model = LastLayers()
-load_model = True
+load_model = False
 if load_model:
     p = os.path.join(P.MODELS, 'epoch_9_57')
     chainer.serializers.load_npz(p, my_model)
@@ -44,8 +44,8 @@ p = os.path.join(P.MODELS, 'epoch_29_34')
 chainer.serializers.load_npz(p, face_model)
 print('face model loaded')
 
-# optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.0001)
-my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
+my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.0001)
+# my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
 my_optimizer.setup(my_model)
 
 if C.ON_GPU:
@@ -192,34 +192,34 @@ for e in range(continuefrom, epochs):
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
-    # run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
-    #     model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
-    #     loss_saving=train_loss, same_frame=True)
+    run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
+        model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
+        loss_saving=train_loss, same_frame=True)
     # ----------------------------------------------------------------------------
     # validation
     # ----------------------------------------------------------------------------
-    # run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
-    #     model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
-    #     loss_saving=val_loss, same_frame=True)
+    run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
+        model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
+        loss_saving=val_loss, same_frame=True)
     # ----------------------------------------------------------------------------
     # test
     # ----------------------------------------------------------------------------
-    times = 1
-    for i in range(1):
-        if times == 1:
-            ordered = True
-            save_all_results = True
-        else:
-            ordered = False
-            save_all_results = False
-
-        run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
-            model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
-            loss_saving=test_loss, ordered=ordered, save_all_results=save_all_results,
-            twostream=False, same_frame=True, record_loss=False, record_predictions=True)
-        # best val: epoch_9_57
+    # times = 1
+    # for i in range(1):
+    #     if times == 1:
+    #         ordered = True
+    #         save_all_results = True
+    #     else:
+    #         ordered = False
+    #         save_all_results = False
+    #
+    #     run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
+    #         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
+    #         loss_saving=test_loss, ordered=ordered, save_all_results=save_all_results,
+    #         twostream=False, same_frame=True, record_loss=False, record_predictions=True)
+        # best val: epoch_9_57 # no weight decay
 
     # save model
-    # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_57' % e)
-    #     chainer.serializers.save_npz(name, my_model)
+    if ((e + 1) % 10) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_88' % e)
+        chainer.serializers.save_npz(name, my_model)
