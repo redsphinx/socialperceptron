@@ -26,7 +26,7 @@ from random import shuffle
 my_model = LastLayers()
 load_model = True
 if load_model:
-    p = os.path.join(P.MODELS, 'epoch_79_61_O')
+    p = os.path.join(P.MODELS, 'epoch_29_61_S')
     chainer.serializers.load_npz(p, my_model)
     print('my_model loaded')
     continuefrom = 0
@@ -34,12 +34,12 @@ else:
     continuefrom = 0
 
 bg_model = Deepimpression()
-p = os.path.join(P.MODELS, 'epoch_59_60_O')
+p = os.path.join(P.MODELS, 'epoch_89_60_S')
 chainer.serializers.load_npz(p, bg_model)
 print('bg model loaded')
 
 face_model = Deepimpression()
-p = os.path.join(P.MODELS, 'epoch_39_59_O')
+p = os.path.join(P.MODELS, 'epoch_19_59_S')
 chainer.serializers.load_npz(p, face_model)
 print('face model loaded')
 
@@ -177,7 +177,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
 print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
-    which_trait = 'O'  # O C E A S
+    which_trait = 'S'  # O C E A S
     train_on = 'all'
     validate_on = 'all'
     # print('trained on: %s val on: %s for trait %s' % (train_on, validate_on, which_trait))

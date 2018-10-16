@@ -39,10 +39,10 @@ def linear_regression_all(record_predictions=False, record_loss=True):
         U.record_all_predictions(which='test', preds=prediction)
 
 
-linear_regression_all(record_predictions=True, record_loss=False)
+# linear_regression_all(record_predictions=True, record_loss=False)
 
 
-def linear_regression_single():
+def linear_regression_single(record_predictions=False, record_loss=True):
     labels, data, _ = D.load_data_special(list(train_labels), train_labels, id_frames, use_luminance=True)
     labels_test, data_test, _ = D.load_data_special(list(test_labels), test_labels, id_frames, ordered=True,
                                                     use_luminance=True)
@@ -59,13 +59,17 @@ def linear_regression_single():
         loss = np.abs(prediction - labels_test[:, i])
         print('loss: ', np.mean(loss))
 
-        num = P.TEST_LOG.split('_')[-1].split('.')[0]
-        save_path = os.path.join(P.LOG_BASE, 'testall_%s_%s.txt' % (num, t))
-        with open(save_path, 'a') as mf:
-            for i in range(len(loss)):
-                line = '%s\n' % str(loss[i])[0:6]
-                mf.write(line)
+        if record_loss:
+            num = P.TEST_LOG.split('_')[-1].split('.')[0]
+            save_path = os.path.join(P.LOG_BASE, 'testall_%s_%s.txt' % (num, t))
+            with open(save_path, 'a') as mf:
+                for i in range(len(loss)):
+                    line = '%s\n' % str(loss[i])[0:6]
+                    mf.write(line)
+        if record_predictions:
+            U.record_all_predictions(which='test', preds=prediction, trait=t)
 
+    # record_loss=True
     # for trait: O
     # reg score:  0.009427910109708337
     # loss:  0.118614726
@@ -83,7 +87,7 @@ def linear_regression_single():
     # loss:  0.12744974
 
 
-# linear_regression_single()
+linear_regression_single(record_predictions=True, record_loss=False)
 
 
 def make_trait_lum_plot(num='68'):

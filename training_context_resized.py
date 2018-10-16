@@ -152,6 +152,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
         if which == 'test' and save_all_results:
             U.record_loss_all_test(loss_tmp)
+
     if record_predictions and which == 'test':
         U.record_all_predictions(which, preds)
 

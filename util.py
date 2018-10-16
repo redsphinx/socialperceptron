@@ -84,10 +84,13 @@ def record_loss_all_test(loss_tmp, trait=False):
             my_file.write(line)
 
 
-def record_all_predictions(which, preds):
+def record_all_predictions(which, preds, trait=None):
     assert (which in ['test'])
-
-    path = P.PREDICTION_LOG
+    if trait is None:
+        path = P.PREDICTION_LOG
+    else:
+        assert(trait in ['O', 'C', 'E', 'A', 'S'])
+        path = os.path.join(P.LOG_BASE, 'pred_87_%s.txt' % trait)
 
     if len(preds.shape) == 2:
         with open(path, 'a') as mf:
@@ -97,7 +100,6 @@ def record_all_predictions(which, preds):
                     line = line + str(preds[i][j])[0:6] + ','
                 line = line[0:-1] + '\n'
                 mf.write(line)
-
     else:
         with open(path, 'a') as mf:
             for i in range(preds.shape[0]):
