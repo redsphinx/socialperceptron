@@ -44,7 +44,7 @@ p = os.path.join(P.MODELS, 'epoch_29_34')
 chainer.serializers.load_npz(p, face_model)
 print('face model loaded')
 
-my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.001)
+my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.00001)
 # my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
 my_optimizer.setup(my_model)
 
@@ -214,6 +214,6 @@ for e in range(continuefrom, epochs):
         # best val, weight decay=0.0001     epoch_9_88
 
     # save model
-    # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_88' % e)
-    #     chainer.serializers.save_npz(name, my_model)
+    if ((e + 1) % 10) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_93' % e)
+        chainer.serializers.save_npz(name, my_model)
