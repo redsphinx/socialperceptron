@@ -25,9 +25,9 @@ from random import shuffle
 print('Initializing')
 
 my_model = LastLayers()
-load_model = False
+load_model = True
 if load_model:
-    p = os.path.join(P.MODELS, 'epoch_9_88')
+    p = os.path.join(P.MODELS, 'epoch_49_90')
     chainer.serializers.load_npz(p, my_model)
     print('my_model loaded')
     continuefrom = 0
@@ -44,7 +44,7 @@ p = os.path.join(P.MODELS, 'epoch_29_34')
 chainer.serializers.load_npz(p, face_model)
 print('face model loaded')
 
-my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.00001)
+my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.001)
 # my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
 my_optimizer.setup(my_model)
 
@@ -55,8 +55,8 @@ if C.ON_GPU:
 
 print('model initialized with %d parameters' % my_model.count_params())
 
-epochs = C.EPOCHS
-# epochs = 1
+# epochs = C.EPOCHS
+epochs = 1
 
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 val_labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
@@ -185,35 +185,35 @@ for e in range(continuefrom, epochs):
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
-    run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
-        model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
-        loss_saving=train_loss, same_frame=True)
+    # run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
+    #     model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
+    #     loss_saving=train_loss, same_frame=True)
     # ----------------------------------------------------------------------------
     # validation
     # ----------------------------------------------------------------------------
-    run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
-        model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
-        loss_saving=val_loss, same_frame=True)
+    # run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
+    #     model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
+    #     loss_saving=val_loss, same_frame=True)
     # ----------------------------------------------------------------------------
     # test
     # ----------------------------------------------------------------------------
-    # times = 1
-    # for i in range(1):
-    #     if times == 1:
-    #         ordered = True
-    #         save_all_results = True
-    #     else:
-    #         ordered = False
-    #         save_all_results = False
-    #
-    #     run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
-    #         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
-    #         loss_saving=test_loss, ordered=ordered, save_all_results=save_all_results,
-    #         twostream=False, same_frame=True, record_loss=True, record_predictions=True)
+    times = 1
+    for i in range(1):
+        if times == 1:
+            ordered = True
+            save_all_results = True
+        else:
+            ordered = False
+            save_all_results = False
+
+        run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
+            model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
+            loss_saving=test_loss, ordered=ordered, save_all_results=save_all_results,
+            twostream=False, same_frame=True, record_loss=True, record_predictions=True)
         # best val, no weight decay:        epoch_9_57
-        # best val, weight decay=0.0001     epoch_9_88
+        # best val, weight decay=0.001     epoch_49_90
 
     # save model
-    if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_93' % e)
-        chainer.serializers.save_npz(name, my_model)
+    # if ((e + 1) % 10) == 0:
+    #     name = os.path.join(P.MODELS, 'epoch_%d_93' % e)
+    #     chainer.serializers.save_npz(name, my_model)

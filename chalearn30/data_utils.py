@@ -500,6 +500,34 @@ def find_best_val(nam):
 # find_best_val('88')
 
 
+def find_best_val_multiple(nam_list):
+    all_nams = []
+
+    for n in nam_list:
+        all_nams.append(P.LOG_BASE + 'val_%s.txt' % (n))
+
+    for l in all_nams:
+        print(l)
+        best = np.genfromtxt(l, 'float', delimiter=',')
+        best = np.transpose(best, (1, 0))[0]
+        # get loss every 10 epochs
+        tmp_best = []
+        r = []
+        for e in range(0, 110, 10):
+            i = e
+            if e != 0:
+                i -= 1
+                r.append(i)
+                tmp_best.append(best[i])
+
+        tmp_best = np.asarray(tmp_best)
+        print(tmp_best)
+        print('worst = ', r[np.argmax(tmp_best, axis=0)])
+        print('best = ', r[np.argmin(tmp_best, axis=0)])
+
+
+# find_best_val_multiple(['88', '90', '91', '92', '93'])
+
 
 def load_model(model, path_to_weights, load_weights=False):
     if load_weights:
