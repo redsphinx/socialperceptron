@@ -60,8 +60,8 @@ LOG_BASE = '/scratch/users/gabras/data/loss/'
 TRAIN_LOG = '/scratch/users/gabras/data/loss/train_94.txt'
 VAL_LOG = '/scratch/users/gabras/data/loss/val_94.txt'
 ##
-TEST_LOG = '/scratch/users/gabras/data/loss/test_94.txt'
-PREDICTION_LOG = '/scratch/users/gabras/data/loss/pred_94.txt'
+TEST_LOG = '/scratch/users/gabras/data/loss/test_95_S.txt'
+PREDICTION_LOG = '/scratch/users/gabras/data/loss/pred_95_S.txt'
 
 # -------------------------------------------------------------------------------------------------
 # models

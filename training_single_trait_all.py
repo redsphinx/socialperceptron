@@ -24,9 +24,9 @@ from random import shuffle
 
 
 my_model = LastLayers()
-load_model = True
+load_model = False
 if load_model:
-    p = os.path.join(P.MODELS, 'epoch_29_61_S')
+    p = os.path.join(P.MODELS, '')
     chainer.serializers.load_npz(p, my_model)
     print('my_model loaded')
     continuefrom = 0
@@ -43,8 +43,8 @@ p = os.path.join(P.MODELS, 'epoch_19_59_S')
 chainer.serializers.load_npz(p, face_model)
 print('face model loaded')
 
-# optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.0001)
-my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
+my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.001)
+# my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
 my_optimizer.setup(my_model)
 
 if C.ON_GPU:
@@ -182,39 +182,39 @@ for e in range(continuefrom, epochs):
     validate_on = 'all'
     # print('trained on: %s val on: %s for trait %s' % (train_on, validate_on, which_trait))
     test_on = 'all'
-    print('trained on: %s test on %s for trait %s' % (train_on, test_on, which_trait))
+    print('trained on: %s val/test on %s for trait %s' % (train_on, test_on, which_trait))
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
-    # run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames, model=my_model,
-    #     optimizer=my_optimizer, pred_diff=pred_diff_train, loss_saving=train_loss, trait=which_trait, same_frame=True)
+    run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames, model=my_model,
+        optimizer=my_optimizer, pred_diff=pred_diff_train, loss_saving=train_loss, trait=which_trait, same_frame=True)
     # ----------------------------------------------------------------------------
     # validation
     # ----------------------------------------------------------------------------
-    # run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames, model=my_model,
-    #     optimizer=my_optimizer, pred_diff=pred_diff_val, loss_saving=val_loss, trait=which_trait, same_frame=True)
+    run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames, model=my_model,
+        optimizer=my_optimizer, pred_diff=pred_diff_val, loss_saving=val_loss, trait=which_trait, same_frame=True)
     # ----------------------------------------------------------------------------
     # test
     # ----------------------------------------------------------------------------
-    times = 1
-    for i in range(1):
-        if times == 1:
-            ordered = True
-            save_results = True
-        else:
-            ordered = False
-            save_results = False
+    # times = 1
+    # for i in range(1):
+    #     if times == 1:
+    #         ordered = True
+    #         save_results = True
+    #     else:
+    #         ordered = False
+    #         save_results = False
+    #
+    #     run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
+    #         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
+    #         loss_saving=test_loss, ordered=ordered, save_all_results=save_results, trait=which_trait,
+    #         record_loss=False, record_predictions=True) # ordered=True so will not shuffle
 
-        run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
-            model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
-            loss_saving=test_loss, ordered=ordered, save_all_results=save_results, trait=which_trait,
-            record_loss=False, record_predictions=True) # ordered=True so will not shuffle
-
-    # best val 'all': epoch_79_61_O, epoch_89_61_C, epoch_69_61_E, epoch_29_61_A, epoch_29_61_S
+    # best val 'all', no decay: epoch_79_61_O, epoch_89_61_C, epoch_69_61_E, epoch_29_61_A, epoch_29_61_S
     # best val 'bg': epoch_59_60_O, epoch_79_60_C, epoch_89_60_E, epoch_89_60_A, epoch_89_60_S
     # best val 'face': epoch_39_59_O, epoch_49_59_C, epoch_99_59_E, epoch_89_59_A, epoch_19_59_S
 
     # save model
-    # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_61_%s' % (e, which_trait))
-    #     chainer.serializers.save_npz(name, my_model)
+    if ((e + 1) % 10) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_95_%s' % (e, which_trait))
+        chainer.serializers.save_npz(name, my_model)
