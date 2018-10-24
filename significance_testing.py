@@ -563,20 +563,19 @@ def effect_size():
 
 
 # effect_size()
-# TODO: rerun
 def pearson_r_all_traits():
     print('Initializing')
 
     test_labels = D.basic_load_personality_labels('test')
     # all_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_80.txt'), delimiter=',',dtype='float')
-    all_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_89.txt'), delimiter=',', dtype='float') # wd=0.0001
+    all_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_94.txt'), delimiter=',', dtype='float') # wd=0.0001
     face_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_81.txt'), delimiter=',',dtype='float')
     bg_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_82.txt'), delimiter=',',dtype='float')
     lum_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_83.txt'), delimiter=',',dtype='float')
 
     # everyone = [all_predictions, face_predictions, bg_predictions, lum_predictions]
     everyone = [all_predictions]
-    everyone_txt = ['all_wd_00001', 'face', 'bg', 'lumi']
+    everyone_txt = ['all_wd_001', 'face', 'bg', 'lumi']
 
     # pt = ['E', 'A', 'C', 'N', 'O']
     # pt2 = ["E'", "A'", "C'", "N'", "O'"]
@@ -626,12 +625,12 @@ def pearson_r_all_traits():
                 text = ax.text(j, i, corr_mat[i][j],
                                ha="center", va="center", color="w")
 
-        ax.set_title("correlation '%s' vs. ground truth. wd=0.0001" % everyone_txt[idx])
+        ax.set_title("correlation '%s' vs. ground truth. wd=0.001" % everyone_txt[idx])
         fig.tight_layout()
         plt.savefig(os.path.join(P.PAPER_PLOTS, 'correlation_%s.png' % everyone_txt[idx]))
 
 
-# pearson_r_all_traits()
+pearson_r_all_traits()
 
 
 def pearson_r_single_traits():

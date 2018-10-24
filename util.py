@@ -321,3 +321,14 @@ def mk_plots(which, num, trait=False):
 # n = '61_S'
 # mk_plots('train', n)
 # mk_plots('val', n)
+
+# mk_plots('train', '95_O')
+# mk_plots('val', '95_O')
+# mk_plots('train', '95_C')
+# mk_plots('val', '95_C')
+# mk_plots('train', '95_E')
+# mk_plots('val', '95_E')
+# mk_plots('train', '95_A')
+# mk_plots('val', '95_A')
+# mk_plots('train', '95_S')
+# mk_plots('val', '95_S')

@@ -492,12 +492,11 @@ def find_best_val(nam):
 
 
 # find_best_val('64')
-# find_best_val('60_O')
-# find_best_val('60_C')
-# find_best_val('60_E')
-# find_best_val('60_A')
-# find_best_val('60_S')
-# find_best_val('88')
+# find_best_val('95_O')
+# find_best_val('95_C')
+# find_best_val('95_E')
+# find_best_val('95_A')
+# find_best_val('95_S')
 
 
 def find_best_val_multiple(nam_list):
