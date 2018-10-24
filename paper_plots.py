@@ -62,7 +62,7 @@ def sns_basic_mae_5_traits():
     fig, axs = plt.subplots(ncols=2, figsize=(11, 5))
 
     axs[0].set_ylim([0.10, 0.14])
-    sns.barplot(data=df, x='models', y='MAE', ax=axs[0], annot=True)
+    sns.barplot(data=df, x='models', y='MAE', ax=axs[0])
 
     sig = np.zeros((4, 4))
     sig[1, 0] = 6.81e-4
@@ -77,12 +77,23 @@ def sns_basic_mae_5_traits():
     mask[np.triu_indices_from(mask)] = True
 
     cmap = sns.diverging_palette(220, 10, as_cmap=True)
-
     sns.heatmap(ds, mask=mask, cmap=cmap, vmax=.3, center=0, annot=True, annot_kws={"size":8},
-                square=True, linewidths=.5, cbar_kws={"orientation": "horizontal"}, ax=axs[1])
+                square=True, linewidths=.5, ax=axs[1], cbar=False)
 
+    def annotateBars(row, ax=axs[0]):
+        for p in ax.patches:
+            ax.annotate("%.4f" % p.get_height(), (p.get_x() + p.get_width() / 2., p.get_height()),
+                        ha='center', va='center', fontsize=8, color='black', xytext=(0, 10),
+                        textcoords='offset points')
 
+    ds.apply(annotateBars)
 
+    for t in axs[1].yaxis.get_major_ticks():
+        t.label.set_fontsize(8)
+    for t in axs[1].xaxis.get_major_ticks():
+        t.label.set_fontsize(8)
+
+    plt.yticks(rotation=45)
 
     fig.savefig(save_path)
 
