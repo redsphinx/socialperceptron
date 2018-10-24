@@ -630,7 +630,7 @@ def pearson_r_all_traits():
         plt.savefig(os.path.join(P.PAPER_PLOTS, 'correlation_%s.png' % everyone_txt[idx]))
 
 
-pearson_r_all_traits()
+# pearson_r_all_traits()
 
 
 def pearson_r_single_traits():
@@ -639,7 +639,7 @@ def pearson_r_single_traits():
     test_labels = D.basic_load_personality_labels('test')
     test_label_order = ['O', 'C', 'E', 'A', 'S']
 
-    all_path = os.path.join(P.LOG_BASE, 'pred_84')
+    all_path = os.path.join(P.LOG_BASE, 'pred_96')
     face_path = os.path.join(P.LOG_BASE, 'pred_85')
     bg_path = os.path.join(P.LOG_BASE, 'pred_86')
     lum_path = os.path.join(P.LOG_BASE, 'pred_87')
@@ -739,4 +739,63 @@ def pearson_r_single_traits():
 
 
 # pearson_r_single_traits()
-#
+
+
+def binomial_test(model1, model2, which_trait=None):
+    if which_trait is None:
+        print('binomial test %s vs. %s' % (model1, model2))
+    else:
+        print('binomial test %s vs. %s for trait %s' % (model1, model2, which_trait))
+
+    model1 = os.path.join(P.LOG_BASE, model1 + '.txt')
+    model2 = os.path.join(P.LOG_BASE, model2 + '.txt')
+
+    model1_pred = np.genfromtxt(model1, delimiter=',')
+    model2_pred = np.genfromtxt(model2, delimiter=',')
+    ground_truth = D.basic_load_personality_labels('test')
+
+    if which_trait is not None:
+        traits = ['O', 'C', 'E', 'A', 'S']
+        idx = traits.index(which_trait)
+        ground_truth = ground_truth[:, idx]
+
+    model1_diff = np.abs(model1_pred - ground_truth)
+    model2_diff = np.abs(model2_pred - ground_truth)
+
+    if which_trait is None:
+        model1_diff = np.mean(model1_diff, axis=1)
+        model2_diff = np.mean(model2_diff, axis=1)
+
+    model1_better_than_model2 = sum(model1_diff < model2_diff)
+    
+    p = stats.binom_test(x=model1_better_than_model2, n=ground_truth.shape[0])
+    alpha = 0.05 / 2
+    
+    if p < alpha:
+        sig = 'significant' 
+    else: 
+        sig = 'not significant'
+    
+    print('m1 > m2 %d times, out of %d. p value: %s. difference is %s'
+          % (model1_better_than_model2, ground_truth.shape[0], str(p), sig))
+
+
+traits = ['O', 'C', 'E', 'A', 'S']
+for t in range(5):
+    trait = traits[t]
+    m1 = 'pred_86_' + trait
+    m2 = 'pred_96_' + trait
+    binomial_test(m1, m2, trait)
+
+
+# single OCEAS
+# face: pred_85
+# bg: pred_86
+# lumi: pred_87
+# all: pred_96
+
+# 5 traits
+# all_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_94.txt'), delimiter=',', dtype='float') # wd=0.0001
+# face_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_81.txt'), delimiter=',',dtype='float')
+# bg_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_82.txt'), delimiter=',',dtype='float')
+# lum_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_83.txt'), delimiter=',',d

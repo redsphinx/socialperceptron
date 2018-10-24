@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import deepimpression2.paths as P
 import numpy as np
 import os
+import seaborn as sns
+import pandas as pd
 
 
 save_path = P.PAPER_PLOTS
@@ -11,8 +13,13 @@ save_path = P.PAPER_PLOTS
 
 def basic_mae_5_traits():
     # names = ['face', 'background', 'all', 'avg. train', 'lin.reg. luminance']
-    names = ['face', 'background', 'all', 'avg. train']
-    values = [0.116, 0.127, 0.119, 0.122]
+    # names = ['face', 'background', 'all', 'avg. train']
+    # values = [0.116, 0.127, 0.119, 0.122]
+
+    # with decay=0.001 for 'all'
+    save_path = os.path.join(P.PAPER_PLOTS, 'weight_decay_all')
+    names = ['face', 'background', 'all', 'luminance']
+    values = [0.1156, 0.1274, 0.1152, 0.1219]
 
     plt.figure()
     x_pos = np.arange(len(names))
@@ -20,7 +27,7 @@ def basic_mae_5_traits():
 
     plt.xticks(x_pos, names, rotation='45')
     plt.ylabel('mean absolute error')
-    plt.ylim((0.11, 0.13))
+    plt.ylim((0.10, 0.14))
     plt.title('MAE averaged over all traits')
     plt.subplots_adjust(bottom=0.2)
 
@@ -41,6 +48,47 @@ def basic_mae_5_traits():
 
 
 # basic_mae_5_traits()
+
+def sns_basic_mae_5_traits():
+    # with decay=0.001 for 'all'
+
+    save_path = os.path.join(P.PAPER_PLOTS, 'weight_decay_all', 'sns.png')
+
+    d = {'models': ['luminance', 'face', 'background', 'all'], 'MAE': [0.1219, 0.1156, 0.1274, 0.1152]}
+    df = pd.DataFrame(data=d)
+
+    sns.set(style='whitegrid')
+
+    fig, axs = plt.subplots(ncols=2, figsize=(11, 5))
+
+    axs[0].set_ylim([0.10, 0.14])
+    sns.barplot(data=df, x='models', y='MAE', ax=axs[0], annot=True)
+
+    sig = np.zeros((4, 4))
+    sig[1, 0] = 6.81e-4
+    sig[2, 0] = 2.81e-8
+    sig[2, 1] = 1.03e-12
+    sig[3, 0] = 4.56e-11
+    sig[3, 1] = 0.68
+    sig[3, 2] = 1.48e-40
+
+    ds = pd.DataFrame({'Luminance': sig[:, 0], 'Face': sig[:, 1], 'Background': sig[:, 2], 'All': sig[:, 3]}, index=['luminance', 'face', 'background', 'all'])
+    mask = np.zeros_like(sig, dtype=np.bool)
+    mask[np.triu_indices_from(mask)] = True
+
+    cmap = sns.diverging_palette(220, 10, as_cmap=True)
+
+    sns.heatmap(ds, mask=mask, cmap=cmap, vmax=.3, center=0, annot=True, annot_kws={"size":8},
+                square=True, linewidths=.5, cbar_kws={"orientation": "horizontal"}, ax=axs[1])
+
+
+
+
+    fig.savefig(save_path)
+
+
+sns_basic_mae_5_traits()
+
 
 
 def boxplot_mae_5_traits():
@@ -140,4 +188,9 @@ def basic_mae_single_traits():
     plt.savefig('%s/%s.png' % (save_path, 'plt_mae_single_traits_basic'))
 
 
-basic_mae_single_traits()
+# basic_mae_single_traits()
+
+
+
+
+
