@@ -65,7 +65,7 @@ def record_loss_sanity(which, loss, pred_diff):
 
     with open(path, 'a') as mf:
         for i in range(len(pred_diff)):
-            line += str(pred_diff[i])[0:4] + ','
+            line += str(pred_diff[i])[0:6] + ','
 
         line = line[0:-1]
         # tmp = '%s,%s\n' % (str(loss)[0:6], line)
