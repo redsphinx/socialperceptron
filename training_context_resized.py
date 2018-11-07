@@ -191,7 +191,7 @@ for e in range(continuefrom, epochs):
         run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
             model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
             loss_saving=test_loss, which_data=test_on, ordered=ordered, save_all_results=save_all_results,
-            record_loss=False, record_predictions=True )
+            record_loss=True, record_predictions=True )
     # best val 'all': epoch_99_32
     # best val 'bg': epoch_89_33
     # best val 'face': epoch_29_34

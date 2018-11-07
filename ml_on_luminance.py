@@ -24,9 +24,11 @@ def linear_regression_all(record_predictions=False, record_loss=True):
     labels, data, _ = D.load_data_special(list(test_labels), test_labels, id_frames, ordered=True, use_luminance=True)
     prediction = reg.predict(data)
     loss = np.abs(prediction - labels)
+    loss_copy = loss
     loss = np.mean(loss, axis=1)
     # loss = np.mean(loss)
     print('loss: ', np.mean(loss))
+    print('OCEAS: ', np.mean(loss_copy, axis=0))
 
     if record_loss:
         num = P.TEST_LOG.split('_')[-1].split('.')[0]
@@ -39,7 +41,7 @@ def linear_regression_all(record_predictions=False, record_loss=True):
         U.record_all_predictions(which='test', preds=prediction)
 
 
-# linear_regression_all(record_predictions=True, record_loss=False)
+linear_regression_all(record_predictions=True, record_loss=True)
 
 
 def linear_regression_single(record_predictions=False, record_loss=True):
@@ -87,7 +89,7 @@ def linear_regression_single(record_predictions=False, record_loss=True):
     # loss:  0.12744974
 
 
-linear_regression_single(record_predictions=True, record_loss=False)
+# linear_regression_single(record_predictions=True, record_loss=False)
 
 
 def make_trait_lum_plot(num='68'):
