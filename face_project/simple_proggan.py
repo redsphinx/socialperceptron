@@ -8,7 +8,7 @@ import pickle
 device = 1
 seed = 6
 number_latents = 10
-path = '/scratch/users/gabras/proggan_tmp'
+path = '/scratch/users/umuguc'
 example_latents = np.random.RandomState(seed).randn(number_latents, 512)
 
 
