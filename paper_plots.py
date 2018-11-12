@@ -1,6 +1,7 @@
 import matplotlib
 matplotlib.use('agg')
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 import deepimpression2.paths as P
 import numpy as np
 import os
@@ -202,6 +203,37 @@ def basic_mae_single_traits():
 # basic_mae_single_traits()
 
 
+def p_values_bar_plots(save=True):
+    fig = plt.figure()
+    # setup the figure and axes
+    # fig = plt.figure(figsize=(8, 3))
+    # ax1 = fig.add_subplot(121, projection='3d')
+    # ax2 = fig.add_subplot(122, projection='3d')
+
+    # fake data
+    _x = np.arange(30)
 
 
 
+    _y = np.arange(2)
+    _xx, _yy = np.meshgrid(_x, _y)
+    x, y = _xx.ravel(), _yy.ravel()
+
+
+
+
+    top = x + y
+    bottom = np.zeros_like(top)
+    width = depth = 1
+
+    ax1.bar3d(x, y, bottom, width, depth, top, shade=True)
+    ax1.set_title('Shaded')
+
+    ax2.bar3d(x, y, bottom, width, depth, top, shade=False)
+    ax2.set_title('Not Shaded')
+
+    if save:
+        plt.savefig('%s/%s.png' % (save_path, '3d_barplot'))
+
+
+p_values_bar_plots()
