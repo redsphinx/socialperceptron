@@ -752,12 +752,19 @@ def binomial_test(model1, model2, which_trait=None):
 
     model1_pred = np.genfromtxt(model1, delimiter=',')
     model2_pred = np.genfromtxt(model2, delimiter=',')
+
     ground_truth = D.basic_load_personality_labels('test')
 
     if which_trait is not None:
         traits = ['O', 'C', 'E', 'A', 'S']
         idx = traits.index(which_trait)
         ground_truth = ground_truth[:, idx]
+
+        if len(model1_pred.shape) > 1:
+            model1_pred = model1_pred[:, idx]
+
+        if model2_pred.shape[1] != 1:
+            model2_pred = model2_pred[:, idx]
 
     model1_diff = np.abs(model1_pred - ground_truth)
     model2_diff = np.abs(model2_pred - ground_truth)
@@ -780,13 +787,25 @@ def binomial_test(model1, model2, which_trait=None):
           % (model1_better_than_model2, ground_truth.shape[0], str(p), sig))
 
 
+# all = pred_94
+# face = pred_81
+# bg = pred_82
+# lumi = pred_83
+
+
 traits = ['O', 'C', 'E', 'A', 'S']
 for t in range(5):
     trait = traits[t]
-    m1 = 'pred_86_' + trait
-    m2 = 'pred_96_' + trait
+    m1 = 'pred_94'
+    m2 = 'pred_83'
     binomial_test(m1, m2, trait)
 
+
+# for t in range(5):
+#     trait = traits[t]
+#     m1 = 'pred_86_' + trait
+#     m2 = 'pred_96_' + trait
+#     binomial_test(m1, m2, trait)
 
 # single OCEAS
 # face: pred_85
@@ -799,3 +818,4 @@ for t in range(5):
 # face_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_81.txt'), delimiter=',',dtype='float')
 # bg_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_82.txt'), delimiter=',',dtype='float')
 # lum_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_83.txt'), delimiter=',',d
+
