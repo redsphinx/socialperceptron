@@ -7,6 +7,7 @@ import numpy as np
 import os
 import seaborn as sns
 import pandas as pd
+from deepimpression2.chalearn30.data_utils import basic_load_personality_labels
 
 
 save_path = P.PAPER_PLOTS
@@ -99,7 +100,7 @@ def sns_basic_mae_5_traits():
     fig.savefig(save_path)
 
 
-sns_basic_mae_5_traits()
+# sns_basic_mae_5_traits()
 
 
 
@@ -201,39 +202,63 @@ def basic_mae_single_traits():
 
 
 # basic_mae_single_traits()
+# p_values_bar_plots()
 
 
-def p_values_bar_plots(save=True):
-    fig = plt.figure()
-    # setup the figure and axes
-    # fig = plt.figure(figsize=(8, 3))
-    # ax1 = fig.add_subplot(121, projection='3d')
-    # ax2 = fig.add_subplot(122, projection='3d')
+def plot_mae_predictions_agreeableness():
+    # make 3 plots, face, bg, all
+    # x axis is predictions, y axis is labels
+    # face_path = os.path.join(P.LOG_BASE, 'pred_97.txt')
+    # bg_path = os.path.join(P.LOG_BASE, 'pred_99.txt')
+    # all_path = os.path.join(P.LOG_BASE, 'pred_94.txt')
+    face_path = os.path.join(P.LOG_BASE, 'pred_85_A.txt')
+    bg_path = os.path.join(P.LOG_BASE, 'pred_86_A.txt')
+    all_path = os.path.join(P.LOG_BASE, 'pred_84_A.txt')
 
-    # fake data
-    _x = np.arange(30)
+    paths = [face_path, bg_path, all_path]
+    names = ['face', 'bg', 'all']
+
+    agreeableness = 3
+    ground_truth = basic_load_personality_labels('test')[:, agreeableness]
+
+    for m in range(3):
+        plt.figure()
+        x = ground_truth
+        # y = np.genfromtxt(paths[m], float, delimiter=',')[:, agreeableness]
+        y = np.genfromtxt(paths[m], float, delimiter=',')
+        n = names[m]
+
+        clr = np.abs(x - y) #np.abs(x - y)
+
+        sc = plt.scatter(x, y, s=3, c=clr)
+        plt.plot(x, x, 'r')
+
+        plt.colorbar(sc)
+        plt.title('single Agreeableness: %s vs. labels' % (n))
+        plt.xlabel('labels')
+        plt.ylabel('predictions')
+        plt.xlim(0, 1)
+        plt.ylim(0, 1)
+        plt.gca().set_aspect('equal', adjustable='box')
+
+        # plt.savefig('%s/%s.png' % (save_path, '5_traits_A_pred_vs_labels_%s' % n))
+        plt.savefig('%s/%s.png' % (save_path, 'single_traits_A_pred_vs_labels_%s' % n))
 
 
+# plot_mae_predictions_agreeableness()
 
-    _y = np.arange(2)
-    _xx, _yy = np.meshgrid(_x, _y)
-    x, y = _xx.ravel(), _yy.ravel()
-
-
-
-
-    top = x + y
-    bottom = np.zeros_like(top)
-    width = depth = 1
-
-    ax1.bar3d(x, y, bottom, width, depth, top, shade=True)
-    ax1.set_title('Shaded')
-
-    ax2.bar3d(x, y, bottom, width, depth, top, shade=False)
-    ax2.set_title('Not Shaded')
-
-    if save:
-        plt.savefig('%s/%s.png' % (save_path, '3d_barplot'))
+def plot_labels():
+    trait = 3 # agreeableness
+    ground_truth = basic_load_personality_labels('test')[:, trait]
+    # np.ndarray.sort(ground_truth)
+    plt.figure()
+    # x = np.arange(0, ground_truth.shape[0])
+    # sc = plt.scatter(x, ground_truth, s=2, c=ground_truth)
+    plt.hist(ground_truth, bins=5)
+    # plt.colorbar(sc)
+    plt.title('agreeableness labels')
+    # plt.ylabel('label values')
+    plt.savefig('%s/%s.png' % (save_path, 'agreeableness_hist'))
 
 
-p_values_bar_plots()
+# plot_labels()
