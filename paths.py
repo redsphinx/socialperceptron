@@ -84,3 +84,7 @@ CHALEARN30_ALL_DATA = '/scratch/users/gabras/data/chalearn30/all_data'
 # -------------------------------------------------------------------------------------------------
 # list of encountered h5 that have zero frames
 ZERO_FRAMES = '/scratch/users/gabras/data/misc/zero_frames.txt'
+
+# -------------------------------------------------------------------------------------------------
+# experiment video location
+BEHAVE_ORIGINAL = '/scratch/users/gabras/data/context_behavior/videoPairs'

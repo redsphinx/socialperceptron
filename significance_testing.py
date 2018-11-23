@@ -792,13 +792,13 @@ def binomial_test(model1, model2, which_trait=None):
 # bg = pred_82
 # lumi = pred_83
 
-
-traits = ['O', 'C', 'E', 'A', 'S']
-for t in range(5):
-    trait = traits[t]
-    m1 = 'pred_82'
-    m2 = 'pred_94'
-    binomial_test(m1, m2, trait)
+#
+# traits = ['O', 'C', 'E', 'A', 'S']
+# for t in range(5):
+#     trait = traits[t]
+#     m1 = 'pred_82'
+#     m2 = 'pred_94'
+#     binomial_test(m1, m2, trait)
 
 
 # for t in range(5):
