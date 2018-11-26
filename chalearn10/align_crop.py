@@ -121,13 +121,14 @@ def align_face(image, xp):
     return face_aligned.astype(xp.uint8)
 
 
-def align_faces_in_video(data_path, frames=None, audio=True, side=196):
+def align_faces_in_video(data_path, frames=None, audio=True, side=196, save_location=None):
 
     # normal case use this
     # save_location = P.CHALEARN_FACES_TEST_TIGHT
 
+    if save_location is None:
     # only for fixing missing 89
-    save_location = '/scratch/users/gabras/data/chalearn10/server_1911'
+        save_location = '/scratch/users/gabras/data/chalearn10/server_1911'
 
     if os.path.exists(data_path):
         video_capture = skvideo.io.vread(data_path)
