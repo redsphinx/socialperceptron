@@ -22,6 +22,9 @@ path_to_original_videos = '/home/gabras/deployed/deepimpression2/context_experim
 path_to_faces = '/home/gabras/deployed/deepimpression2/context_experiment/faces'
 
 path_to_completed = '/home/gabras/deployed/deepimpression2/context_experiment/completed'
+path_to_normalized_videos = '/home/gabras/deployed/deepimpression2/context_experiment/normalized_videos'
+path_to_cut_videos = '/home/gabras/deployed/deepimpression2/context_experiment/cut_videos'
+path_to_faces_normalized_fps = '/home/gabras/deployed/deepimpression2/context_experiment/faces_normalized_fps'
 
 
 def make_list_video_paths(path_to_videos):
@@ -74,14 +77,15 @@ def copy_correct_videos():
 
 
 def videos_to_faces(b, e):
-    original_videos = os.listdir(path_to_original_videos)
+    original_videos = os.listdir(path_to_normalized_videos)
     print('total: ', len(original_videos))
+    print('b', b, 'e', e)
     for i in original_videos[b:e]:
-        video_length_sec = 5
-        src = os.path.join(path_to_original_videos, i)
-        # dst = os.path.join(path_to_faces, i)
-        dst = path_to_faces
-        AC.align_faces_in_video(data_path=src, save_location=dst, side=196, audio=True, frames=5*30)
+        src = os.path.join(path_to_normalized_videos, i)
+        fps = 30
+        duration = 5
+        dst = path_to_faces_normalized_fps
+        AC.align_faces_in_video(data_path=src, save_location=dst, side=196, audio=True, frames=duration*fps)
 
 
 def fix_some_videos():
@@ -125,11 +129,39 @@ def make_green_outline(frame):
 
 
 def get_audio(path):
+    # create silent second
+    path_silent = os.path.join(path_to_completed, 'silent.wav')
+    command = "ffmpeg -f lavfi -i anullsrc=channel_layout=5.1:sample_rate=48000 -t 1 %s" % path_silent
+    subprocess.call(command, shell=True)
+
     data_path = os.path.join(path_to_faces, path)
     name_video = path.split('.mp4')[0]
     name_audio = os.path.join(path_to_completed, '%s.wav' % name_video)
-    command = "ffmpeg -loglevel panic -i %s -ab 160k -ac 2 -ar 44100 -vn -y %s" % (data_path, name_audio)
+    # command = "ffmpeg -loglevel panic -i %s -ab 160k -ac 2 -ar 44100 -vn -y %s" % (data_path, name_audio)
+    command = "ffmpeg -loglevel panic -ss 0 -t 5 -i %s -ab 160k -ac 2 -ar 44100 -vn -y -strict -2 %s" % (data_path, name_audio)
     subprocess.call(command, shell=True)
+
+    # check if lengths are correct
+    # for created wav, get metadata
+    meta_data = skvideo.io.ffprobe(name_audio)
+    length = int(float(meta_data['audio']['@duration']))
+    if length != 5:
+        # AC.remove_file(name_audio)
+        if length == 4:
+            # add 1 sec of silence at end
+            new_name = os.path.join(path_to_completed, '%s_2.wav' % name_video)
+            command = "ffmpeg -i %s -i %s -filter_complex '[0:0][1:0] concat=n=2:v=0:a=1[out]' -map '[out]' %s" % \
+                      (name_audio, path_silent, new_name)
+            # command = 'ffmpeg -i concat:"%s|%s" -codec copy %s' % (name_audio, name_audio, new_name)
+            subprocess.call(command, shell=True)
+            # remove original wav
+            AC.remove_file(name_audio)
+            # rename silenced one
+            os.rename(new_name, name_audio)
+        else:
+            print('length = %d' % length)
+
+    AC.remove_file(path_silent)
     print('audio extracted and saved')
     return name_audio
 
@@ -158,8 +190,11 @@ def glue_together():
     for i, p in enumerate(pairs):
         if i < 10:
             merged_video = np.zeros((frames, h, w, c), dtype='uint8')
-            vid_left = skvideo.io.vread(os.path.join(path_to_faces, p[0]))
-            vid_right = skvideo.io.vread(os.path.join(path_to_faces, p[1]))
+            # vid_left = skvideo.io.vread(os.path.join(path_to_faces, p[0]))
+            # vid_right = skvideo.io.vread(os.path.join(path_to_faces, p[1]))
+            vid_left = skvideo.io.vread(os.path.join(path_to_faces_normalized_fps, p[0]))
+            vid_right = skvideo.io.vread(os.path.join(path_to_faces_normalized_fps, p[1]))
+
 
             # if frames < half, outline left frame green, else outline right frame
             for f in range(frames // 2):
@@ -173,8 +208,8 @@ def glue_together():
                 # base_image.save('testing_side_by_side.jpg')
                 merged_video[f] = base
 
-            vid_left = skvideo.io.vread(os.path.join(path_to_faces, p[0]))
-            vid_right = skvideo.io.vread(os.path.join(path_to_faces, p[1]))
+            vid_left = skvideo.io.vread(os.path.join(path_to_faces_normalized_fps, p[0]))
+            vid_right = skvideo.io.vread(os.path.join(path_to_faces_normalized_fps, p[1]))
 
             for f in range(frames // 2):
                 base = background
@@ -209,16 +244,41 @@ def glue_together():
             AC.avi_to_mp4(avi_vid_name, vid_name)
             # remove the wav file
             AC.remove_file(name_audio)
+            AC.remove_file(audio_left)
+            AC.remove_file(audio_right)
             # remove the avi file
             AC.remove_file(avi_vid_name)
             print('done with %s' % pair_name[i])
 
 
+def normalize_videos():
+    videos = os.listdir(path_to_original_videos)
+    for i, v in enumerate(videos):
+        src = os.path.join(path_to_original_videos, v)
+        dst = os.path.join(path_to_normalized_videos, v)
+        frame_rate = 30
+        command = 'ffmpeg -y -i %s -strict -2 -r %d %s ' % (src, frame_rate, dst)
+        subprocess.call(command, shell=True)
+
+
+def cut_videos():
+    # TODO: doesn't work
+    videos = os.listdir(path_to_normalized_videos)
+    for i, v in enumerate(videos):
+        if i < 3:
+            src = os.path.join(path_to_normalized_videos, v)
+            dst = os.path.join(path_to_cut_videos, v)
+            command = 'ffmpeg -i %s -ss 00:00:01 -t 00:05:01 -async 1 -strict -2 %s' % (src, dst)
+            subprocess.call(command, shell=True)
+
 
 if __name__ == '__main__':
-    # b = 190
+    # b = 180
     # e = 200
     # print(b, e)
     # videos_to_faces(b, e)
 
+    # normalize_videos()
+    # videos_to_faces(b, e)
     glue_together()
+
