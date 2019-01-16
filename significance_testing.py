@@ -637,6 +637,7 @@ def pearson_r_single_traits():
     print('Initializing')
 
     test_labels = D.basic_load_personality_labels('test')
+    print(len(test_labels))
     test_label_order = ['O', 'C', 'E', 'A', 'S']
 
     all_path = os.path.join(P.LOG_BASE, 'pred_96')
@@ -644,8 +645,10 @@ def pearson_r_single_traits():
     bg_path = os.path.join(P.LOG_BASE, 'pred_86')
     lum_path = os.path.join(P.LOG_BASE, 'pred_87')
 
-    everyone_path = [all_path, face_path, bg_path, lum_path]
-    everyone_txt = ['all', 'face', 'bg', 'lumi']
+    # everyone_path = [all_path, face_path, bg_path, lum_path]
+    # everyone_txt = ['all', 'face', 'bg', 'lumi']
+    everyone_path = [all_path, face_path, bg_path]
+    everyone_txt = ['all', 'face', 'bg']
 
     pt = ['O', 'C', 'E', 'A', 'S']
     pt2 = ["O'", "C'", "E'", "A'", "S'"]
@@ -653,12 +656,13 @@ def pearson_r_single_traits():
 
     for idx, e in enumerate(everyone_path):
         corr_mat = np.zeros(5)
+        p_vals = np.zeros(5)
         for i in range(len(pt)):
             path = e + '_%s.txt' % pt[i]
             pred_vals = np.genfromtxt(path, delimiter=',', dtype='float')
             test_vals = test_labels[:, i]
 
-            corr_mat[i] = stats.pearsonr(pred_vals, test_vals)[0]
+            corr_mat[i], p_vals[i] = stats.pearsonr(pred_vals, test_vals)
 
         if everyone_txt[idx] == 'lumi':
             round_num = 5
@@ -667,6 +671,9 @@ def pearson_r_single_traits():
 
         corr_mat = np.round(corr_mat, decimals=round_num)
         corr_mat = np.diag(corr_mat)
+
+        # print p-vals
+        print('mode: %s, p-values: %s' % (everyone_txt[idx], str(p_vals)))
 
         # ------------------- plot matrix -------------------
 
@@ -692,7 +699,7 @@ def pearson_r_single_traits():
 
         ax.set_title("correlation '%s' vs. ground truth" % everyone_txt[idx])
         fig.tight_layout()
-        plt.savefig(os.path.join(P.PAPER_PLOTS, 'singles', 'correlation_%s.png' % everyone_txt[idx]))
+        plt.savefig(os.path.join(P.PAPER_PLOTS, 'singles', 'correlation_%s_v2.png' % everyone_txt[idx]))
 
         # if everyone_txt[idx] == 'lumi':
         #     print('holdup')
@@ -787,6 +794,7 @@ def binomial_test(model1, model2, which_trait=None):
           % (model1_better_than_model2, ground_truth.shape[0], str(p), sig))
 
 
+
 # all = pred_94
 # face = pred_81
 # bg = pred_82
@@ -817,5 +825,74 @@ def binomial_test(model1, model2, which_trait=None):
 # all_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_94.txt'), delimiter=',', dtype='float') # wd=0.0001
 # face_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_81.txt'), delimiter=',',dtype='float')
 # bg_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_82.txt'), delimiter=',',dtype='float')
-# lum_predictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_83.txt'), delimiter=',',d
+# lum_pred
+# ictions = np.genfromtxt(os.path.join(P.LOG_BASE, 'pred_83.txt'), delimiter=',',d
 
+def t_test_single_model(r_list, n=1676):
+    r_null = 0
+    for i, r in enumerate(r_list):
+        delta_r = r - r_null
+        t_val = delta_r * np.sqrt((n - 2) / (1 - delta_r) * 2)
+        print('t-val = %f' % t_val)
+
+
+# alpha = 0.025
+# print(stats.t.ppf(1-alpha, df=1675))
+# 1.9613812724298512, values have to be greater than this
+
+# DF = 1, two-tailed
+# t_test([0.37, 0.46, 0.46, 0.2, 0.36])
+# face-chance         conclusion
+# t-val = 26.972685     not by chance
+# t-val = 36.220436     not by chance
+# t-val = 36.220436     not by chance
+# t-val = 12.938315     not by chance
+# t-val = 26.037857     not by chance
+
+# t_test([0.23, 0.27, 0.07, 0.0, 0.09])
+# bg-chance           conclusion
+# t-val = 15.166145     not by chance
+# t-val = 18.285004     not by chance
+# t-val = 4.200000      not by chance
+# t-val = 0.000000      could be by chance
+# t-val = 5.459018      not by chance
+
+# t_test([0.37, 0.38, 0.45, 0.22, 0.31])
+# all-chance          conclusion
+# t-val = 26.972685     not by chance
+# t-val = 27.924183     not by chance
+# t-val = 35.109439     not by chance
+# t-val = 14.413455     not by chance
+# t-val = 21.593840     not by chance
+
+def t_test_comparing_model(r_list_1, r_list_2, n=1676):
+    for i, r in enumerate(r_list_1):
+        r_null = r_list_2[i]
+        delta_r = np.abs(r - r_null)
+        t_val = delta_r * np.sqrt((n - 2) / (1 - delta_r) * 2)
+        print('t-val = %f' % t_val)
+
+
+# t_test_comparing_model([0.23, 0.27, 0.07, 0.0, 0.09], [0.37, 0.46, 0.46, 0.2, 0.36])
+# face - bg             conclusion
+# t-val = 8.735173        significant
+# t-val = 12.215291       significant
+# t-val = 28.892985       significant
+# t-val = 12.938315       significant
+# t-val = 18.285004       significant
+
+# t_test_comparing_model([0.37, 0.38, 0.45, 0.22, 0.31], [0.37, 0.46, 0.46, 0.2, 0.36])
+# face - all            conclusion
+# t-val = 0.000000        not significant
+# t-val = 4.826016        significant
+# t-val = 0.581534        not significant
+# t-val = 1.168987        not significant
+# t-val = 2.968253        significant
+
+# t_test_comparing_model([0.23, 0.27, 0.07, 0.0, 0.09], [0.37, 0.38, 0.45, 0.22, 0.31])
+# bg - all              conclusion
+# t-val = 8.735173        significant
+# t-val = 6.746685        significant
+# t-val = 27.924183       significant
+# t-val = 14.413455       significant
+# t-val = 14.413455       significant

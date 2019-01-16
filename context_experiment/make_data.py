@@ -188,7 +188,7 @@ def glue_together():
     frames = 10*fps
 
     for i, p in enumerate(pairs):
-        if i < 10:
+        if i < 1000:
             merged_video = np.zeros((frames, h, w, c), dtype='uint8')
             # vid_left = skvideo.io.vread(os.path.join(path_to_faces, p[0]))
             # vid_right = skvideo.io.vread(os.path.join(path_to_faces, p[1]))
