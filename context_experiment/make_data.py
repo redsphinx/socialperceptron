@@ -26,6 +26,9 @@ path_to_normalized_videos = '/home/gabras/deployed/deepimpression2/context_exper
 path_to_cut_videos = '/home/gabras/deployed/deepimpression2/context_experiment/cut_videos'
 path_to_faces_normalized_fps = '/home/gabras/deployed/deepimpression2/context_experiment/faces_normalized_fps'
 
+# attempting to fix the audio-video syncing issues
+path_to_fixed_sync = '/home/gabras/deployed/deepimpression2/context_experiment/synced'
+
 
 def make_list_video_paths(path_to_videos):
     dir_videos = os.listdir(path_to_videos)
@@ -128,17 +131,56 @@ def make_green_outline(frame):
     return copy_frame
 
 
+# # def get_audio(path):
+# #     # create silent second
+# #     path_silent = os.path.join(path_to_completed, 'silent.wav')
+# #     command = "ffmpeg -f lavfi -i anullsrc=channel_layout=5.1:sample_rate=48000 -t 1 %s" % path_silent
+# #     subprocess.call(command, shell=True)
+# #
+# #     data_path = os.path.join(path_to_faces, path)
+# #     name_video = path.split('.mp4')[0]
+# #     name_audio = os.path.join(path_to_completed, '%s.wav' % name_video)
+# #     # command = "ffmpeg -loglevel panic -i %s -ab 160k -ac 2 -ar 44100 -vn -y %s" % (data_path, name_audio)
+# #     command = "ffmpeg -loglevel panic -ss 0 -t 5 -i %s -ab 160k -ac 2 -ar 44100 -vn -y -strict -2 %s" % (data_path, name_audio)
+# #     subprocess.call(command, shell=True)
+# #
+# #     # check if lengths are correct
+# #     # for created wav, get metadata
+# #     meta_data = skvideo.io.ffprobe(name_audio)
+# #     length = int(float(meta_data['audio']['@duration']))
+# #     if length != 5:
+# #         # AC.remove_file(name_audio)
+# #         if length == 4:
+# #             # add 1 sec of silence at end
+# #             new_name = os.path.join(path_to_completed, '%s_2.wav' % name_video)
+# #             command = "ffmpeg -i %s -i %s -filter_complex '[0:0][1:0] concat=n=2:v=0:a=1[out]' -map '[out]' %s" % \
+# #                       (name_audio, path_silent, new_name)
+# #             # command = 'ffmpeg -i concat:"%s|%s" -codec copy %s' % (name_audio, name_audio, new_name)
+# #             subprocess.call(command, shell=True)
+# #             # remove original wav
+# #             AC.remove_file(name_audio)
+# #             # rename silenced one
+# #             os.rename(new_name, name_audio)
+# #         else:
+# #             print('length = %d' % length)
+#
+#     AC.remove_file(path_silent)
+#     print('audio extracted and saved')
+#     return name_audio
+
+
 def get_audio(path):
     # create silent second
-    path_silent = os.path.join(path_to_completed, 'silent.wav')
-    command = "ffmpeg -f lavfi -i anullsrc=channel_layout=5.1:sample_rate=48000 -t 1 %s" % path_silent
-    subprocess.call(command, shell=True)
+    # path_silent = os.path.join(path_to_completed, 'silent.wav')
+    # command = "ffmpeg -f lavfi -i anullsrc=channel_layout=5.1:sample_rate=48000 -t 1 %s" % path_silent
+    # subprocess.call(command, shell=True)
 
     data_path = os.path.join(path_to_faces, path)
     name_video = path.split('.mp4')[0]
-    name_audio = os.path.join(path_to_completed, '%s.wav' % name_video)
+    name_audio = os.path.join(path_to_completed, '%s.mp3' % name_video)
     # command = "ffmpeg -loglevel panic -i %s -ab 160k -ac 2 -ar 44100 -vn -y %s" % (data_path, name_audio)
-    command = "ffmpeg -loglevel panic -ss 0 -t 5 -i %s -ab 160k -ac 2 -ar 44100 -vn -y -strict -2 %s" % (data_path, name_audio)
+    command = "ffmpeg -loglevel panic -ss 0 -t 5 -i %s -ab 160k -ac 2 -ar 44100 -vn -y -strict -2 %s" % (
+    data_path, name_audio)
     subprocess.call(command, shell=True)
 
     # check if lengths are correct
@@ -146,24 +188,11 @@ def get_audio(path):
     meta_data = skvideo.io.ffprobe(name_audio)
     length = int(float(meta_data['audio']['@duration']))
     if length != 5:
-        # AC.remove_file(name_audio)
-        if length == 4:
-            # add 1 sec of silence at end
-            new_name = os.path.join(path_to_completed, '%s_2.wav' % name_video)
-            command = "ffmpeg -i %s -i %s -filter_complex '[0:0][1:0] concat=n=2:v=0:a=1[out]' -map '[out]' %s" % \
-                      (name_audio, path_silent, new_name)
-            # command = 'ffmpeg -i concat:"%s|%s" -codec copy %s' % (name_audio, name_audio, new_name)
-            subprocess.call(command, shell=True)
-            # remove original wav
-            AC.remove_file(name_audio)
-            # rename silenced one
-            os.rename(new_name, name_audio)
-        else:
-            print('length = %d' % length)
-
-    AC.remove_file(path_silent)
-    print('audio extracted and saved')
+        print('length %s : %d' % (path, length) )
+    # else:
+    #     print('length = %d' % length)
     return name_audio
+
 
 
 def merge_audio(left, right, name):
@@ -220,19 +249,20 @@ def glue_together():
                 merged_video[f + (frames // 2)] = base
 
             # create video without sound
-            path_tmp = os.path.join(path_to_completed, pair_name[i])
+            path_tmp = os.path.join(path_to_fixed_sync, pair_name[i])
             imageio.mimwrite(path_tmp, merged_video, fps=fps)
 
             # get the audio
             audio_left = get_audio(p[0])
             audio_right = get_audio(p[1])
-            name_audio = os.path.join(path_to_completed, '%s.wav' % pair_name[i].split('.')[0])
+            name_audio = os.path.join(path_to_fixed_sync, '%s.mp3' % pair_name[i].split('.')[0])
+            # name_audio = os.path.join(path_to_completed, '%s.wav' % pair_name[i].split('.')[0])
             merge_audio(audio_left, audio_right, name_audio)
 
             # put audio and video together + save
             time.sleep(1)
-            avi_vid_name = os.path.join(path_to_completed, '%s.avi' % pair_name[i].split('.')[0])
-            vid_name = os.path.join(path_to_completed, pair_name[i])
+            avi_vid_name = os.path.join(path_to_fixed_sync, '%s.avi' % pair_name[i].split('.')[0])
+            vid_name = os.path.join(path_to_fixed_sync, pair_name[i])
 
             AC.add_audio(vid_name, name_audio, avi_vid_name)
             # command = "ffmpeg -loglevel panic -i %s -i %s -codec copy -shortest -y %s" % (vid_name, name_audio,

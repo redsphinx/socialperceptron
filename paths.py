@@ -11,16 +11,18 @@ CHALEARN_TEST_LABELS_20 = '/scratch/users/gabras/data/chalearn20/test_labels.h5'
 
 CHALEARN_ALL_DATA_20_2 = '/scratch/users/gabras/data/chalearn20/all_data_2'
 
-# unused
+# unused -- confirmed -- deleted
 # this is not used, will be moved to local soon
 CHALEARN_ALL_DATA_20 = '/scratch/users/gabras/data/chalearn20/all_data'
 
-# unused
+# unused -- confirmed -- deleted
 # these are not used, will be moved to local soon
 CHALEARN_TRAIN_DATA_20 = '/scratch/users/gabras/data/chalearn20/train_data.h5'
 CHALEARN_VAL_DATA_20 = '/scratch/users/gabras/data/chalearn20/val_data.h5'
 CHALEARN_TEST_DATA_20 = '/scratch/users/gabras/data/chalearn20/test_data.h5'
 
+
+# these are being used
 TRAIN_UID_KEYS_MAPPING = '/scratch/users/gabras/data/chalearn20/train_uid_keys_mapping.h5'
 TEST_UID_KEYS_MAPPING = '/scratch/users/gabras/data/chalearn20/test_uid_keys_mapping.h5'
 VAL_UID_KEYS_MAPPING = '/scratch/users/gabras/data/chalearn20/val_uid_keys_mapping.h5'
