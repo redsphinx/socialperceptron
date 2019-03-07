@@ -7,7 +7,7 @@ matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import math
 from deepimpression2.savitzky_golay_filter import savitzky_golay
-from scipy.signal import savgol_filter
+# from scipy.signal import savgol_filter
 
 
 def sigmoid(x):
@@ -249,10 +249,13 @@ def mk_plots(which, num, trait=False):
     y = data[:, 0]
     # smoothing
     smooth = False
-    if smooth:
-        # y_hat = savitzky_golay(y, 31, 3)  # window size, polynomial order
-        y_hat = savgol_filter(y, 31, 3)
-        y = y_hat
+
+    # commenting because mxnet
+    # if smooth:
+    #     # y_hat = savitzky_golay(y, 31, 3)  # window size, polynomial order
+    #     y_hat = savgol_filter(y, 31, 3)
+    #     y = y_hat
+
     # y = data
     plt.plot(x, y, 'r')
     if trait:

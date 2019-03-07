@@ -1,20 +1,21 @@
 # utils for chalearn30
 import deepimpression2.paths as P
 import os
-import skvideo.io
+# import skvideo.io
 import h5py as h5
-from tqdm import tqdm
+# from tqdm import tqdm
 from deepimpression2.chalearn20 import data_utils as D
 import numpy as np
 from random import shuffle
 import deepimpression2.chalearn20.constants as C2
 from PIL import Image
-import chainer
+# import chainer
 
 
-def mp4_to_arr(video_path):
-    vid = skvideo.io.vread(video_path)
-    return vid
+# commenting because of mxnet
+# def mp4_to_arr(video_path):
+#     vid = skvideo.io.vread(video_path)
+#     return vid
 
 
 def get_all_videos(which):
@@ -42,23 +43,23 @@ def get_all_videos(which):
     all_videos.sort()
     return all_videos
 
-
-def check_which_not_done(which, b, e):
-    all_videos = get_all_videos(which)[b:e]
-    save_path = '/scratch/users/gabras/data/chalearn30/todo_%s.txt' % (which)
-
-    for vp in tqdm(all_videos):
-        v = mp4_to_arr(vp)
-        frames_video = v.shape[0]
-        video_name = vp.split('/')[-1].split('.mp4')[0] + '.h5'
-        h5_path = os.path.join(P.CHALEARN30_ALL_DATA, video_name)
-        with h5.File(h5_path, 'r') as my_file:
-            frames_h5 = len(my_file.keys()) - 1
-
-        if frames_video != frames_h5:
-            with open(save_path, 'a') as todo:
-                todo.write('%s/n' % (vp))
-            print(vp)
+# commenting because of mxnet
+# def check_which_not_done(which, b, e):
+#     all_videos = get_all_videos(which)[b:e]
+#     save_path = '/scratch/users/gabras/data/chalearn30/todo_%s.txt' % (which)
+#
+#     for vp in tqdm(all_videos):
+#         v = mp4_to_arr(vp)
+#         frames_video = v.shape[0]
+#         video_name = vp.split('/')[-1].split('.mp4')[0] + '.h5'
+#         h5_path = os.path.join(P.CHALEARN30_ALL_DATA, video_name)
+#         with h5.File(h5_path, 'r') as my_file:
+#             frames_h5 = len(my_file.keys()) - 1
+#
+#         if frames_video != frames_h5:
+#             with open(save_path, 'a') as todo:
+#                 todo.write('%s/n' % (vp))
+#             print(vp)
 
 
 def only_names_check_which_not_done(which, b, e):
@@ -527,12 +528,12 @@ def find_best_val_multiple(nam_list):
 
 # find_best_val_multiple(['88', '90', '91', '92', '93'])
 
-
-def load_model(model, path_to_weights, load_weights=False):
-    if load_weights:
-        chainer.serializers.load_npz(path_to_weights, model)
-
-    return model
+# commenting because of mxnet
+# def load_model(model, path_to_weights, load_weights=False):
+#     if load_weights:
+#         chainer.serializers.load_npz(path_to_weights, model)
+#
+#     return model
 
 
 def load_last_layers(model_to, model_from, load_weights=False):
