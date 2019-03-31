@@ -48,6 +48,7 @@ def parallel_convert(which, b, e, func, number_processes=20):
     all_videos = all_videos[b:e]
     pool.apply_async(func)
     pool.map(func, all_videos)
+# parallel_convert('train', 1000, 2000, convert, number_processes=20) # hinton busy, issues, partial
 
 
 def normal_convert(which, b, e):
