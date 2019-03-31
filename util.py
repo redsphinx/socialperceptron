@@ -336,3 +336,12 @@ def mk_plots(which, num, trait=False):
 # mk_plots('train', '95_S')
 # mk_plots('val', '95_S')
 
+
+def get_torch_params(model):
+    pp=0
+    for p in list(model.parameters()):
+        nn = 1
+        for s in list(p.size()):
+            nn = nn*s
+        pp += nn
+    return pp
