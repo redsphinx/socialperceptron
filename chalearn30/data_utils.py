@@ -10,7 +10,12 @@ from random import shuffle
 import deepimpression2.chalearn20.constants as C2
 from PIL import Image
 # import chainer
+import torchvision.transforms as transforms
+import torch
 
+
+normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                                     std=[0.229, 0.224, 0.225])
 
 # commenting because of mxnet
 # def mp4_to_arr(video_path):
@@ -292,7 +297,7 @@ def fill_average(image, which_data, optface, resize=False):
 
 
 def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream=False, frame_num=None,
-             use_luminance=False, use_color=False, use_everything=False):
+             use_luminance=False, use_color=False, use_everything=False, is_resnet18=False):
     if resize:
         if twostream:
             data = np.zeros((len(keys), 6, C2.RESIDE, C2.RESIDE), dtype=np.float32)
@@ -341,11 +346,29 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
             image, optface = quicker_load(k, id_frames, which_data, ordered)
             image = fill_average(image, which_data, optface)
             if use_luminance:
-                data[i] = get_luminance(image)
+                data[i] = get_luminance(image)  
             elif use_color:
                 data[i] = get_color(image)
             elif use_everything:
                 data[i] = get_everything(image)
+            elif is_resnet18:
+                # normalize is torch resnet18
+                img_max = np.max(image)
+                if img_max == 0:
+                    data[i] = image
+                else:
+                    # image /= img_max
+                    try:
+                        image[0] = image[0] / np.max(image[0])
+                        image[1] = image[1] / np.max(image[1])
+                        image[2] = image[2] / np.max(image[2])
+                    except RuntimeWarning:
+                        print('channel has a max of 0')
+                        break
+                    image = torch.from_numpy(image)
+                    image = normalize(image)
+                    image = image.numpy()
+                    data[i] = image
             else:
                 data[i] = image
 
@@ -353,7 +376,7 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
 
 
 def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False, ordered=False, twostream=False,
-              frame_num=None, same_frame=False):
+              frame_num=None, same_frame=False, is_resnet18=False):
     assert(which_data in ['bg', 'face', 'all'])
 
     labels = np.zeros((len(labs_selected), 5), dtype=np.float32)
@@ -370,7 +393,7 @@ def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False, order
         keys.append(k)
         labels[i] = labs_h5[k][0:5]
 
-    data, n = get_data(keys, id_frames, which_data, resize, ordered, twostream, frame_num)
+    data, n = get_data(keys, id_frames, which_data, resize, ordered, twostream, frame_num, is_resnet18=is_resnet18)
     return labels, data, n
 
 

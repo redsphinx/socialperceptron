@@ -94,7 +94,7 @@ id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 
 def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, which_data, trait=None,
-        ordered=False, save_all_results=False, record_predictions=False, record_loss=True):
+        ordered=False, save_all_results=False, record_predictions=False, record_loss=True, is_resnet18=True):
     print('steps: ', steps)
     assert(which in ['train', 'test', 'val'])
     assert(which_data in ['bg', 'face'])
@@ -125,10 +125,10 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         # HERE
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
-        labels, data, _ = D.load_data_single(labels_selected, which_labels, frames, which_data, resize=True,
-                                          ordered=ordered, trait=trait)
-
-        # TODO: normalize the data in "load_data"
+        # labels, data, _ = D.load_data_single(labels_selected, which_labels, frames, which_data, resize=True,
+        #                                   ordered=ordered, trait=trait)
+        labels, data = D.load_data(labels_selected, which_labels, frames, which_data, ordered=ordered,
+                                   is_resnet18=is_resnet18)
 
         if C.ON_GPU:
             data = data.cuda(device)
