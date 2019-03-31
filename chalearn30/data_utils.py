@@ -14,8 +14,7 @@ import torchvision.transforms as transforms
 import torch
 
 
-normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                                     std=[0.229, 0.224, 0.225])
+normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
 # commenting because of mxnet
 # def mp4_to_arr(video_path):
@@ -342,7 +341,7 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
 
     else:
         for i, k in enumerate(keys):
-            print(i)
+            # print(i)
             image, optface = quicker_load(k, id_frames, which_data, ordered)
             image = fill_average(image, which_data, optface)
             if use_luminance:
@@ -357,6 +356,7 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
                 if img_max == 0:
                     data[i] = image
                 else:
+                    image = image[0].astype(np.float32)
                     # image /= img_max
                     try:
                         image[0] = image[0] / np.max(image[0])
@@ -365,9 +365,11 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
                     except RuntimeWarning:
                         print('channel has a max of 0')
                         break
+
                     image = torch.from_numpy(image)
                     image = normalize(image)
                     image = image.numpy()
+                    image = np.expand_dims(image, 0)
                     data[i] = image
             else:
                 data[i] = image

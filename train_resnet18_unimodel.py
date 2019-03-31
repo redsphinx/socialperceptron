@@ -3,6 +3,7 @@ import os
 import h5py as h5
 from random import shuffle
 import time
+from tqdm import tqdm
 
 from torchvision.models import resnet18
 from torch.optim.adam import Adam
@@ -12,9 +13,9 @@ from torch.nn import CrossEntropyLoss, L1Loss
 
 import deepimpression2.paths as P
 import deepimpression2.constants as C
+import deepimpression2.chalearn20.constants as C2
 import deepimpression2.util as U
 import deepimpression2.chalearn30.data_utils as D
-
 
 # settings
 num_traits = 5
@@ -84,11 +85,11 @@ pred_diff_val = np.zeros((epochs, num_traits), float)
 test_loss = []
 pred_diff_test = np.zeros((epochs, num_traits), float)
 
-training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
-val_steps = len(val_labels) // C.VAL_BATCH_SIZE
-test_steps = len(test_labels) // C.TEST_BATCH_SIZE
-# training_steps = 10
-# val_steps = 10
+# training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
+# val_steps = len(val_labels) // C.VAL_BATCH_SIZE
+# test_steps = len(test_labels) // C.TEST_BATCH_SIZE
+training_steps = 2
+val_steps = 2
 
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
@@ -118,7 +119,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         shuffle(_labs)
 
     ts = time.time()
-    for s in range(steps):
+    for s in tqdm(range(steps)):
         # HERE
         # if which == 'test':
         #     print(s)
@@ -127,12 +128,14 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         assert (len(labels_selected) == which_batch_size)
         # labels, data, _ = D.load_data_single(labels_selected, which_labels, frames, which_data, resize=True,
         #                                   ordered=ordered, trait=trait)
-        labels, data = D.load_data(labels_selected, which_labels, frames, which_data, ordered=ordered,
-                                   is_resnet18=is_resnet18)
+        labels, data, _ = D.load_data(labels_selected, which_labels, frames, which_data, ordered=ordered,
+                                      is_resnet18=is_resnet18)
 
         if C.ON_GPU:
+            data = torch.from_numpy(data)
             data = data.cuda(device)
-            labels = labels.long()
+            labels = torch.from_numpy(labels)
+            # labels = labels.long()
             labels = labels.cuda(device)
 
         if which == 'train':
@@ -152,7 +155,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         if record_loss:
             loss_tmp.append(float(loss.data))
             # isn't this the same as MAE??
-            pd_tmp[s] = U.pred_diff_trait(np.array(predictions.cpu().data), np.array(predictions.cpu().labels))
+            pd_tmp[s] = U.pred_diff_trait(np.array(predictions.cpu().data), np.array(labels.cpu().data))
         if record_predictions and which == 'test':
             preds[s] = np.array(predictions.cpu().data)
 
@@ -179,22 +182,24 @@ for e in range(continuefrom, epochs):
     train_on = 'face'
     validate_on = 'face'
     test_on = 'face'
-    print('trained on: %s test on %s for trait %s' % (train_on, test_on, which_trait))
+    # print('trained on: %s test on %s for trait %s' % (train_on, test_on, which_trait))
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
     run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
-        loss_saving=train_loss, which_data=train_on, trait=which_trait, record_loss=False)
+        loss_saving=train_loss, which_data=train_on, trait=which_trait)
     # ----------------------------------------------------------------------------
     # validation
     # ----------------------------------------------------------------------------
-    # run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
-    #     model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
-    #     loss_saving=val_loss, which_data=validate_on, trait=which_trait)
+    # C2.ORDERED_FRAME = 6 # TODO SET THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    run(which='val', steps=val_steps, which_labels=val_labels, frames=id_frames,
+        model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_val,
+        loss_saving=val_loss, which_data=validate_on, trait=which_trait, ordered=True)
     # ----------------------------------------------------------------------------
     # test
     # ----------------------------------------------------------------------------
+    # C2.ORDERED_FRAME = 10 # TODO SET THIS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # times = 1
     # for i in range(1):
     #     if times == 1:
@@ -212,7 +217,6 @@ for e in range(continuefrom, epochs):
     # best val 'face' OCEAS: epoch_39_59_O, epoch_49_59_C, epoch_99_59_E, epoch_89_59_A, epoch_19_59_S
 
     # save model
-    # if ((e + 1) % 10) == 0:
-    # name = os.path.join(P.MODELS, 'epoch_%d_60' % e)
-    # torch.save(my_model.state_dict(), name)
-    # 
+    if ((e + 1) % 10) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_101' % e)
+        torch.save(my_model.state_dict(), name)

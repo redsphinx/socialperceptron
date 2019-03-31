@@ -18,4 +18,5 @@ RESIDE = 256
 # sanity check size
 SIZE = 224
 
-ORDERED_FRAME = 10
+# ORDERED_FRAME = 10 # for testing
+ORDERED_FRAME = 6 # for validation
