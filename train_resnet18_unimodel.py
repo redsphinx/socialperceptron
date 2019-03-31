@@ -85,11 +85,11 @@ pred_diff_val = np.zeros((epochs, num_traits), float)
 test_loss = []
 pred_diff_test = np.zeros((epochs, num_traits), float)
 
-# training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
-# val_steps = len(val_labels) // C.VAL_BATCH_SIZE
-# test_steps = len(test_labels) // C.TEST_BATCH_SIZE
-training_steps = 2
-val_steps = 2
+training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
+val_steps = len(val_labels) // C.VAL_BATCH_SIZE
+test_steps = len(test_labels) // C.TEST_BATCH_SIZE
+# training_steps = 2
+# val_steps = 2
 
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
