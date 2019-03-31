@@ -179,9 +179,9 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
     which_trait = None
-    train_on = 'face'
-    validate_on = 'face'
-    test_on = 'face'
+    train_on = 'bg'
+    validate_on = 'bg'
+    test_on = 'bg'
     # print('trained on: %s test on %s for trait %s' % (train_on, test_on, which_trait))
     # ----------------------------------------------------------------------------
     # training
@@ -218,5 +218,5 @@ for e in range(continuefrom, epochs):
 
     # save model
     if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_101' % e)
+        name = os.path.join(P.MODELS, 'epoch_%d_102' % e)
         torch.save(my_model.state_dict(), name)
