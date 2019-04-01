@@ -34,7 +34,7 @@ device = torch.device(_dev)
 
 
 # get model
-my_model = resnet18(pretrained=True)
+my_model = resnet18(pretrained=False)
 
 my_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
 # my_model.fc = Tanh(nn.Linear(in_features=512, out_features=num_traits, bias=True))
@@ -183,15 +183,13 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
     which_trait = None
-    train_on = 'bg'
-    validate_on = 'bg'
-    test_on = 'bg'
+    train_on = 'face'
+    validate_on = 'face'
+    test_on = 'face'
     # print('trained on: %s test on %s for trait %s' % (train_on, test_on, which_trait))
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
-    if e == 4:
-        print('hre')
     run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
         loss_saving=train_loss, which_data=train_on, trait=which_trait)
@@ -224,7 +222,7 @@ for e in range(continuefrom, epochs):
 
     # save model
     if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_102' % e)
+        name = os.path.join(P.MODELS, 'epoch_%d_106' % e)
         torch.save(my_model.state_dict(), name)
 
 # TODO: why is bg nan after epoch 4?? can't replicate...oh well
