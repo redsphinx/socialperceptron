@@ -59,11 +59,11 @@ SETUP4 = '/scratch/users/gabras/data/trying_out/setup4'
 # -------------------------------------------------------------------------------------------------
 # log files
 LOG_BASE = '/scratch/users/gabras/data/loss/'
-TRAIN_LOG = '/scratch/users/gabras/data/loss/train_104_S.txt'
-VAL_LOG = '/scratch/users/gabras/data/loss/val_104_S.txt'
+TRAIN_LOG = '/scratch/users/gabras/data/loss/train_105_O.txt'
+VAL_LOG = '/scratch/users/gabras/data/loss/val_105_O.txt'
 ##
-TEST_LOG = '/scratch/users/gabras/data/loss/test_104_S.txt'
-PREDICTION_LOG = '/scratch/users/gabras/data/loss/pred_104_S.txt'
+TEST_LOG = '/scratch/users/gabras/data/loss/test_105_O.txt'
+PREDICTION_LOG = '/scratch/users/gabras/data/loss/pred_105_O.txt'
 
 # -------------------------------------------------------------------------------------------------
 # models
