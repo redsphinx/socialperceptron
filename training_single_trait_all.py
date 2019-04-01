@@ -21,6 +21,7 @@ import os
 import cupy as cp
 from chainer.functions import expand_dims
 from random import shuffle
+from tqdm import tqdm
 
 
 my_model = LastLayers()
@@ -104,10 +105,10 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         shuffle(_labs)
 
     ts = time.time()
-    for s in range(steps):
+    for s in tqdm(range(steps)):
         # HERE
-        if which == 'test':
-            print(s)
+        # if which == 'test':
+        #     print(s)
         # HERE
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
