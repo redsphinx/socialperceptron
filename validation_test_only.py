@@ -26,7 +26,7 @@ def initialize(which, model_name):
     if load_model:
         p = os.path.join(P.MODELS, model_name)
         chainer.serializers.load_npz(p, my_model)
-        print('model loaded')
+        print('%s loaded' % model_name)
 
     my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
     my_optimizer.setup(my_model)
@@ -134,7 +134,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
 
 def main_loop(which):
-    val_test_on = 'face'
+    val_test_on = 'bg'
     if val_test_on == 'face':
         model_number = 59
     elif val_test_on == 'bg':
@@ -144,12 +144,12 @@ def main_loop(which):
         model_number = None
 
     saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
-    which_trait = 'O'
+    # which_trait = 'O'
     # which_trait = 'C'
     # which_trait = 'E'
     # which_trait = 'A'
-    # which_trait = 'S'
-    models_to_load = ['epoch_%d_%d_%s' % (i, model_number, which_trait) for i in range(len(saved_epochs))]
+    which_trait = 'S'
+    models_to_load = ['epoch_%d_%d_%s' % (saved_epochs[i], model_number, which_trait) for i in range(len(saved_epochs))]
 
     for i, model_name in enumerate(models_to_load):
         my_model, my_optimizer, epochs, labels, steps, loss, pred_diff, id_frames = initialize(which, model_name)
@@ -157,7 +157,8 @@ def main_loop(which):
         if which == 'val':
             run(which=which, steps=steps, which_labels=labels, frames=id_frames,
                 model=my_model, optimizer=my_optimizer, pred_diff=pred_diff,
-                loss_saving=loss, which_data=val_test_on, trait=which_trait, ordered=True)
+                loss_saving=loss, which_data=val_test_on, trait=which_trait, ordered=True, record_loss=True,
+                record_predictions=False, save_all_results=False)
         elif which == 'test':
             run(which=which, steps=steps, which_labels=labels, frames=id_frames,
                 model=my_model, optimizer=my_optimizer, pred_diff=pred_diff,
@@ -173,9 +174,9 @@ best val 'bg': epoch_59_60_O, epoch_79_60_C, epoch_89_60_E, epoch_89_60_A, epoch
 best val 'face': epoch_39_59_O, epoch_49_59_C, epoch_99_59_E, epoch_89_59_A, epoch_19_59_S
 
 as of 1 apr 2019:
-best val 'bg': 
-best val 'face': 
+best val 'bg': epoch_89_60_O, epoch_79_60_C, epoch_99_60_E, epoch_89_60_A, epoch_89_60_S
+best val 'face': epoch_39_59_O, epoch_19_59_C, epoch_99_59_E, epoch_89_59_A, epoch_19_59_S
 
 '''
 
-main_loop('val')
+# main_loop('val')

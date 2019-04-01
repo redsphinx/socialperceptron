@@ -39,7 +39,7 @@ CHALEARN_TEST_GETH_LABELS_ORIGINAL = '/scratch/users/gabras/data/chalearn10/eth_
 CHALEARN_DEV_GETH_LABELS_ORIGINAL = '/scratch/users/gabras/data/chalearn10/eth_gender_annotations_dev.csv'
 
 # -------------------------------------------------------------------------------------------------
-# stefan data
+# stefan data UNUSED possibly
 CHALEARN_FACES_TRAIN_H5 = '/scratch/users/steiac/steiac/deployed-3d/3DDIdata/data_preprocessed/'
 CHALEARN_FACES_VAL_H5 = '/scratch/users/steiac/steiac/deployed-3d/3DDIdata/val_preprocessed/'
 CHALEARN_FACES_TEST_H5 = '/scratch/users/gabras/data/chalearn10/test_preprocessed'
@@ -59,11 +59,11 @@ SETUP4 = '/scratch/users/gabras/data/trying_out/setup4'
 # -------------------------------------------------------------------------------------------------
 # log files
 LOG_BASE = '/scratch/users/gabras/data/loss/'
-TRAIN_LOG = '/scratch/users/gabras/data/loss/train_102.txt'
-VAL_LOG = '/scratch/users/gabras/data/loss/val_102.txt'
+TRAIN_LOG = '/scratch/users/gabras/data/loss/train_104_S.txt'
+VAL_LOG = '/scratch/users/gabras/data/loss/val_104_S.txt'
 ##
-TEST_LOG = '/scratch/users/gabras/data/loss/test_102.txt'
-PREDICTION_LOG = '/scratch/users/gabras/data/loss/pred_102.txt'
+TEST_LOG = '/scratch/users/gabras/data/loss/test_104_S.txt'
+PREDICTION_LOG = '/scratch/users/gabras/data/loss/pred_104_S.txt'
 
 # -------------------------------------------------------------------------------------------------
 # models

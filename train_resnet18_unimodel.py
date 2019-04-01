@@ -10,12 +10,15 @@ from torch.optim.adam import Adam
 import torch
 from torch import nn
 from torch.nn import CrossEntropyLoss, L1Loss
+from torch.nn import Tanh
 
 import deepimpression2.paths as P
 import deepimpression2.constants as C
 import deepimpression2.chalearn20.constants as C2
 import deepimpression2.util as U
 import deepimpression2.chalearn30.data_utils as D
+# from deepimpression2.model_resnet18 import ResNet18
+
 
 # settings
 num_traits = 5
@@ -34,9 +37,10 @@ device = torch.device(_dev)
 my_model = resnet18(pretrained=True)
 
 my_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
+# my_model.fc = Tanh(nn.Linear(in_features=512, out_features=num_traits, bias=True))
 
 if load_model:
-    p = os.path.join(P.MODELS, 'epoch_9_53')
+    p = os.path.join(P.MODELS, '')
     my_model.load_state_dict(torch.load(p))
     print('model loaded')
     continuefrom = 0
@@ -167,7 +171,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
               ' pred diff %s: ' % trait, pred_diff[e],
               ' time: ', time.time() - ts)
 
-        # U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
+        U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
 
         if which == 'test' and save_all_results:
             U.record_loss_all_test(loss_tmp, trait=True)
@@ -219,8 +223,8 @@ for e in range(continuefrom, epochs):
     # best val 'face' OCEAS: epoch_39_59_O, epoch_49_59_C, epoch_99_59_E, epoch_89_59_A, epoch_19_59_S
 
     # save model
-    # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_102' % e)
-    #     torch.save(my_model.state_dict(), name)
+    if ((e + 1) % 10) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_102' % e)
+        torch.save(my_model.state_dict(), name)
 
-# TODO: why is bg nan after epoch 4??
+# TODO: why is bg nan after epoch 4?? can't replicate...oh well
