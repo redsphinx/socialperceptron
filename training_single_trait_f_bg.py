@@ -189,4 +189,3 @@ for e in range(continuefrom, epochs):
     # if ((e + 1) % 10) == 0:
     #     name = os.path.join(P.MODELS, 'epoch_%d_60_%s' % (e, which_trait))
     #     chainer.serializers.save_npz(name, my_model)
-
