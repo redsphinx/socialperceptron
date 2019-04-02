@@ -1,23 +1,15 @@
-import chainer
 import numpy as np
-from deepimpression2.model_59 import Deepimpression
-import deepimpression2.constants as C
-from chainer.functions import sigmoid_cross_entropy, mean_absolute_error, softmax_cross_entropy
-from chainer.optimizers import Adam
 import h5py as h5
-import deepimpression2.paths as P
-# import deepimpression2.chalearn20.data_utils as D
-import deepimpression2.chalearn30.data_utils as D
 import time
-from chainer.backends.cuda import to_gpu, to_cpu
-import deepimpression2.util as U
 import os
-import cupy as cp
-from chainer.functions import expand_dims
-from random import shuffle
 from tqdm import tqdm
+
+import deepimpression2.constants as C
+import deepimpression2.paths as P
+import deepimpression2.chalearn30.data_utils as D
+import deepimpression2.util as U
+
 from torchvision.models import resnet18
-from torch.optim.adam import Adam
 import torch
 from torch import nn
 from torch.nn import L1Loss
@@ -69,12 +61,11 @@ def initialize(which, model_name):
 
 def run(which, steps, which_labels, frames, model, pred_diff, loss_saving, which_data, trait, ordered,
         save_all_results, record_predictions, record_loss, is_resnet18, num_traits, device, loss_function):
-
     print('steps: ', steps)
-    assert(which in ['test', 'val'])
-    assert(which_data in ['bg', 'face'])
+    assert (which in ['test', 'val'])
+    assert (which_data in ['bg', 'face'])
     if trait is not None:
-        assert(trait in ['O', 'C', 'E', 'A', 'S'])
+        assert (trait in ['O', 'C', 'E', 'A', 'S'])
 
     if which == 'val':
         which_batch_size = C.VAL_BATCH_SIZE
@@ -116,7 +107,7 @@ def run(which, steps, which_labels, frames, model, pred_diff, loss_saving, which
         pred_diff[0] = np.mean(pd_tmp, axis=0)
         loss_tmp_mean = np.mean(loss_tmp, axis=0)
         loss_saving.append(loss_tmp_mean)
-        print('E %d. %s loss: ' %(0, which), loss_tmp_mean,
+        print('E %d. %s loss: ' % (0, which), loss_tmp_mean,
               ' pred diff %s: ' % trait, pred_diff[0],
               ' time: ', time.time() - ts)
 
@@ -148,7 +139,8 @@ def main_loop(which, val_test_on):
         models_to_load = ['']
 
     for i, model_name in enumerate(models_to_load):
-        my_model, labels, steps, loss, pred_diff, id_frames, loss_function, device, num_traits = initialize(which, model_name)
+        my_model, labels, steps, loss, pred_diff, id_frames, loss_function, device, num_traits = \
+            initialize(which, model_name)
 
         if which == 'val':
             run(which=which, steps=steps, which_labels=labels, frames=id_frames, model=my_model, pred_diff=pred_diff,
@@ -163,7 +155,7 @@ def main_loop(which, val_test_on):
                 num_traits=num_traits, device=device, loss_function=loss_function)
 
 
-main_loop('test', 'bg')
+main_loop('val', 'bg')
 
 '''
 RESULTS
@@ -172,4 +164,3 @@ best val 'bg':
 best val 'face': 
 
 '''
-
