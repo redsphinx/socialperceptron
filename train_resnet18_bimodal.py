@@ -70,8 +70,8 @@ epochs = C.EPOCHS
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 train_loss = []
 pred_diff_train = np.zeros((epochs, num_traits), float)
-# training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
-training_steps = 1
+training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
+# training_steps = 1
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 
@@ -140,7 +140,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
               ' pred diff %s: ' % trait, pred_diff[e],
               ' time: ', time.time() - ts)
 
-        # U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
+        U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
 
         if which == 'test' and save_all_results:
             U.record_loss_all_test(loss_tmp, trait=True)
@@ -158,6 +158,6 @@ for e in range(0, epochs):
         loss_saving=train_loss, which_data=train_on, trait=which_trait)
 
     # save model
-    # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_113' % e)
-    #     torch.save(my_model.state_dict(), name)
+    if ((e + 1) % 10) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_113' % e)
+        torch.save(my_model.state_dict(), name)
