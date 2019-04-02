@@ -132,12 +132,10 @@ def main_loop(which, val_test_on):
         model_number = None
 
     if which == 'val':
-        # saved_epochs = [9, 19, 29, 39, 49]
-        saved_epochs = [59, 69, 79, 89, 99]
+        saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
         models_to_load = ['epoch_%d_%d' % (saved_epochs[i], model_number) for i in range(len(saved_epochs))]
     else:
-        which_trait = ''
-        models_to_load = ['']
+        models_to_load = ['epoch_99_102']
 
     for i, model_name in enumerate(models_to_load):
         my_model, labels, steps, loss, pred_diff, id_frames, loss_function, device, num_traits = \
@@ -156,7 +154,7 @@ def main_loop(which, val_test_on):
                 num_traits=num_traits, device=device, loss_function=loss_function)
 
 
-main_loop('val', 'bg')
+main_loop('test', 'bg')
 
 '''
 RESULTS
