@@ -22,7 +22,7 @@ import deepimpression2.chalearn30.data_utils as D
 
 # settings
 num_traits = 5
-load_model = False
+load_model = True
 
 
 # device
@@ -37,13 +37,12 @@ device = torch.device(_dev)
 my_model = resnet18(pretrained=False)
 
 my_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
-# my_model.fc = Tanh(nn.Linear(in_features=512, out_features=num_traits, bias=True))
 
 if load_model:
-    p = os.path.join(P.MODELS, '')
+    p = os.path.join(P.MODELS, 'epoch_19_107')
     my_model.load_state_dict(torch.load(p))
-    print('model loaded')
-    continuefrom = 0
+    print('model epoch_19_107 loaded')
+    continuefrom = 20
 else:
     continuefrom = 0
 
@@ -149,6 +148,8 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
             loss = loss_function(predictions, labels)
             loss.backward()
             optimizer.step()
+            if bool(torch.isnan(loss)):
+                print('its happening')
         else:
             model.eval()
             with torch.no_grad():
@@ -222,5 +223,5 @@ for e in range(continuefrom, epochs):
 
     # save model
     # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_107' % e)
-    #     torch.save(my_model.state_dict(), name)
+    name = os.path.join(P.MODELS, 'epoch_%d_107' % e)
+    torch.save(my_model.state_dict(), name)

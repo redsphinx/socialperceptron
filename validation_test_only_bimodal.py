@@ -153,15 +153,15 @@ def run(which, steps, which_labels, frames, model, bg_model, face_model, optimiz
 
 
 def main_loop(which):
-    model_number = 61  # TODO: check this!!!!!!!!!! OCE: 105 AS: 61
-    index = 4
+    model_number = 105  # TODO: check this!!!!!!!!!! OCE: 105 AS: 61
+    index = 2
     #          0    1    2    3    4
     traits = ['O', 'C', 'E', 'A', 'S']
     which_trait = traits[index]
 
     bgs = ['epoch_89_60_O', 'epoch_79_60_C', 'epoch_99_60_E', 'epoch_89_60_A', 'epoch_89_60_S']
     faces = ['epoch_39_59_O', 'epoch_19_59_C', 'epoch_99_59_E', 'epoch_89_59_A', 'epoch_19_59_S']
-    bg_and_face = ['', '', '', 'epoch_99_61_A', 'epoch_9_61_S']
+    bg_and_face = ['epoch_99_105_O', 'epoch_99_105_C', 'epoch_19_105_E', 'epoch_99_61_A', 'epoch_9_61_S']
 
     bg_name = bgs[index]
     face_name = faces[index]
@@ -203,7 +203,7 @@ best val 'all', with decay 0.001: epoch_69_95_O, epoch_99_95_C, epoch_29_95_E, e
 
 as of 1 apr 19:
 
-best val 'all': epoch_99_61_A, epoch_9_61_S
+best val 'all': epoch_99_105_O, epoch_99_105_C, epoch_19_105_E, epoch_99_61_A, epoch_9_61_S
 
 best val 'bg': epoch_89_60_O, epoch_79_60_C, epoch_99_60_E, epoch_89_60_A, epoch_89_60_S
 best val 'face': epoch_39_59_O, epoch_19_59_C, epoch_99_59_E, epoch_89_59_A, epoch_19_59_S
