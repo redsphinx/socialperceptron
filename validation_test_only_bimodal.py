@@ -154,7 +154,7 @@ def run(which, steps, which_labels, frames, model, bg_model, face_model, optimiz
 
 def main_loop(which):
     model_number = 105  # TODO: check this!!!!!!!!!! OCE: 105 AS: 61
-    index = 2
+    index = 4
     #          0    1    2    3    4
     traits = ['O', 'C', 'E', 'A', 'S']
     which_trait = traits[index]

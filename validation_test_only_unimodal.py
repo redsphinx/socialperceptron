@@ -144,16 +144,16 @@ def main_loop(which, val_test_on):
 
     if which == 'val':
         saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
-        # which_trait = 'O'
+        which_trait = 'O'
         # which_trait = 'C'
         # which_trait = 'E'
         # which_trait = 'A'
-        which_trait = 'S'
+        # which_trait = 'S'
         models_to_load = ['epoch_%d_%d_%s' % (saved_epochs[i], model_number, which_trait) for i in range(len(saved_epochs))]
     else:
         # TODO: for test change here!!!!!!!!!!!!
         which_trait = 'S'
-        models_to_load = ['epoch_89_60_S']
+        models_to_load = ['epoch_19_59_S']
 
     for i, model_name in enumerate(models_to_load):
         my_model, my_optimizer, epochs, labels, steps, loss, pred_diff, id_frames = initialize(which, model_name)

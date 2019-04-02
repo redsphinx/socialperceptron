@@ -358,14 +358,9 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
                 else:
                     image = image[0].astype(np.float32)
                     # image /= img_max
-                    try:
-                        image[0] = image[0] / np.max(image[0])
-                        image[1] = image[1] / np.max(image[1])
-                        image[2] = image[2] / np.max(image[2])
-                    except RuntimeWarning:
-                        print('channel has a max of 0')
-                        break
-
+                    for ch in range(3):
+                        if np.max(image[ch]) != 0:
+                            image[ch] = image[ch] / np.max(image[ch])
                     image = torch.from_numpy(image)
                     image = normalize(image)
                     image = image.numpy()

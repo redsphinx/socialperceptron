@@ -49,6 +49,9 @@ else:
 my_model.cuda(device)
 
 
+# Erdi tips: SGD, lr=0.001
+# https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html
+
 # optimizer
 learning_rate = 0.0002
 
