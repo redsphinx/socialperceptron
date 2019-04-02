@@ -92,7 +92,7 @@ pred_diff_test = np.zeros((epochs, num_traits), float)
 training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
 val_steps = len(val_labels) // C.VAL_BATCH_SIZE
 test_steps = len(test_labels) // C.TEST_BATCH_SIZE
-# training_steps = 2
+# training_steps = 10
 # val_steps = 2
 
 id_frames = h5.File(P.NUM_FRAMES, 'r')
@@ -221,6 +221,6 @@ for e in range(continuefrom, epochs):
     # best val 'face' OCEAS: epoch_39_59_O, epoch_49_59_C, epoch_99_59_E, epoch_89_59_A, epoch_19_59_S
 
     # save model
-    if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_107' % e)
-        torch.save(my_model.state_dict(), name)
+    # if ((e + 1) % 10) == 0:
+    #     name = os.path.join(P.MODELS, 'epoch_%d_107' % e)
+    #     torch.save(my_model.state_dict(), name)
