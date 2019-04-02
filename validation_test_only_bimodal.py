@@ -155,17 +155,22 @@ def run(which, steps, which_labels, frames, model, bg_model, face_model, optimiz
 def main_loop(which):
     model_number = 61  # TODO: check this!!!!!!!!!! OCE: 105 AS: 61
     index = 4
-
+    #          0    1    2    3    4
     traits = ['O', 'C', 'E', 'A', 'S']
     which_trait = traits[index]
 
     bgs = ['epoch_89_60_O', 'epoch_79_60_C', 'epoch_99_60_E', 'epoch_89_60_A', 'epoch_89_60_S']
     faces = ['epoch_39_59_O', 'epoch_19_59_C', 'epoch_99_59_E', 'epoch_89_59_A', 'epoch_19_59_S']
+    bg_and_face = ['', '', '', 'epoch_99_61_A', 'epoch_9_61_S']
+
     bg_name = bgs[index]
     face_name = faces[index]
 
-    saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
-    models_to_load = ['epoch_%d_%d_%s' % (saved_epochs[i], model_number, which_trait) for i in range(len(saved_epochs))]
+    if which == 'val':
+        saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
+        models_to_load = ['epoch_%d_%d_%s' % (saved_epochs[i], model_number, which_trait) for i in range(len(saved_epochs))]
+    else:
+        models_to_load = [bg_and_face[index]]
 
     for i, model_name in enumerate(models_to_load):
         my_model, bg_model, face_model, my_optimizer, epochs, labels, steps, loss, pred_diff, id_frames = \
@@ -183,7 +188,7 @@ def main_loop(which):
                 record_predictions=True)  # ordered=True so will not shuffle
 
 
-# main_loop('val')
+main_loop('test')
 
 '''
 RESULTS 

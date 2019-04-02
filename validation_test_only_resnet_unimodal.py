@@ -52,7 +52,7 @@ def initialize(which, model_name):
         steps = None
 
     loss = []
-    pred_diff = np.zeros((1, 1), float)
+    pred_diff = np.zeros((1, num_traits), float)
 
     id_frames = h5.File(P.NUM_FRAMES, 'r')
 
@@ -132,7 +132,8 @@ def main_loop(which, val_test_on):
         model_number = None
 
     if which == 'val':
-        saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
+        # saved_epochs = [9, 19, 29, 39, 49]
+        saved_epochs = [59, 69, 79, 89, 99]
         models_to_load = ['epoch_%d_%d' % (saved_epochs[i], model_number) for i in range(len(saved_epochs))]
     else:
         which_trait = ''
@@ -160,7 +161,7 @@ main_loop('val', 'bg')
 '''
 RESULTS
 
-best val 'bg': 
-best val 'face': 
+best val 'bg': epoch_99_102
+best val 'face': epoch_99_101
 
 '''

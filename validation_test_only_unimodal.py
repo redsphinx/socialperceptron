@@ -151,8 +151,9 @@ def main_loop(which, val_test_on):
         which_trait = 'S'
         models_to_load = ['epoch_%d_%d_%s' % (saved_epochs[i], model_number, which_trait) for i in range(len(saved_epochs))]
     else:
-        which_trait = 'O'
-        models_to_load = ['epoch_39_59_O']
+        # TODO: for test change here!!!!!!!!!!!!
+        which_trait = 'S'
+        models_to_load = ['epoch_89_60_S']
 
     for i, model_name in enumerate(models_to_load):
         my_model, my_optimizer, epochs, labels, steps, loss, pred_diff, id_frames = initialize(which, model_name)
@@ -169,7 +170,7 @@ def main_loop(which, val_test_on):
                 trait=which_trait, record_loss=True, record_predictions=True)
 
 
-main_loop('test', 'face')
+main_loop('test', 'bg')
 
 '''
 RESULTS

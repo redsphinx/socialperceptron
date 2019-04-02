@@ -59,11 +59,14 @@ SETUP4 = '/scratch/users/gabras/data/trying_out/setup4'
 # -------------------------------------------------------------------------------------------------
 # log files
 LOG_BASE = '/scratch/users/gabras/data/loss/'
-TRAIN_LOG = '/scratch/users/gabras/data/loss/train_111.txt'
-VAL_LOG = '/scratch/users/gabras/data/loss/val_111.txt'
-##
-TEST_LOG = '/scratch/users/gabras/data/loss/test_111.txt'
-PREDICTION_LOG = '/scratch/users/gabras/data/loss/pred_111.txt'
+# TODO: change saving files HERE !!!!!!
+
+nam = '112_S'
+
+TRAIN_LOG = '/scratch/users/gabras/data/loss/train_%s.txt' % nam
+VAL_LOG = '/scratch/users/gabras/data/loss/val_%s.txt' % nam
+TEST_LOG = '/scratch/users/gabras/data/loss/test_%s.txt' % nam
+PREDICTION_LOG = '/scratch/users/gabras/data/loss/pred_%s.txt' % nam
 
 # -------------------------------------------------------------------------------------------------
 # models
