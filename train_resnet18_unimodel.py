@@ -224,5 +224,3 @@ for e in range(continuefrom, epochs):
     if ((e + 1) % 10) == 0:
         name = os.path.join(P.MODELS, 'epoch_%d_107' % e)
         torch.save(my_model.state_dict(), name)
-
-# TODO: why is bg nan after epoch 4?? can't replicate...oh well
