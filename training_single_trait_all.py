@@ -121,6 +121,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
                                                        frame_num=frame_num, same_frame=same_frame, trait=trait)
 
         # shuffle data and labels in same order
+        # TODO: this is issue...leave it. no wait, it's not. we repeat validation later without shuffling, saulgoodman
         if which != 'test':
             shuf = np.arange(which_batch_size)
             shuffle(shuf)
