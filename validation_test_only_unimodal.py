@@ -133,8 +133,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         U.record_all_predictions(which, preds)
 
 
-def main_loop(which):
-    val_test_on = 'bg'
+def main_loop(which, val_test_on):
     if val_test_on == 'face':
         model_number = 59
     elif val_test_on == 'bg':
@@ -143,13 +142,17 @@ def main_loop(which):
         print('val_test_on is not correct')
         model_number = None
 
-    saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
-    # which_trait = 'O'
-    # which_trait = 'C'
-    # which_trait = 'E'
-    # which_trait = 'A'
-    which_trait = 'S'
-    models_to_load = ['epoch_%d_%d_%s' % (saved_epochs[i], model_number, which_trait) for i in range(len(saved_epochs))]
+    if which == 'val':
+        saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
+        # which_trait = 'O'
+        # which_trait = 'C'
+        # which_trait = 'E'
+        # which_trait = 'A'
+        which_trait = 'S'
+        models_to_load = ['epoch_%d_%d_%s' % (saved_epochs[i], model_number, which_trait) for i in range(len(saved_epochs))]
+    else:
+        which_trait = 'O'
+        models_to_load = ['epoch_39_59_O']
 
     for i, model_name in enumerate(models_to_load):
         my_model, my_optimizer, epochs, labels, steps, loss, pred_diff, id_frames = initialize(which, model_name)
@@ -166,6 +169,8 @@ def main_loop(which):
                 trait=which_trait, record_loss=True, record_predictions=True)
 
 
+main_loop('test', 'face')
+
 '''
 RESULTS
 
@@ -179,4 +184,3 @@ best val 'face': epoch_39_59_O, epoch_19_59_C, epoch_99_59_E, epoch_89_59_A, epo
 
 '''
 
-# main_loop('val')

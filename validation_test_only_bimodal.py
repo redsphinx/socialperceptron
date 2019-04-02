@@ -183,7 +183,7 @@ def main_loop(which):
                 record_predictions=True)  # ordered=True so will not shuffle
 
 
-main_loop('val')
+# main_loop('val')
 
 '''
 RESULTS 
