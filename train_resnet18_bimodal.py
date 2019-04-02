@@ -98,20 +98,12 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
         
-        # TODO: check if data are same size!!!!!!!
-        # if not, load data with resize=True
-
-        # face_data.shape
-        # (32, 3, 256, 256)
-        # bg_data.shape
-        # (32, 3, 256, 256)
-
+        # keep resize=False. control with the case NO pre-trained resnet18
         labels_bg, bg_data, frame_num = D.load_data(labels_selected, which_labels, frames, which_data='bg',
-                                                    ordered=ordered, is_resnet18=is_resnet18, same_frame=True)
+                                                    ordered=False, is_resnet18=is_resnet18, same_frame=False)
         labels_face, face_data, _ = D.load_data(labels_selected, which_labels, frames, which_data='face',
-                                                ordered=ordered, is_resnet18=is_resnet18, same_frame=True,
+                                                ordered=False, is_resnet18=is_resnet18, same_frame=True,
                                                 frame_num=frame_num)
-        # TODO: check if labels are same
 
         if C.ON_GPU:
             bg_data = torch.from_numpy(bg_data)
