@@ -44,8 +44,8 @@ p = os.path.join(P.MODELS, 'epoch_39_59_O')
 chainer.serializers.load_npz(p, face_model)
 print('face model loaded')
 
-# my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.001)
-my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
+my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8, weight_decay_rate=0.001)
+# my_optimizer = Adam(alpha=0.0002, beta1=0.5, beta2=0.999, eps=10e-8)
 my_optimizer.setup(my_model)
 
 if C.ON_GPU:
@@ -179,7 +179,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 
 print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
-    which_trait = 'O'  # O C E A S
+    which_trait = 'S'  # O C E A S
     train_on = 'all'
     validate_on = 'all'
     # print('trained on: %s val on: %s for trait %s' % (train_on, validate_on, which_trait))
@@ -214,7 +214,7 @@ for e in range(continuefrom, epochs):
 
     # save model
     if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_105_%s' % (e, which_trait))
+        name = os.path.join(P.MODELS, 'epoch_%d_127_%s' % (e, which_trait))
         chainer.serializers.save_npz(name, my_model)
 '''
 RESULTS

@@ -14,3 +14,18 @@ class ResNet18_LastLayers(nn.Module):
         h = torch.cat((x1, x2), dim=1)
         h = self.fc(h)
         return h
+
+
+class hackyResNet18(nn.Module):
+    def __init__(self, num_traits):
+        super(hackyResNet18, self).__init__()
+
+        self.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
+
+
+    def forward(self, x):
+        h = self.fc(x)
+        h = torch.tanh(h)
+        # (1+ torch.tanh(fc(a))) / 2
+        h = (1 + h) / 2
+        return h

@@ -19,5 +19,5 @@ RESIDE = 256
 SIZE = 224
 
 # ORDERED_FRAME = 30  # for testing
-ORDERED_FRAME = 10
-# ORDERED_FRAME = 6  # for validation
+# ORDERED_FRAME = 10
+ORDERED_FRAME = 6  # for validation

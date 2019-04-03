@@ -61,7 +61,7 @@ SETUP4 = '/scratch/users/gabras/data/trying_out/setup4'
 LOG_BASE = '/scratch/users/gabras/data/loss/'
 # TODO: change saving files HERE !!!!!!
 
-nam = '126_S'
+nam = '127_S'
 
 TRAIN_LOG = '/scratch/users/gabras/data/loss/train_%s.txt' % nam
 VAL_LOG = '/scratch/users/gabras/data/loss/val_%s.txt' % nam
