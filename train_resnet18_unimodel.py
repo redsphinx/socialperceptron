@@ -25,7 +25,7 @@ import deepimpression2.chalearn30.data_utils as D
 # settings
 # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 pretrained = True
-mode = 'extractor'  # or extractor
+mode = 'finetune'  # or extractor
 num_traits = 5
 load_model = False
 
@@ -62,7 +62,14 @@ else:
 
 learning_rate = 0.001
 momentum = 0.9
-my_optimizer = SGD(my_model.fc.parameters(), lr=learning_rate, momentum=momentum)
+
+if mode == 'finetune':
+    my_optimizer = SGD(my_model.parameters(), lr=learning_rate, momentum=momentum)
+elif mode == 'extractor':
+    my_optimizer = SGD(my_model.fc.parameters(), lr=learning_rate, momentum=momentum)
+else:
+    print('problem with mode', mode)
+    my_optimizer = None
 # Decay LR by a factor of 0.1 every 7 epochs
 exp_lr_scheduler = lr_scheduler.StepLR(my_optimizer, step_size=7, gamma=0.1)
     
@@ -93,8 +100,8 @@ epochs = C.EPOCHS
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 train_loss = []
 pred_diff_train = np.zeros((epochs, num_traits), float)
-training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
-# training_steps = 10
+# training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
+training_steps = 30
 
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
@@ -157,7 +164,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
               ' pred diff %s: ' % trait, pred_diff[e],
               ' time: ', time.time() - ts)
 
-        U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
+        # U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
 
         if which == 'test' and save_all_results:
             U.record_loss_all_test(loss_tmp, trait=True)
@@ -169,7 +176,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 print('Enter training loop with validation')
 for e in range(0, epochs):
     which_trait = None
-    train_on = 'bg'
+    train_on = 'face'
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
@@ -178,6 +185,6 @@ for e in range(0, epochs):
         loss_saving=train_loss, which_data=train_on, trait=which_trait)
 
     # save model
-    if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_124' % e)
-        torch.save(my_model.state_dict(), name)
+    # if ((e + 1) % 10) == 0:
+    #     name = os.path.join(P.MODELS, 'epoch_%d_12' % e)
+    #     torch.save(my_model.state_dict(), name)
