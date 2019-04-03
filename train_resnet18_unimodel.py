@@ -25,7 +25,7 @@ import deepimpression2.chalearn30.data_utils as D
 # settings
 # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 pretrained = True
-mode = 'finetune'  # or extractor
+mode = 'extractor'  # or extractor
 num_traits = 5
 load_model = False
 
@@ -169,7 +169,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 print('Enter training loop with validation')
 for e in range(0, epochs):
     which_trait = None
-    train_on = 'face'
+    train_on = 'bg'
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
@@ -179,5 +179,5 @@ for e in range(0, epochs):
 
     # save model
     if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_119' % e)
+        name = os.path.join(P.MODELS, 'epoch_%d_124' % e)
         torch.save(my_model.state_dict(), name)

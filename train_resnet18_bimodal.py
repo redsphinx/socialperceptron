@@ -11,6 +11,8 @@ import torch
 from torch import nn
 from torch.nn import CrossEntropyLoss, L1Loss
 from torch.nn import Tanh
+from torch.optim.sgd import SGD
+from torch.optim import lr_scheduler
 
 import deepimpression2.paths as P
 import deepimpression2.constants as C
@@ -21,25 +23,44 @@ from deepimpression2.model_resnet18 import ResNet18_LastLayers
 
 
 num_traits = 5
+# mode in ['finetune'] or ['extractor']
+mode = 'extractor' 
 
-# face model
-face_model = resnet18()
-face_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
-p = os.path.join(P.MODELS, 'epoch_99_101')
-face_model.load_state_dict(torch.load(p))
-# get activations: make fc sequential
-face_model.fc = nn.Sequential()
+if mode == 'finetune':
+    # face model
+    face_model = resnet18()
+    face_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
+    p = os.path.join(P.MODELS, 'epoch_99_101')
+    face_model.load_state_dict(torch.load(p))
+    # get activations: make fc sequential
+    face_model.fc = nn.Sequential()
+    
+    print('face model epoch_99_101 loaded')
+    
+    # bg model
+    bg_model = resnet18()
+    bg_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
+    p = os.path.join(P.MODELS, 'epoch_99_102')
+    bg_model.load_state_dict(torch.load(p))
+    # get activations: make fc sequential
+    bg_model.fc = nn.Sequential()
+    print('bg model epoch_99_102 loaded')
+    
+elif mode == 'extractor':
+    face_model = resnet18(pretrained=True)
+    for param in face_model.parameters():
+        param.requires_grad = False
+    face_model.fc = nn.Sequential()
 
-print('face model epoch_99_101 loaded')
+    bg_model = resnet18(pretrained=True)
+    for param in bg_model.parameters():
+        param.requires_grad = False
+    bg_model.fc = nn.Sequential()
 
-# bg model
-bg_model = resnet18()
-bg_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
-p = os.path.join(P.MODELS, 'epoch_99_102')
-bg_model.load_state_dict(torch.load(p))
-# get activations: make fc sequential
-bg_model.fc = nn.Sequential()
-print('bg model epoch_99_102 loaded')
+else:
+    print('mode is not good', mode)
+    face_model = None
+    bg_model = None
 
 # final model
 my_model = ResNet18_LastLayers(num_traits)
@@ -56,9 +77,17 @@ face_model.cuda(device)
 bg_model.cuda(device)
 my_model.cuda(device)
 
-learning_rate = 0.0002
-my_optimizer = Adam(my_model.parameters(), lr=learning_rate, betas=(0.5, 0.999), eps=10-8)
+# learning_rate = 0.0002
+# my_optimizer = Adam(my_model.parameters(), lr=learning_rate, betas=(0.5, 0.999), eps=10-8)
+
 loss_function = L1Loss()
+
+learning_rate = 0.001
+momentum = 0.9
+my_optimizer = SGD(my_model.fc.parameters(), lr=learning_rate, momentum=momentum)
+# Decay LR by a factor of 0.1 every 7 epochs
+exp_lr_scheduler = lr_scheduler.StepLR(my_optimizer, step_size=7, gamma=0.1)
+
 
 print('Initializing')
 print('model initialized with %d parameters' % U.get_torch_params(my_model))
@@ -100,10 +129,11 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         
         # keep resize=False. control with the case NO pre-trained resnet18
         labels_bg, bg_data, frame_num = D.load_data(labels_selected, which_labels, frames, which_data='bg',
-                                                    ordered=False, is_resnet18=is_resnet18, same_frame=False)
+                                                    ordered=False, is_resnet18=is_resnet18, same_frame=False,
+                                                    resize=True)
         labels_face, face_data, _ = D.load_data(labels_selected, which_labels, frames, which_data='face',
                                                 ordered=False, is_resnet18=is_resnet18, same_frame=True,
-                                                frame_num=frame_num)
+                                                frame_num=frame_num, resize=True)
 
         if C.ON_GPU:
             bg_data = torch.from_numpy(bg_data)
@@ -119,12 +149,16 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
             bg_activations = bg_model(bg_data)
             face_activations = face_model(face_data)
 
+        exp_lr_scheduler.step()
         model.train()
         optimizer.zero_grad()
-        predictions = model(bg_activations, face_activations)
-        loss = loss_function(predictions, labels)
-        loss.backward()
-        optimizer.step()
+        with torch.set_grad_enabled(True):
+            predictions = model(bg_activations, face_activations)
+            loss = loss_function(predictions, labels)
+            loss.backward()
+            optimizer.step()
+            if bool(torch.isnan(loss)):
+                print('its happening')
 
         if record_loss:
             loss_tmp.append(float(loss.data))
@@ -159,5 +193,5 @@ for e in range(0, epochs):
 
     # save model
     if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_113' % e)
+        name = os.path.join(P.MODELS, 'epoch_%d_125' % e)
         torch.save(my_model.state_dict(), name)
