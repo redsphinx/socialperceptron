@@ -44,12 +44,14 @@ def corr_bg_single_deepimpression():
 def corr_all_single_deepimpression():
     traits = ['O', 'C', 'E', 'A', 'S']
     # models = ['pred_112_O.txt', 'pred_112_C.txt', 'pred_112_E.txt', 'pred_112_A.txt', 'pred_112_S.txt']  # frame=6
-    models = ['pred_118_O.txt', 'pred_118_C.txt', 'pred_118_E.txt', 'pred_118_A.txt', 'pred_118_S.txt']  # frame=30
+    # models = ['pred_118_O.txt', 'pred_118_C.txt', 'pred_118_E.txt', 'pred_118_A.txt', 'pred_118_S.txt']  # frame=30
+    # models = []  # frame=10
+    models = ['pred_126_O.txt', 'pred_126_C.txt', 'pred_126_E.txt', 'pred_126_A.txt', 'pred_126_S.txt']  # frame=10
 
     for i in range(5):
         correlations_ground_truth(traits[i], models[i])
-
-corr_all_single_deepimpression()
+# 
+# corr_all_single_deepimpression()
 
 def correlations_resnet_ground_truth(trait, name):
     traits_all = ['O', 'C', 'E', 'A', 'S']

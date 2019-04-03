@@ -60,34 +60,33 @@ else:
     print('mode is not correct: %s' % mode)
     my_model = None
 
-learning_rate = 0.001
-momentum = 0.9
 
-if mode == 'finetune':
-    my_optimizer = SGD(my_model.parameters(), lr=learning_rate, momentum=momentum)
-elif mode == 'extractor':
-    my_optimizer = SGD(my_model.fc.parameters(), lr=learning_rate, momentum=momentum)
-else:
-    print('problem with mode', mode)
-    my_optimizer = None
-# Decay LR by a factor of 0.1 every 7 epochs
-exp_lr_scheduler = lr_scheduler.StepLR(my_optimizer, step_size=7, gamma=0.1)
-    
-# learning_rate = 0.0002
-# my_optimizer = Adam(
-#             [
-#                 {'params': my_model.conv1.parameters(), 'lr': learning_rate/64},
-#                 {'params': my_model.bn1.parameters(), 'lr': learning_rate/32},
-#                 {'params': my_model.layer1.parameters(), 'lr': learning_rate/16},
-#                 {'params': my_model.layer2.parameters(), 'lr': learning_rate/8},
-#                 {'params': my_model.layer3.parameters(), 'lr': learning_rate/4},
-#                 {'params': my_model.layer4.parameters(), 'lr': learning_rate/2},
-#                 {'params': my_model.fc.parameters(), 'lr': learning_rate}
-#             ],
-#             lr=learning_rate, betas=(0.5, 0.999), eps=10-8
-#         )
+# which_opt = 'sgd'
+which_opt = 'adam'
 
-# loss
+if which_opt == 'sgd':
+    learning_rate = 0.001
+    momentum = 0.9
+    if mode == 'finetune':
+        my_optimizer = SGD(my_model.parameters(), lr=learning_rate, momentum=momentum)
+    elif mode == 'extractor':
+        my_optimizer = SGD(my_model.fc.parameters(), lr=learning_rate, momentum=momentum)
+    else:
+        print('problem with mode', mode)
+        my_optimizer = None
+    # Decay LR by a factor of 0.1 every 7 epochs
+    # exp_lr_scheduler = lr_scheduler.StepLR(my_optimizer, step_size=7, gamma=0.1)
+
+elif which_opt == 'adam':
+    learning_rate = 0.0002
+    betas = (0.5, 0.999)
+    eps=10-8
+
+    if mode == 'finetune':
+        my_optimizer = Adam(my_model.parameters(), lr=learning_rate, betas=betas, eps=eps, weight_decay=0.001)
+    elif mode == 'extractor':
+        my_optimizer = Adam(my_model.fc.parameters(), lr=learning_rate, betas=betas, eps=eps)
+
 loss_function = L1Loss()
 
 print('Initializing')
@@ -101,7 +100,7 @@ train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 train_loss = []
 pred_diff_train = np.zeros((epochs, num_traits), float)
 # training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
-training_steps = 30
+training_steps = 100
 
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
@@ -140,16 +139,17 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
             labels = torch.from_numpy(labels)
             labels = labels.cuda(device)
 
-        exp_lr_scheduler.step()
+        # exp_lr_scheduler.step()
+
         model.train()
         optimizer.zero_grad()
-        with torch.set_grad_enabled(True):
-            predictions = model(data)
-            loss = loss_function(predictions, labels)
-            loss.backward()
-            optimizer.step()
-            if bool(torch.isnan(loss)):
-                print('its happening')
+        # with torch.set_grad_enabled(True):
+        predictions = model(data)
+        loss = loss_function(predictions, labels)
+        loss.backward()
+        optimizer.step()
+        if bool(torch.isnan(loss)):
+            print('its happening')
 
         if record_loss:
             loss_tmp.append(float(loss.data))

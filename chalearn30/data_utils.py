@@ -295,10 +295,12 @@ def fill_average(image, which_data, optface, resize=False):
 
 
 def do_the_normalize(im):
+
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     totensor = transforms.ToTensor()
-    im = im[0].astype(np.float32)
-    im = torch.from_numpy(im)
+
+    im = im[0]
+    im = im.transpose((1,2,0))
     im = totensor(im)
     im = normalize(im)
     im = im.numpy()
@@ -333,7 +335,6 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
                     bg = fill_average(bg, 'bg', optface, resize)
                     face, optface, n = quicker_load_resize(k, id_frames, 'face', ordered)
                     face = fill_average(face, 'face', optface, resize)
-                    # TODO: what is shape
 
                     if is_resnet18 and resnet18_pretrain:
                         face = do_the_normalize(face)
