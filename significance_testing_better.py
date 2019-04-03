@@ -1,6 +1,9 @@
 import numpy as np
 import os
 from scipy import stats
+import h5py as h5
+from shutil import copyfile
+from tqdm import tqdm
 
 import deepimpression2.paths as P
 import deepimpression2.chalearn30.data_utils as D
@@ -80,4 +83,32 @@ def corr_bg_resnet():
         correlations_resnet_ground_truth(traits[i], 'pred_115.txt')
 
 
-# corr_bg_resnet()
+def how_many_frames():
+    total = 0
+    id_frames = h5.File(P.NUM_FRAMES, 'r')
+    labels = h5.File(P.CHALEARN_TEST_LABELS_20, 'r')
+    for k in labels.keys():
+        k = k.split('.mp4')[0]
+        total += id_frames[k][0]
+    # 309973
+    p = '/scratch/users/gabras/data/chalearn30/all_data'
+
+    totsize = 0
+    for k in labels.keys():
+        name = k.split('.mp4')[0] + '.h5'
+        path = os.path.join(p, name)
+        totsize += os.path.getsize(path)
+
+    # 252936585160/1024/1024/1024 = 236GB
+
+    for k in tqdm(labels.keys()):
+        name = k.split('.mp4')[0] + '.h5'
+        d = '/home/gabras/chalearn_test_data'
+        src = os.path.join(p, name)
+        dst = os.path.join(d, name)
+        copyfile(src, dst)
+
+
+how_many_frames()
+
+
