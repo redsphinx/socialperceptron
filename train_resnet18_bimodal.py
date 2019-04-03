@@ -21,7 +21,7 @@ import deepimpression2.util as U
 import deepimpression2.chalearn30.data_utils as D
 from deepimpression2.model_resnet18 import ResNet18_LastLayers
 
-
+PRETRAIN = True
 num_traits = 5
 # mode in ['finetune'] or ['extractor']
 mode = 'extractor' 
@@ -47,12 +47,12 @@ if mode == 'finetune':
     print('bg model epoch_99_102 loaded')
     
 elif mode == 'extractor':
-    face_model = resnet18(pretrained=True)
+    face_model = resnet18(pretrained=PRETRAIN)
     for param in face_model.parameters():
         param.requires_grad = False
     face_model.fc = nn.Sequential()
 
-    bg_model = resnet18(pretrained=True)
+    bg_model = resnet18(pretrained=PRETRAIN)
     for param in bg_model.parameters():
         param.requires_grad = False
     bg_model.fc = nn.Sequential()
@@ -105,7 +105,8 @@ id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 
 def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, which_data, trait=None,
-        ordered=False, save_all_results=False, record_predictions=False, record_loss=True, is_resnet18=True):
+        ordered=False, save_all_results=False, record_predictions=False, record_loss=True, is_resnet18=True,
+        pretrain_resnet=PRETRAIN):
     print('steps: ', steps)
     assert(which in ['train'])
     assert(which_data in ['all'])
@@ -130,10 +131,10 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         # keep resize=False. control with the case NO pre-trained resnet18
         labels_bg, bg_data, frame_num = D.load_data(labels_selected, which_labels, frames, which_data='bg',
                                                     ordered=False, is_resnet18=is_resnet18, same_frame=False,
-                                                    resize=True)
+                                                    resize=True, resnet18_pretrain=pretrain_resnet)
         labels_face, face_data, _ = D.load_data(labels_selected, which_labels, frames, which_data='face',
                                                 ordered=False, is_resnet18=is_resnet18, same_frame=True,
-                                                frame_num=frame_num, resize=True)
+                                                frame_num=frame_num, resize=True, resnet18_pretrain=pretrain_resnet)
 
         if C.ON_GPU:
             bg_data = torch.from_numpy(bg_data)

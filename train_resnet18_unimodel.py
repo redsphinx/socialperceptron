@@ -24,7 +24,7 @@ import deepimpression2.chalearn30.data_utils as D
 
 # settings
 # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-pretrained = True
+PRETRAIN = True
 mode = 'finetune'  # or extractor
 num_traits = 5
 load_model = False
@@ -38,7 +38,7 @@ device = torch.device(_dev)
 
 if mode == 'finetune':
     # get model
-    my_model = resnet18(pretrained=pretrained)
+    my_model = resnet18(pretrained=PRETRAIN)
     my_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
     if load_model:
         p = os.path.join(P.MODELS, '')
@@ -51,7 +51,7 @@ if mode == 'finetune':
 
     # https://pytorch.org/tutorials/beginner/transfer_learning_tutorial.html
 elif mode == 'extractor':
-    my_model = resnet18(pretrained=pretrained)
+    my_model = resnet18(pretrained=PRETRAIN)
     for param in my_model.parameters():
         param.requires_grad = False
     my_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
@@ -107,7 +107,8 @@ id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 
 def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, which_data, trait=None,
-        ordered=False, save_all_results=False, record_predictions=False, record_loss=True, is_resnet18=True):
+        ordered=False, save_all_results=False, record_predictions=False, record_loss=True, is_resnet18=True,
+        pretrain_resnet=PRETRAIN):
     print('steps: ', steps)
     assert(which in ['train'])
     assert(which_data in ['bg', 'face'])
@@ -131,7 +132,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
         labels, data, _ = D.load_data(labels_selected, which_labels, frames, which_data, ordered=ordered,
-                                      is_resnet18=is_resnet18, resize=True)
+                                      is_resnet18=is_resnet18, resize=True, resnet18_pretrain=pretrain_resnet)
 
         if C.ON_GPU:
             data = torch.from_numpy(data)

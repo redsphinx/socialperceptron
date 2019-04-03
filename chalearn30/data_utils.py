@@ -14,7 +14,6 @@ import torchvision.transforms as transforms
 import torch
 
 
-normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
 # commenting because of mxnet
 # def mp4_to_arr(video_path):
@@ -295,8 +294,20 @@ def fill_average(image, which_data, optface, resize=False):
                 return image
 
 
+def do_the_normalize(im):
+    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    totensor = transforms.ToTensor()
+    im = im[0].astype(np.float32)
+    im = torch.from_numpy(im)
+    im = totensor(im)
+    im = normalize(im)
+    im = im.numpy()
+    im = np.expand_dims(im, 0)
+    return im
+
+
 def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream=False, frame_num=None,
-             use_luminance=False, use_color=False, use_everything=False, is_resnet18=False):
+             use_luminance=False, use_color=False, use_everything=False, is_resnet18=False, resnet18_pretrain=False):
     if resize:
         if twostream:
             data = np.zeros((len(keys), 6, C2.RESIDE, C2.RESIDE), dtype=np.float32)
@@ -322,6 +333,12 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
                     bg = fill_average(bg, 'bg', optface, resize)
                     face, optface, n = quicker_load_resize(k, id_frames, 'face', ordered)
                     face = fill_average(face, 'face', optface, resize)
+                    # TODO: what is shape
+
+                    if is_resnet18 and resnet18_pretrain:
+                        face = do_the_normalize(face)
+                        bg = do_the_normalize(bg)
+
                     data[i] = np.concatenate((bg, face), axis=1)
         else:
             if frame_num is None:
@@ -330,12 +347,17 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
                     image, optface, n = quicker_load_resize(k, id_frames, which_data, ordered)
                     frames.append(n)
                     image = fill_average(image, which_data, optface, resize)
+                    if is_resnet18 and resnet18_pretrain:
+                        image = do_the_normalize(image)
+
                     data[i] = image
                 n = frames
             else:
                 for i, k in enumerate(keys):
                     image, optface, n = quicker_load_resize(k, id_frames, which_data, ordered, frame_num[i])
                     image = fill_average(image, which_data, optface, resize)
+                    if is_resnet18 and resnet18_pretrain:
+                        image = do_the_normalize(image)
                     data[i] = image
                 n = frame_num
 
@@ -350,30 +372,19 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
                 data[i] = get_color(image)
             elif use_everything:
                 data[i] = get_everything(image)
-            elif is_resnet18:
-                # normalize is torch resnet18
-                img_max = np.max(image)
-                if img_max == 0:
-                    data[i] = image
-                else:
-                    image = image[0].astype(np.float32)
-                    # image /= img_max
-                    for ch in range(3):
-                        if np.max(image[ch]) != 0:
-                            image[ch] = image[ch] / np.max(image[ch])
-                    image = torch.from_numpy(image)
-                    image = normalize(image)
-                    image = image.numpy()
-                    image = np.expand_dims(image, 0)
-                    data[i] = image
+            # ONLY normalize if using pretrained resnet18
+            elif is_resnet18 and resnet18_pretrain:
+                image = do_the_normalize(image)
+                data[i] = image
             else:
                 data[i] = image
+
 
     return data, n
 
 
 def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False, ordered=False, twostream=False,
-              frame_num=None, same_frame=False, is_resnet18=False):
+              frame_num=None, same_frame=False, is_resnet18=False, resnet18_pretrain=False):
     assert(which_data in ['bg', 'face', 'all'])
 
     labels = np.zeros((len(labs_selected), 5), dtype=np.float32)
@@ -390,7 +401,8 @@ def load_data(labs_selected, labs_h5, id_frames, which_data, resize=False, order
         keys.append(k)
         labels[i] = labs_h5[k][0:5]
 
-    data, n = get_data(keys, id_frames, which_data, resize, ordered, twostream, frame_num, is_resnet18=is_resnet18)
+    data, n = get_data(keys, id_frames, which_data, resize, ordered, twostream, frame_num, is_resnet18=is_resnet18,
+                       resnet18_pretrain=resnet18_pretrain)
     return labels, data, n
 
 

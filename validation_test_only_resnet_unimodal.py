@@ -15,7 +15,7 @@ from torch import nn
 from torch.nn import L1Loss
 
 
-def initialize(which, model_name):
+def initialize(which, model_name, pretrain):
     num_traits = 5
     load_model = True
 
@@ -25,7 +25,7 @@ def initialize(which, model_name):
         _dev = 'cpu'
     device = torch.device(_dev)
 
-    my_model = resnet18(pretrained=False)
+    my_model = resnet18(pretrained=pretrain)
     my_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
 
     if load_model:
@@ -60,7 +60,8 @@ def initialize(which, model_name):
 
 
 def run(which, steps, which_labels, frames, model, pred_diff, loss_saving, which_data, trait, ordered,
-        save_all_results, record_predictions, record_loss, is_resnet18, num_traits, device, loss_function):
+        save_all_results, record_predictions, record_loss, is_resnet18, num_traits, device, loss_function,
+        resnet18_pretrain):
     print('steps: ', steps)
     assert (which in ['test', 'val'])
     assert (which_data in ['bg', 'face'])
@@ -83,7 +84,7 @@ def run(which, steps, which_labels, frames, model, pred_diff, loss_saving, which
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
         labels, data, _ = D.load_data(labels_selected, which_labels, frames, which_data, ordered=ordered,
-                                      is_resnet18=is_resnet18)
+                                      is_resnet18=is_resnet18, resnet18_pretrain=resnet18_pretrain)
 
         if C.ON_GPU:
             data = torch.from_numpy(data)
@@ -122,6 +123,7 @@ def run(which, steps, which_labels, frames, model, pred_diff, loss_saving, which
 
 def main_loop(which, val_test_on):
     which_trait = None
+    PRETRAIN = False
 
     if val_test_on == 'face':
         model_number = 101
@@ -139,19 +141,19 @@ def main_loop(which, val_test_on):
 
     for i, model_name in enumerate(models_to_load):
         my_model, labels, steps, loss, pred_diff, id_frames, loss_function, device, num_traits = \
-            initialize(which, model_name)
+            initialize(which, model_name, pretrain=PRETRAIN)
 
         if which == 'val':
             run(which=which, steps=steps, which_labels=labels, frames=id_frames, model=my_model, pred_diff=pred_diff,
                 loss_saving=loss, which_data=val_test_on, trait=which_trait, ordered=True,
                 save_all_results=False, record_predictions=False, record_loss=True, is_resnet18=True,
-                num_traits=num_traits, device=device, loss_function=loss_function)
+                num_traits=num_traits, device=device, loss_function=loss_function, resnet18_pretrain=PRETRAIN)
 
         elif which == 'test':
             run(which=which, steps=steps, which_labels=labels, frames=id_frames, model=my_model, pred_diff=pred_diff,
                 loss_saving=loss, which_data=val_test_on, trait=which_trait, ordered=True,
                 save_all_results=True, record_predictions=True, record_loss=True, is_resnet18=True,
-                num_traits=num_traits, device=device, loss_function=loss_function)
+                num_traits=num_traits, device=device, loss_function=loss_function, resnet18_pretrain=PRETRAIN)
 
 
 main_loop('test', 'bg')
