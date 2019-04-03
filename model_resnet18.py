@@ -18,17 +18,15 @@ class ResNet18_LastLayers(nn.Module):
 
 
 class hackyResNet18(nn.Module):
-    def __init__(self, num_traits):
+    def __init__(self, num_traits, pretrain):
         super(hackyResNet18, self).__init__()
-        self.real_resnet18 = resnet18(pretrained=True)
+        self.real_resnet18 = resnet18(pretrained=pretrain)
+        self.real_resnet18.fc = nn.Sequential()
         self.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
 
     def forward(self, x):
-
-        h = self.real_resnet18[:10](x) # TODO: get layer number
-
-        h = self.fc(x)
+        h = self.real_resnet18(x)
+        h = self.fc(h)
         h = torch.tanh(h)
-        # (1+ torch.tanh(fc(a))) / 2
         h = (1 + h) / 2
         return h

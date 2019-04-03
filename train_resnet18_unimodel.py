@@ -24,7 +24,7 @@ from deepimpression2.model_resnet18 import hackyResNet18
 
 # settings
 # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-PRETRAIN = True
+PRETRAIN = False
 mode = 'finetune'  # or extractor
 num_traits = 5
 load_model = False
@@ -64,24 +64,19 @@ device = torch.device(_dev)
 
 # ------------------------------------------------------------------------------
 # EXPERIMENTAL
-m1 = resnet18(pretrained=PRETRAIN)
-m1.fc = nn.Sequential()
-my_model = hackyResNet18(num_traits)
-m1 = m1.to(device)
+my_model = hackyResNet18(num_traits, PRETRAIN)
 my_model = my_model.to(device)
 # ------------------------------------------------------------------------------
 
 
-# which_opt = 'sgd'
-which_opt = 'adam'
+which_opt = 'sgd'
+# which_opt = 'adam'
 
 if which_opt == 'sgd':
     learning_rate = 0.001
     momentum = 0.9
     if mode == 'finetune':
-        # EXPERIMENTAL
-        my_optimizer = SGD(list(m1.parameters()) + list(my_model.parameters()), lr=learning_rate, momentum=momentum)
-        # my_optimizer = SGD(my_model.parameters(), lr=learning_rate, momentum=momentum)
+        my_optimizer = SGD(my_model.parameters(), lr=learning_rate, momentum=momentum)
     elif mode == 'extractor':
         my_optimizer = SGD(my_model.fc.parameters(), lr=learning_rate, momentum=momentum)
     else:
@@ -96,15 +91,14 @@ elif which_opt == 'adam':
     eps=10-8
 
     if mode == 'finetune':
-        my_optimizer = Adam(list(m1.parameters()) + list(my_model.parameters()), lr=learning_rate, betas=betas, eps=eps, weight_decay=0.001)
-        # my_optimizer = Adam(my_model.parameters(), lr=learning_rate, betas=betas, eps=eps, weight_decay=0.001)
+        my_optimizer = Adam(my_model.parameters(), lr=learning_rate, betas=betas, eps=eps, weight_decay=0.001)
     elif mode == 'extractor':
         my_optimizer = Adam(my_model.fc.parameters(), lr=learning_rate, betas=betas, eps=eps)
 
 loss_function = L1Loss()
 
 print('Initializing')
-print('model initialized with %d parameters' % (U.get_torch_params(my_model) + U.get_torch_params(m1)))
+print('model initialized with %d parameters' % (U.get_torch_params(my_model)))
 
 # train model
 epochs = C.EPOCHS
@@ -113,13 +107,13 @@ epochs = C.EPOCHS
 train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 train_loss = []
 pred_diff_train = np.zeros((epochs, num_traits), float)
-# training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
-training_steps = 100
+training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
+# training_steps = 100
 
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 
-def run(which, steps, which_labels, frames, first_part, model, optimizer, pred_diff, loss_saving, which_data, trait=None,
+def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, which_data, trait=None,
         ordered=False, save_all_results=False, record_predictions=False, record_loss=True, is_resnet18=True,
         pretrain_resnet=PRETRAIN):
     print('steps: ', steps)
@@ -155,13 +149,10 @@ def run(which, steps, which_labels, frames, first_part, model, optimizer, pred_d
 
         # exp_lr_scheduler.step()
 
-        first_part.train()
         model.train()
         optimizer.zero_grad()
         # with torch.set_grad_enabled(True):
-        features = first_part(data)
-        predictions = model(features)
-        # predictions = model(data)
+        predictions = model(data)
         loss = loss_function(predictions, labels)
         loss.backward()
         optimizer.step()
@@ -194,15 +185,15 @@ def run(which, steps, which_labels, frames, first_part, model, optimizer, pred_d
 print('Enter training loop with validation')
 for e in range(0, epochs):
     which_trait = None
-    train_on = 'face'
+    train_on = 'bg'
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
-    run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames, first_part=m1,
+    run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
         loss_saving=train_loss, which_data=train_on, trait=which_trait)
 
     # save model
-    # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_12' % e)
-    #     torch.save(my_model.state_dict(), name)
+    if ((e + 1) % 5) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_131' % e)
+        torch.save(my_model.state_dict(), name)
