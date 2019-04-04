@@ -5,7 +5,7 @@ from tqdm import tqdm
 from PIL import Image
 
 import chainer
-from chainer.backends.cuda import to_gpu
+from chainer.backends.cuda import to_gpu, to_cpu
 
 from deepimpression2.model_59 import Deepimpression
 from deepimpression2.model_59 import LastLayers
@@ -118,21 +118,24 @@ def resize_bg(image, optface):
     return image
 
 
-def run(all_models, id_frames, labels, dev, batch_size):
+def run(all_models, id_frames, labels, dev, batch_size, gpu):
     all_traits = ['O', 'C', 'E', 'A', 'S']
 
-    for k in tqdm(labels.keys()):
+    for k in labels.keys():
 
         BOSS_ARRAY = np.zeros(shape=(3, 5))  # holds mean prediction for single video
 
         k = k.split('.mp4')[0]
         if k != '4ZlcaXadwlo.005':  # video with no frames
+
+            print('video: %s' % k)
+
             num_frames = id_frames[k][0] - 1
 
             steps = num_frames // batch_size
             worker_array = np.zeros(shape=(3, 5, steps))
 
-            for s in range(steps):
+            for s in tqdm(range(steps)):
                 data = np.zeros(shape=(batch_size, 2, 3, 256, 256))
 
                 start = steps * batch_size
@@ -149,7 +152,8 @@ def run(all_models, id_frames, labels, dev, batch_size):
                     data[cnt] = face, bg
                     cnt += 1
 
-                data = to_gpu(data, device=dev)
+                if gpu:
+                    data = to_gpu(data, device=dev)
 
                 # for trait in traits
                 for i, t in enumerate(all_traits):
@@ -162,9 +166,9 @@ def run(all_models, id_frames, labels, dev, batch_size):
                         bg_pred, bg_features = bg_model(data[1])
                         all_pred = my_model(bg_features, face_features)
 
-                    worker_array[0][i][start:end] = face_pred
-                    worker_array[1][i][start:end] = bg_pred
-                    worker_array[2][i][start:end] = all_pred
+                    worker_array[0][i][start:end] = to_cpu(face_pred.data)
+                    worker_array[1][i][start:end] = to_cpu(bg_pred.data)
+                    worker_array[2][i][start:end] = to_cpu(all_pred.data)
 
             BOSS_ARRAY[0] = np.mean(worker_array[0], axis=-1)
             BOSS_ARRAY[1] = np.mean(worker_array[1], axis=-1)
@@ -195,3 +199,5 @@ def main_loop():
     id_frames = h5.File(P.NUM_FRAMES, 'r')
 
     run(all_models, id_frames, labels, dev=device, batch_size=batch)
+
+    print('d\n o\n  n\n   e')

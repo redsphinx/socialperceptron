@@ -109,6 +109,6 @@ def how_many_frames():
         copyfile(src, dst)
 
 
-how_many_frames()
+# how_many_frames()
 
 
