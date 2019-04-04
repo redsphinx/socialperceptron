@@ -375,11 +375,27 @@ def get_data(keys, id_frames, which_data, resize=False, ordered=False, twostream
                 data[i] = get_everything(image)
             # ONLY normalize if using pretrained resnet18
             elif is_resnet18 and resnet18_pretrain:
+                # ------------------------------------
+                # temporary for train_135
+                # img_max = np.max(image)
+                # if img_max == 0:
+                #     data[i] = image
+                # else:
+                #     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+                #     image = image[0].astype(np.float32)
+                #     image /= img_max
+                #     image = torch.from_numpy(image)
+                #     image = normalize(image)
+                #     image = image.numpy()
+                #     image = np.expand_dims(image, 0)
+                #     data[i] = image
+                # ------------------------------------
+
+                # uncomment this when done!!!!!!!!!!!!!!!
                 image = do_the_normalize(image)
                 data[i] = image
             else:
                 data[i] = image
-
 
     return data, n
 

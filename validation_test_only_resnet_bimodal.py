@@ -8,6 +8,7 @@ import deepimpression2.constants as C
 import deepimpression2.paths as P
 import deepimpression2.chalearn30.data_utils as D
 import deepimpression2.util as U
+from deepimpression2.model_resnet18 import ResNet18_LastLayers
 
 from torchvision.models import resnet18
 import torch
@@ -15,7 +16,7 @@ from torch import nn
 from torch.nn import L1Loss
 
 
-def initialize(which, model_name, pretrain):
+def initialize(which, model_name):
     num_traits = 5
     load_model = True
 
@@ -25,14 +26,27 @@ def initialize(which, model_name, pretrain):
         _dev = 'cpu'
     device = torch.device(_dev)
 
-    my_model = resnet18(pretrained=pretrain)
-    my_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
+    face_model = resnet18()
+    face_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
+    p = os.path.join(P.MODELS, 'epoch_99_101')
+    face_model.load_state_dict(torch.load(p))
+    face_model.fc = nn.Sequential()
+
+    bg_model = resnet18()
+    bg_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
+    p = os.path.join(P.MODELS, 'epoch_99_102')
+    bg_model.load_state_dict(torch.load(p))
+    bg_model.fc = nn.Sequential()
+
+    my_model = ResNet18_LastLayers(num_traits)
 
     if load_model:
         p = os.path.join(P.MODELS, model_name)
         my_model.load_state_dict(torch.load(p))
         print('model %s loaded' % model_name)
 
+    face_model.cuda(device)
+    bg_model.cuda(device)
     my_model.cuda(device)
 
     loss_function = L1Loss()
@@ -56,15 +70,14 @@ def initialize(which, model_name, pretrain):
 
     id_frames = h5.File(P.NUM_FRAMES, 'r')
 
-    return my_model, labels, steps, loss, pred_diff, id_frames, loss_function, device, num_traits
+    return my_model, face_model, bg_model, labels, steps, loss, pred_diff, id_frames, loss_function, device, num_traits
 
 
-def run(which, steps, which_labels, frames, model, pred_diff, loss_saving, which_data, trait, ordered,
+def run(which, steps, which_labels, frames, model, face_model, bg_model, pred_diff, loss_saving, trait, ordered,
         save_all_results, record_predictions, record_loss, is_resnet18, num_traits, device, loss_function,
         resnet18_pretrain):
     print('steps: ', steps)
     assert (which in ['test', 'val'])
-    assert (which_data in ['bg', 'face'])
     if trait is not None:
         assert (trait in ['O', 'C', 'E', 'A', 'S'])
 
@@ -83,18 +96,31 @@ def run(which, steps, which_labels, frames, model, pred_diff, loss_saving, which
     for s in tqdm(range(steps)):
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
-        labels, data, _ = D.load_data(labels_selected, which_labels, frames, which_data, ordered=ordered,
-                                      is_resnet18=is_resnet18, resnet18_pretrain=resnet18_pretrain)
-        # TODO: mess up the normalization to be consistent
+
+        labels_bg, bg_data, frame_num = D.load_data(labels_selected, which_labels, frames, which_data='bg',
+                                                    ordered=True, is_resnet18=is_resnet18, same_frame=True,
+                                                    resize=False, resnet18_pretrain=resnet18_pretrain)
+        labels_face, face_data, _ = D.load_data(labels_selected, which_labels, frames, which_data='face',
+                                                ordered=True, is_resnet18=is_resnet18, same_frame=True,
+                                                frame_num=frame_num, resize=False, resnet18_pretrain=resnet18_pretrain)
+
         if C.ON_GPU:
-            data = torch.from_numpy(data)
-            data = data.cuda(device)
-            labels = torch.from_numpy(labels)
+            bg_data = torch.from_numpy(bg_data)
+            bg_data = bg_data.cuda(device)
+
+            face_data = torch.from_numpy(face_data)
+            face_data = face_data.cuda(device)
+
+            labels = torch.from_numpy(labels_bg)
             labels = labels.cuda(device)
 
         model.eval()
+        bg_model.eval()
+        face_model.eval()
         with torch.no_grad():
-            predictions = model(data)
+            bg_activations = bg_model(bg_data)
+            face_activations = face_model(face_data)
+            predictions = model(bg_activations, face_activations)
             loss = loss_function(predictions, labels)
             loss = loss.detach()
 
@@ -121,49 +147,44 @@ def run(which, steps, which_labels, frames, model, pred_diff, loss_saving, which
         U.record_all_predictions(which, preds)
 
 
-def main_loop(which, val_test_on):
+def main_loop(which):
     which_trait = None
-    PRETRAIN = False
+    PRETRAIN = True
 
-    model_number = 131
-
-    # if val_test_on == 'face':
-    #     model_number = 101
-    # elif val_test_on == 'bg':
-    #     model_number = 102
-    # else:
-    #     print('val_test_on is not correct')
-    #     model_number = None
+    model_number = 113
 
     if which == 'val':
         saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
         models_to_load = ['epoch_%d_%d' % (saved_epochs[i], model_number) for i in range(len(saved_epochs))]
     else:
-        models_to_load = ['epoch_99_102']
+        models_to_load = ['epoch_99_113']
 
     for i, model_name in enumerate(models_to_load):
-        my_model, labels, steps, loss, pred_diff, id_frames, loss_function, device, num_traits = \
-            initialize(which, model_name, pretrain=PRETRAIN)
+        my_model, face_model, bg_model, labels, steps, loss, pred_diff, id_frames, loss_function, device, num_traits = \
+            initialize(which, model_name)
 
         if which == 'val':
-            run(which=which, steps=steps, which_labels=labels, frames=id_frames, model=my_model, pred_diff=pred_diff,
-                loss_saving=loss, which_data=val_test_on, trait=which_trait, ordered=True,
+            run(which=which, steps=steps, which_labels=labels, frames=id_frames, model=my_model, bg_model=bg_model,
+                face_model=face_model, pred_diff=pred_diff,
+                loss_saving=loss, trait=which_trait, ordered=True,
                 save_all_results=False, record_predictions=False, record_loss=True, is_resnet18=True,
                 num_traits=num_traits, device=device, loss_function=loss_function, resnet18_pretrain=PRETRAIN)
 
         elif which == 'test':
-            run(which=which, steps=steps, which_labels=labels, frames=id_frames, model=my_model, pred_diff=pred_diff,
-                loss_saving=loss, which_data=val_test_on, trait=which_trait, ordered=True,
+            run(which=which, steps=steps, which_labels=labels, frames=id_frames, model=my_model, bg_model=bg_model,
+                face_model=face_model, pred_diff=pred_diff,
+                loss_saving=loss, trait=which_trait, ordered=True,
                 save_all_results=True, record_predictions=True, record_loss=True, is_resnet18=True,
                 num_traits=num_traits, device=device, loss_function=loss_function, resnet18_pretrain=PRETRAIN)
 
 
-main_loop('val', 'bg')
+main_loop('test')
 
 '''
 RESULTS
 
 best val 'bg': epoch_99_102
 best val 'face': epoch_99_101
+best val 'all': epoch_99_113
 
 '''

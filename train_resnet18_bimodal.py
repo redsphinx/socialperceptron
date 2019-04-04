@@ -150,6 +150,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
             bg_activations = bg_model(bg_data)
             face_activations = face_model(face_data)
 
+        # TODO: fix this shit
         exp_lr_scheduler.step()
         model.train()
         optimizer.zero_grad()
