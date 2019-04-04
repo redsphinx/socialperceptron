@@ -59,6 +59,7 @@ def initialize(which, model_name):
     return my_model, my_optimizer, epochs, labels, steps, loss, pred_diff, id_frames
 
 
+
 def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, which_data, trait, ordered,
         save_all_results, record_predictions, record_loss):
     print('steps: ', steps)

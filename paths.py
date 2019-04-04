@@ -50,6 +50,8 @@ CHALEARN_TEST_ORIGINAL = '/scratch/users/gabras/data/chalearn10/original_test'
 CHALEARN_FACES_TEST_TIGHT = '/scratch/users/gabras/data/chalearn10/test_face_tight_crop'
 
 # -------------------------------------------------------------------------------------------------
+CHALEARN_TEST_SCHMID = '/home/gabras/chalearn_test_data'
+# -------------------------------------------------------------------------------------------------
 # dummy data for performance testing
 DUMMY_DATA_JPG = '/scratch/users/gabras/data/trying_out/training80_05'
 SETUP1 = '/scratch/users/gabras/data/trying_out/setup1'
@@ -93,3 +95,4 @@ ZERO_FRAMES = '/scratch/users/gabras/data/misc/zero_frames.txt'
 # -------------------------------------------------------------------------------------------------
 # experiment video location
 BEHAVE_ORIGINAL = '/scratch/users/gabras/data/context_behavior/videoPairs'
+
