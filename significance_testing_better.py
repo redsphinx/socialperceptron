@@ -75,6 +75,7 @@ def corr_all_single_deepimpression():
 # 
 # corr_all_single_deepimpression()
 
+
 def correlations_resnet_ground_truth(trait, name):
     traits_all = ['O', 'C', 'E', 'A', 'S']
     index = traits_all.index(trait)
@@ -99,7 +100,7 @@ def corr_face_resnet():
 def corr_bg_resnet():
     traits = ['O', 'C', 'E', 'A', 'S']
     for i in range(5):
-        correlations_resnet_ground_truth(traits[i], 'pred_142.txt')
+        correlations_resnet_ground_truth(traits[i], 'pred_144.txt')
 
 
 corr_bg_resnet()
