@@ -8,6 +8,7 @@ import deepimpression2.constants as C
 import deepimpression2.paths as P
 import deepimpression2.chalearn30.data_utils as D
 import deepimpression2.util as U
+from deepimpression2.model_resnet18 import hackyResNet18
 
 from torchvision.models import resnet18
 import torch
@@ -15,7 +16,7 @@ from torch import nn
 from torch.nn import L1Loss
 
 
-def initialize(which, model_name, pretrain):
+def initialize(which, model_name, pretrain, model_number, hacky_models):
     num_traits = 5
     load_model = True
 
@@ -25,8 +26,11 @@ def initialize(which, model_name, pretrain):
         _dev = 'cpu'
     device = torch.device(_dev)
 
-    my_model = resnet18(pretrained=pretrain)
-    my_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
+    if model_number in hacky_models:
+        my_model = hackyResNet18(num_traits, pretrain)
+    else:
+        my_model = resnet18(pretrained=pretrain)
+        my_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
 
     if load_model:
         p = os.path.join(P.MODELS, model_name)
@@ -83,9 +87,10 @@ def run(which, steps, which_labels, frames, model, pred_diff, loss_saving, which
     for s in tqdm(range(steps)):
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
+
         labels, data, _ = D.load_data(labels_selected, which_labels, frames, which_data, ordered=ordered,
-                                      is_resnet18=is_resnet18, resnet18_pretrain=resnet18_pretrain)
-        # TODO: mess up the normalization to be consistent
+                                      is_resnet18=is_resnet18, resnet18_pretrain=resnet18_pretrain, resize=True)
+
         if C.ON_GPU:
             data = torch.from_numpy(data)
             data = data.cuda(device)
@@ -123,9 +128,11 @@ def run(which, steps, which_labels, frames, model, pred_diff, loss_saving, which
 
 def main_loop(which, val_test_on):
     which_trait = None
-    PRETRAIN = False
+    # for normalization of images
+    PRETRAIN = True
+    hacky_models = [131, 130, 129]
 
-    model_number = 131
+    model_number = 129
 
     # if val_test_on == 'face':
     #     model_number = 101
@@ -136,14 +143,17 @@ def main_loop(which, val_test_on):
     #     model_number = None
 
     if which == 'val':
-        saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
+        if model_number in hacky_models:
+            saved_epochs = [4, 9, 14, 19, 24, 29, 34, 39, 44, 49, 54, 59, 64, 69, 74, 79, 84, 89, 94, 99]
+        else:
+            saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
         models_to_load = ['epoch_%d_%d' % (saved_epochs[i], model_number) for i in range(len(saved_epochs))]
     else:
-        models_to_load = ['epoch_99_102']
+        models_to_load = ['epoch_14_131']
 
     for i, model_name in enumerate(models_to_load):
         my_model, labels, steps, loss, pred_diff, id_frames, loss_function, device, num_traits = \
-            initialize(which, model_name, pretrain=PRETRAIN)
+            initialize(which, model_name, model_number=model_number, pretrain=PRETRAIN, hacky_models=hacky_models)
 
         if which == 'val':
             run(which=which, steps=steps, which_labels=labels, frames=id_frames, model=my_model, pred_diff=pred_diff,

@@ -19,12 +19,12 @@ import deepimpression2.constants as C
 import deepimpression2.chalearn20.constants as C2
 import deepimpression2.util as U
 import deepimpression2.chalearn30.data_utils as D
-from deepimpression2.model_resnet18 import ResNet18_LastLayers
+from deepimpression2.model_resnet18 import ResNet18_LastLayers, hackyResNet18, hackyResNet18_extractor
 
-PRETRAIN = True
+PRETRAIN = False
 num_traits = 5
 # mode in ['finetune'] or ['extractor']
-mode = 'extractor' 
+mode = 'hacky'
 
 if mode == 'finetune':
     # face model
@@ -57,6 +57,17 @@ elif mode == 'extractor':
         param.requires_grad = False
     bg_model.fc = nn.Sequential()
 
+elif mode == 'hacky':
+    face_model = hackyResNet18_extractor(num_traits, PRETRAIN)
+    p = os.path.join(P.MODELS, 'epoch_4_130')
+    face_model.load_state_dict(torch.load(p))
+    face_model.fc = nn.Sequential()
+
+    bg_model = hackyResNet18_extractor(num_traits, PRETRAIN)
+    p = os.path.join(P.MODELS, 'epoch_14_131')
+    bg_model.load_state_dict(torch.load(p))
+    bg_model.fc = nn.Sequential()
+
 else:
     print('mode is not good', mode)
     face_model = None
@@ -84,9 +95,10 @@ loss_function = L1Loss()
 
 learning_rate = 0.001
 momentum = 0.9
-my_optimizer = SGD(my_model.fc.parameters(), lr=learning_rate, momentum=momentum)
+
+my_optimizer = SGD(my_model.parameters(), lr=learning_rate, momentum=momentum)
 # Decay LR by a factor of 0.1 every 7 epochs
-exp_lr_scheduler = lr_scheduler.StepLR(my_optimizer, step_size=7, gamma=0.1)
+# exp_lr_scheduler = lr_scheduler.StepLR(my_optimizer, step_size=7, gamma=0.1)
 
 
 print('Initializing')
@@ -100,7 +112,11 @@ train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 train_loss = []
 pred_diff_train = np.zeros((epochs, num_traits), float)
 training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
-# training_steps = 1
+
+# TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
+
+# training_steps = 100
+
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
 
@@ -150,17 +166,16 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
             bg_activations = bg_model(bg_data)
             face_activations = face_model(face_data)
 
-        # TODO: fix this shit
-        exp_lr_scheduler.step()
+        # exp_lr_scheduler.step()
         model.train()
         optimizer.zero_grad()
-        with torch.set_grad_enabled(True):
-            predictions = model(bg_activations, face_activations)
-            loss = loss_function(predictions, labels)
-            loss.backward()
-            optimizer.step()
-            if bool(torch.isnan(loss)):
-                print('its happening')
+        # with torch.set_grad_enabled(True):
+        predictions = model(bg_activations, face_activations)
+        loss = loss_function(predictions, labels)
+        loss.backward()
+        optimizer.step()
+        if bool(torch.isnan(loss)):
+            print('its happening')
 
         if record_loss:
             loss_tmp.append(float(loss.data))
@@ -176,6 +191,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
               ' pred diff %s: ' % trait, pred_diff[e],
               ' time: ', time.time() - ts)
 
+        # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         U.record_loss_sanity(which, loss_tmp_mean, pred_diff[e])
 
         if which == 'test' and save_all_results:
@@ -194,6 +210,6 @@ for e in range(0, epochs):
         loss_saving=train_loss, which_data=train_on, trait=which_trait)
 
     # save model
-    if ((e + 1) % 10) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_125' % e)
+    if ((e + 1) % 5) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_139' % e)
         torch.save(my_model.state_dict(), name)
