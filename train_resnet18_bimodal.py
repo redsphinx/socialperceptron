@@ -211,5 +211,5 @@ for e in range(0, epochs):
 
     # save model
     if ((e + 1) % 5) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_139' % e)
+        name = os.path.join(P.MODELS, 'epoch_%d_146' % e)
         torch.save(my_model.state_dict(), name)
