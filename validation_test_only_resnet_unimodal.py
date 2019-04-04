@@ -149,7 +149,7 @@ def main_loop(which, val_test_on):
             saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
         models_to_load = ['epoch_%d_%d' % (saved_epochs[i], model_number) for i in range(len(saved_epochs))]
     else:
-        models_to_load = ['epoch_14_131']
+        models_to_load = ['epoch_49_129']
 
     for i, model_name in enumerate(models_to_load):
         my_model, labels, steps, loss, pred_diff, id_frames, loss_function, device, num_traits = \
@@ -168,7 +168,7 @@ def main_loop(which, val_test_on):
                 num_traits=num_traits, device=device, loss_function=loss_function, resnet18_pretrain=PRETRAIN)
 
 
-main_loop('val', 'bg')
+main_loop('test', 'bg')
 
 '''
 RESULTS
