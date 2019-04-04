@@ -3,6 +3,7 @@ import h5py as h5
 import os
 from tqdm import tqdm
 from PIL import Image
+import time
 
 import chainer
 from chainer.backends.cuda import to_gpu, to_cpu
@@ -51,8 +52,7 @@ def get_frame(key, frame):
     # face
     face_path = os.path.join(P.CHALEARN_ALL_DATA_20_2, '%s.h5' % key)
     f = h5.File(face_path, 'r')
-    face = f[str(frame)][:]  # shape=(1, c, h, w)
-    # TODO: check shape
+    face = f[str(frame)][:]  # shape=(c, h, w)
     f.close()
 
     # bg
@@ -133,12 +133,13 @@ def run(all_models, id_frames, labels, dev, batch_size, gpu):
             num_frames = id_frames[k][0] - 1
 
             steps = num_frames // batch_size
-            worker_array = np.zeros(shape=(3, 5, steps))
+
+            worker_array = np.zeros(shape=(3, 5, num_frames-(num_frames%batch_size)))
 
             for s in tqdm(range(steps)):
-                data = np.zeros(shape=(batch_size, 2, 3, 256, 256))
+                data = np.zeros(shape=(batch_size, 2, 3, 256, 256), dtype=np.float32)
 
-                start = steps * batch_size
+                start = s * batch_size
                 end = start + batch_size
 
                 cnt = 0
@@ -162,42 +163,48 @@ def run(all_models, id_frames, labels, dev, batch_size, gpu):
                     my_model = all_models[2][i]
 
                     with chainer.using_config('train', False):
-                        face_pred, face_features = face_model(data[0])
-                        bg_pred, bg_features = bg_model(data[1])
+                        face_pred, face_features = face_model(data[:, 0])
+                        bg_pred, bg_features = bg_model(data[:, 1])
                         all_pred = my_model(bg_features, face_features)
 
-                    worker_array[0][i][start:end] = to_cpu(face_pred.data)
-                    worker_array[1][i][start:end] = to_cpu(bg_pred.data)
-                    worker_array[2][i][start:end] = to_cpu(all_pred.data)
+                    worker_array[0][i][start:end] = to_cpu(face_pred.data).flatten()
+                    worker_array[1][i][start:end] = to_cpu(bg_pred.data).flatten()
+                    worker_array[2][i][start:end] = to_cpu(all_pred.data).flatten()
 
             BOSS_ARRAY[0] = np.mean(worker_array[0], axis=-1)
             BOSS_ARRAY[1] = np.mean(worker_array[1], axis=-1)
             BOSS_ARRAY[2] = np.mean(worker_array[2], axis=-1)
 
-        file_names_face = ['pred_132_O', 'pred_132_C', 'pred_132_E', 'pred_132_A', 'pred_132_S']
-        file_names_bg = ['pred_132_O', 'pred_132_C', 'pred_132_E', 'pred_132_A', 'pred_132_S']
-        file_names_all = ['pred_132_O', 'pred_132_C', 'pred_132_E', 'pred_132_A', 'pred_132_S']
+            file_names_face = ['pred_132_O', 'pred_132_C', 'pred_132_E', 'pred_132_A', 'pred_132_S']
+            file_names_bg = ['pred_133_O', 'pred_133_C', 'pred_133_E', 'pred_133_A', 'pred_133_S']
+            file_names_all = ['pred_134_O', 'pred_134_C', 'pred_134_E', 'pred_134_A', 'pred_134_S']
 
-        all_files = [file_names_face, file_names_bg, file_names_all]
-        for i, mode in enumerate(all_files):
-            for j, f in enumerate(mode):
-                f = f + '.txt'
-                path = os.path.join(P.LOG_BASE, f)
-                line = '%f\n' % BOSS_ARRAY[i][j]
-                with open(path, 'a') as my_file:
-                    my_file.write(line)
+            all_files = [file_names_face, file_names_bg, file_names_all]
+            for i, mode in enumerate(all_files):
+                for j, f in enumerate(mode):
+                    f = f + '.txt'
+                    path = os.path.join(P.LOG_BASE, f)
+                    line = '%f\n' % BOSS_ARRAY[i][j]
+                    with open(path, 'a') as my_file:
+                        my_file.write(line)
 
 
 def main_loop():
+    start = time.time()
+    print('s\n t\n  a\n   r\n    t')
     model_type = 'deepimpression'
     use_gpu = True
     device = 0
-    batch = 16
+    batch = 32
 
     all_models = load_models(model_type, use_gpu, device)
-    labels = h5.File(P.CHALEARN_VAL_LABELS_20, 'r')
+    labels = h5.File(P.CHALEARN_TEST_LABELS_20, 'r')
     id_frames = h5.File(P.NUM_FRAMES, 'r')
 
-    run(all_models, id_frames, labels, dev=device, batch_size=batch)
+    run(all_models, id_frames, labels, dev=device, batch_size=batch, gpu=use_gpu)
 
+    print('total time: %d minutes' % ((time.time()-start)/60))
     print('d\n o\n  n\n   e')
+
+
+main_loop()
