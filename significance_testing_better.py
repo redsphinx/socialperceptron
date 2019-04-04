@@ -9,11 +9,29 @@ import deepimpression2.paths as P
 import deepimpression2.chalearn30.data_utils as D
 
 
+def find_index():
+    key_where = '4ZlcaXadwlo.005.mp4'
+    labels = h5.File(P.CHALEARN_TEST_LABELS_20, 'r')
+    for i, k in enumerate(labels.keys()):
+        if k == key_where:
+            print(i)
+            break
+
+# find_index()
+
+
+def fix_labels(labels):
+    ignore = 173
+    labels = np.delete(labels, ignore, axis=0)
+    return labels
+
+
 def correlations_ground_truth(trait, name):
     traits_all = ['O', 'C', 'E', 'A', 'S']
     index = traits_all.index(trait)
     target = D.basic_load_personality_labels('test')
     target = target[:, index]
+    target = fix_labels(target)
 
     path = os.path.join(P.LOG_BASE, name)
     predictions = np.genfromtxt(path, delimiter=',', dtype=float)
@@ -26,7 +44,7 @@ def correlations_ground_truth(trait, name):
 def corr_face_single_deepimpression():
     traits = ['O', 'C', 'E', 'A', 'S']
     # models = ['pred_109_O.txt', 'pred_109_C.txt', 'pred_109_E.txt', 'pred_109_A.txt', 'pred_109_S.txt']  # frame=6
-    models = ['pred_116_O.txt', 'pred_116_C.txt', 'pred_116_E.txt', 'pred_116_A.txt', 'pred_116_S.txt']  # frame=30
+    models = ['pred_132_O.txt', 'pred_132_C.txt', 'pred_132_E.txt', 'pred_132_A.txt', 'pred_132_S.txt']  # frame=30
 
     for i in range(5):
         correlations_ground_truth(traits[i], models[i])
@@ -38,18 +56,19 @@ def corr_face_single_deepimpression():
 def corr_bg_single_deepimpression():
     traits = ['O', 'C', 'E', 'A', 'S']
     # models = ['pred_110_O.txt', 'pred_110_C.txt', 'pred_110_E.txt', 'pred_110_A.txt', 'pred_110_S.txt']  # frame=6
-    models = ['pred_117_O.txt', 'pred_117_C.txt', 'pred_117_E.txt', 'pred_117_A.txt', 'pred_117_S.txt']  # frame=30
+    models = ['pred_133_O.txt', 'pred_133_C.txt', 'pred_133_E.txt', 'pred_133_A.txt', 'pred_133_S.txt']  # frame=30
 
     for i in range(5):
         correlations_ground_truth(traits[i], models[i])
 
+# corr_bg_single_deepimpression()
 
 def corr_all_single_deepimpression():
     traits = ['O', 'C', 'E', 'A', 'S']
     # models = ['pred_112_O.txt', 'pred_112_C.txt', 'pred_112_E.txt', 'pred_112_A.txt', 'pred_112_S.txt']  # frame=6
     # models = ['pred_118_O.txt', 'pred_118_C.txt', 'pred_118_E.txt', 'pred_118_A.txt', 'pred_118_S.txt']  # frame=30
     # models = []  # frame=10
-    models = ['pred_126_O.txt', 'pred_126_C.txt', 'pred_126_E.txt', 'pred_126_A.txt', 'pred_126_S.txt']  # frame=10
+    models = ['pred_134_O.txt', 'pred_134_C.txt', 'pred_134_E.txt', 'pred_134_A.txt', 'pred_134_S.txt']  # frame=10
 
     for i in range(5):
         correlations_ground_truth(traits[i], models[i])
@@ -110,5 +129,11 @@ def how_many_frames():
 
 
 # how_many_frames()
+
+
+
+
+
+
 
 
