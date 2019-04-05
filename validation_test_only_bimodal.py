@@ -154,7 +154,7 @@ def run(which, steps, which_labels, frames, model, bg_model, face_model, optimiz
 
 def main_loop(which):
     model_number = 127  # TODO: check this!!!!!!!!!! OCE: 105 AS: 61
-    index = 0
+    index = 4
     #          0    1    2    3    4
     traits = ['O', 'C', 'E', 'A', 'S']
     which_trait = traits[index]
@@ -163,9 +163,7 @@ def main_loop(which):
     faces = ['epoch_39_59_O', 'epoch_19_59_C', 'epoch_99_59_E', 'epoch_89_59_A', 'epoch_19_59_S']
     # bg_and_face = ['epoch_99_105_O', 'epoch_99_105_C', 'epoch_19_105_E', 'epoch_99_61_A', 'epoch_9_61_S'] # no regularized
     bg_and_face = ['epoch_79_127_O', 'epoch_19_127_C', 'epoch_39_127_E', '', 'epoch_29_127_S'] # regularized
-
-
-
+    # bg_and_face = []
 
     bg_name = bgs[index]
     face_name = faces[index]

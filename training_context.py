@@ -34,13 +34,14 @@ import os
 import cupy as cp
 from chainer.functions import expand_dims
 from random import shuffle
+from tqdm import tqdm
 
 
 my_model = Deepimpression()
 
-load_model = True
+load_model = False
 if load_model:
-    p = os.path.join(P.MODELS, 'epoch_49_20')
+    p = os.path.join(P.MODELS, '')
     chainer.serializers.load_npz(p, my_model)
     print('model loaded')
     continuefrom = 0
@@ -102,11 +103,11 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         shuffle(_labs)
 
     ts = time.time()
-    for s in range(steps):
-        print(s)
+    for s in tqdm(range(steps)):
+        # print(s)
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
-        labels, data = D.load_data(labels_selected, which_labels, frames, which_data, ordered=ordered)
+        labels, data, _ = D.load_data(labels_selected, which_labels, frames, which_data, ordered=ordered)
 
         if C.ON_GPU:
             data = to_gpu(data, device=C.DEVICE)
@@ -150,14 +151,14 @@ print('Enter training loop with validation')
 for e in range(continuefrom, epochs):
     train_on = 'all'
     # validate_on = 'face'
-    test_on = 'face'
-    print('trained on: %s test on %s' % (train_on, test_on))
+    # test_on = 'face'
+    # print('trained on: %s test on %s' % (train_on, test_on))
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
-    # run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
-    #     model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
-    #     loss_saving=train_loss, which_data=train_on)
+    run(which='train', steps=training_steps, which_labels=train_labels, frames=id_frames,
+        model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_train,
+        loss_saving=train_loss, which_data=train_on)
     # ----------------------------------------------------------------------------
     # validation
     # ----------------------------------------------------------------------------
@@ -167,24 +168,24 @@ for e in range(continuefrom, epochs):
     # ----------------------------------------------------------------------------
     # test
     # ----------------------------------------------------------------------------
-    times = 1
-    for i in range(1):
-        if times == 1:
-            ordered = True
-            save_all_results = True
-        else:
-            ordered = False
-            save_all_results = False
-
-        run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
-            model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
-            loss_saving=test_loss, which_data=test_on, ordered=ordered, save_all_results=save_all_results)
+    # times = 1
+    # for i in range(1):
+    #     if times == 1:
+    #         ordered = True
+    #         save_all_results = True
+    #     else:
+    #         ordered = False
+    #         save_all_results = False
+    #
+    #     run(which='test', steps=test_steps, which_labels=test_labels, frames=id_frames,
+    #         model=my_model, optimizer=my_optimizer, pred_diff=pred_diff_test,
+    #         loss_saving=test_loss, which_data=test_on, ordered=ordered, save_all_results=save_all_results)
     # best val 'all': epoch_49_20
     # best val 'bg': epoch_79_21
     # best val 'face': epoch_29_22
 
     # # save model
-    # if ((e + 1) % 10) == 0:
-    #     name = os.path.join(P.MODELS, 'epoch_%d_22' % e)
-    #     chainer.serializers.save_npz(name, my_model)
+    if ((e + 1) % 5) == 0:
+        name = os.path.join(P.MODELS, 'epoch_%d_149' % e)
+        chainer.serializers.save_npz(name, my_model)
 
