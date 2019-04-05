@@ -179,14 +179,14 @@ def run(all_models, id_frames, labels, dev, batch_size, gpu):
             file_names_bg = ['pred_133_O', 'pred_133_C', 'pred_133_E', 'pred_133_A', 'pred_133_S']
             file_names_all = ['pred_134_O', 'pred_134_C', 'pred_134_E', 'pred_134_A', 'pred_134_S']
 
-            all_files = [file_names_face, file_names_bg, file_names_all]
-            for i, mode in enumerate(all_files):
-                for j, f in enumerate(mode):
-                    f = f + '.txt'
-                    path = os.path.join(P.LOG_BASE, f)
-                    line = '%f\n' % BOSS_ARRAY[i][j]
-                    with open(path, 'a') as my_file:
-                        my_file.write(line)
+            # all_files = [file_names_face, file_names_bg, file_names_all]
+            # for i, mode in enumerate(all_files):
+            #     for j, f in enumerate(mode):
+            #         f = f + '.txt'
+            #         path = os.path.join(P.LOG_BASE, f)
+            #         line = '%f\n' % BOSS_ARRAY[i][j]
+            #         with open(path, 'a') as my_file:
+            #             my_file.write(line)
 
 
 def main_loop():
@@ -194,10 +194,10 @@ def main_loop():
     print('s\n t\n  a\n   r\n    t')
     model_type = 'deepimpression'
     use_gpu = True
-    device = 0
+    device = 1
     batch = 32
 
-    all_models = load_models(model_type, use_gpu, device)
+    all_models = [] #load_models(model_type, use_gpu, device)
     labels = h5.File(P.CHALEARN_TEST_LABELS_20, 'r')
     id_frames = h5.File(P.NUM_FRAMES, 'r')
 

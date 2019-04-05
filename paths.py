@@ -96,3 +96,7 @@ ZERO_FRAMES = '/scratch/users/gabras/data/misc/zero_frames.txt'
 # experiment video location
 BEHAVE_ORIGINAL = '/scratch/users/gabras/data/context_behavior/videoPairs'
 
+CHALEARN_JPG_FACE = '/home/gabras/chalearn_jpgs/face'
+CHALEARN_JPG_FULL_FRAME = '/home/gabras/chalearn_jpgs/full_frame'
+CHALEARN_JPG_BG = '/home/gabras/chalearn_jpgs/bg'
+

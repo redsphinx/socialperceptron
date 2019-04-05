@@ -9,6 +9,7 @@ import deepimpression2.chalearn30.data_utils as DU
 import shutil
 from tqdm import tqdm
 import skvideo.io
+import deepimpression2.chalearn20.constants as C2
 
 
 def convert(video_path):
@@ -308,3 +309,34 @@ def controleren(b, e):
 
 # convert missing
 # parallel_convert_missing(convert)
+
+
+def convert_h5_to_jpg():
+    which = ['face', 'bg', 'full_frame']
+
+    src_face = P.CHALEARN_ALL_DATA_20_2
+    src_else = P.CHALEARN30_ALL_DATA
+
+    dest = [P.CHALEARN_JPG_FACE, P.CHALEARN_JPG_BG, P.CHALEARN_JPG_FULL_FRAME]
+
+    for i, w in enumerate(which):
+        if i == 0:
+            src_files = os.listdir(src_face)
+            for j, v in enumerate(src_files):
+                # TODO: mkdir(v) as folder and add to the filepath of dest
+                if j < 50:
+                    p_src = os.path.join(src_face, v)
+                    src_h5 = h5py.File(p_src, 'r')
+                    for frame in src_h5.keys():
+                        image = src_h5[frame][:]
+                        image = np.transpose(image, (1, 2, 0))
+                        img = Image.fromarray(image, mode='RGB')
+                        img = img.resize((C2.RESIDE, C2.RESIDE))
+                        name = os.path.join(dest[i], frame+'.jpg')
+                        img.save(name)
+
+
+                print('eee')
+
+
+convert_h5_to_jpg()
