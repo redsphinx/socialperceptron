@@ -31,7 +31,7 @@ def correlations_ground_truth(trait, name):
     index = traits_all.index(trait)
     target = D.basic_load_personality_labels('test')
     target = target[:, index]
-    target = fix_labels(target)
+    # target = fix_labels(target)
 
     path = os.path.join(P.LOG_BASE, name)
     predictions = np.genfromtxt(path, delimiter=',', dtype=float)
@@ -68,12 +68,19 @@ def corr_all_single_deepimpression():
     # models = ['pred_112_O.txt', 'pred_112_C.txt', 'pred_112_E.txt', 'pred_112_A.txt', 'pred_112_S.txt']  # frame=6
     # models = ['pred_118_O.txt', 'pred_118_C.txt', 'pred_118_E.txt', 'pred_118_A.txt', 'pred_118_S.txt']  # frame=30
     # models = []  # frame=10
-    models = ['pred_134_O.txt', 'pred_134_C.txt', 'pred_134_E.txt', 'pred_134_A.txt', 'pred_134_S.txt']  # frame=10
+    models = ['pred_148_O.txt', 'pred_148_C.txt', 'pred_148_E.txt', 'pred_148_A.txt', 'pred_148_S.txt']  # frame=10
 
-    for i in range(5):
-        correlations_ground_truth(traits[i], models[i])
+    correlations_ground_truth(traits[0], models[0])
+    correlations_ground_truth(traits[1], models[1])
+    correlations_ground_truth(traits[2], models[2])
+    # correlations_ground_truth(traits[3], models[3])
+    correlations_ground_truth(traits[4], models[4])
+
+
+    # for i in range(5):
+    #     correlations_ground_truth(traits[i], models[i])
 # 
-# corr_all_single_deepimpression()
+corr_all_single_deepimpression()
 
 
 def correlations_resnet_ground_truth(trait, name):
@@ -103,7 +110,7 @@ def corr_bg_resnet():
         correlations_resnet_ground_truth(traits[i], 'pred_144.txt')
 
 
-corr_bg_resnet()
+# corr_bg_resnet()
 
 
 def how_many_frames():
@@ -133,11 +140,4 @@ def how_many_frames():
 
 
 # how_many_frames()
-
-
-
-
-
-
-
 
