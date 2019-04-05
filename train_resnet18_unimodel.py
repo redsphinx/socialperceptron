@@ -118,7 +118,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         pretrain_resnet=PRETRAIN):
     print('steps: ', steps)
     assert(which in ['train'])
-    assert(which_data in ['bg', 'face'])
+    assert(which_data in ['bg', 'face', 'all'])
     if trait is not None:
         assert(trait in ['O', 'C', 'E', 'A', 'S'])
 
@@ -138,8 +138,10 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
     for s in tqdm(range(steps)):
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
+        # labels, data, _ = D.load_data(labels_selected, which_labels, frames, which_data, ordered=ordered,
+        #                               is_resnet18=is_resnet18, resize=True, resnet18_pretrain=pretrain_resnet)
         labels, data, _ = D.load_data(labels_selected, which_labels, frames, which_data, ordered=ordered,
-                                      is_resnet18=is_resnet18, resize=True, resnet18_pretrain=pretrain_resnet)
+                                      is_resnet18=is_resnet18, resize=False, resnet18_pretrain=pretrain_resnet)
 
         if C.ON_GPU:
             data = torch.from_numpy(data)
@@ -185,7 +187,7 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
 print('Enter training loop with validation')
 for e in range(0, epochs):
     which_trait = None
-    train_on = 'bg'
+    train_on = 'all'
     # ----------------------------------------------------------------------------
     # training
     # ----------------------------------------------------------------------------
@@ -195,5 +197,5 @@ for e in range(0, epochs):
 
     # save model
     if ((e + 1) % 5) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_131' % e)
+        name = os.path.join(P.MODELS, 'epoch_%d_151' % e)
         torch.save(my_model.state_dict(), name)
