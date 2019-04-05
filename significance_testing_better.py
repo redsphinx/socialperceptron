@@ -80,7 +80,7 @@ def corr_all_single_deepimpression():
     # for i in range(5):
     #     correlations_ground_truth(traits[i], models[i])
 # 
-corr_all_single_deepimpression()
+# corr_all_single_deepimpression()
 
 
 def correlations_resnet_ground_truth(trait, name):
@@ -107,10 +107,10 @@ def corr_face_resnet():
 def corr_bg_resnet():
     traits = ['O', 'C', 'E', 'A', 'S']
     for i in range(5):
-        correlations_resnet_ground_truth(traits[i], 'pred_144.txt')
+        correlations_resnet_ground_truth(traits[i], 'pred_157.txt')
 
 
-# corr_bg_resnet()
+corr_bg_resnet()
 
 
 def how_many_frames():

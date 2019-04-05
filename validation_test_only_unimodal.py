@@ -2,6 +2,7 @@
 import chainer
 import numpy as np
 from deepimpression2.model_59 import Deepimpression
+from deepimpression2.model_16 import Deepimpression as d2
 import deepimpression2.constants as C
 from chainer.functions import sigmoid_cross_entropy, mean_absolute_error, softmax_cross_entropy
 from chainer.optimizers import Adam
@@ -20,7 +21,8 @@ from tqdm import tqdm
 
 
 def initialize(which, model_name):
-    my_model = Deepimpression()
+    # my_model = Deepimpression()
+    my_model = d2()
 
     load_model = True
     if load_model:
@@ -52,20 +54,20 @@ def initialize(which, model_name):
         steps = None
 
     loss = []
-    pred_diff = np.zeros((1, 1), float)
+    # pred_diff = np.zeros((1, 1), float)
+    pred_diff = np.zeros((1, 5), float)
 
     id_frames = h5.File(P.NUM_FRAMES, 'r')
 
     return my_model, my_optimizer, epochs, labels, steps, loss, pred_diff, id_frames
 
 
-
 def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_saving, which_data, trait, ordered,
         save_all_results, record_predictions, record_loss):
     print('steps: ', steps)
     assert (which in ['train', 'test', 'val'])
-    assert (which_data in ['bg', 'face'])
-    assert (trait in ['O', 'C', 'E', 'A', 'S'])
+    # assert (which_data in ['bg', 'face'])
+    # assert (trait in ['O', 'C', 'E', 'A', 'S'])
 
     if which == 'train':
         which_batch_size = C.TRAIN_BATCH_SIZE
@@ -75,10 +77,12 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
         which_batch_size = C.TEST_BATCH_SIZE
 
     loss_tmp = []
-    pd_tmp = np.zeros((steps, 1), dtype=float)
+    # pd_tmp = np.zeros((steps, 1), dtype=float)
+    pd_tmp = np.zeros((steps, 5), dtype=float)
     _labs = list(which_labels)
 
-    preds = np.zeros((steps, 1), dtype=float)
+    # preds = np.zeros((steps, 1), dtype=float)
+    preds = np.zeros((steps, 5), dtype=float)
 
     if not ordered:
         shuffle(_labs)
@@ -87,8 +91,10 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
     for s in tqdm(range(steps)):
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
-        labels, data, _ = D.load_data_single(labels_selected, which_labels, frames, which_data, resize=True,
-                                             ordered=ordered, trait=trait)
+
+        # labels, data, _ = D.load_data_single(labels_selected, which_labels, frames, which_data, resize=True,
+        #                                      ordered=ordered, trait=trait)
+        labels, data, _ = D.load_data(labels_selected, which_labels, frames, which_data, ordered=ordered)
 
         if C.ON_GPU:
             data = to_gpu(data, device=C.DEVICE)
@@ -103,7 +109,8 @@ def run(which, steps, which_labels, frames, model, optimizer, pred_diff, loss_sa
             with chainer.using_config('train', config):
                 if which == 'train':
                     model.cleargrads()
-                prediction, _ = model(data)
+                # prediction, _ = model(data)
+                prediction = model(data)
 
                 loss = mean_absolute_error(prediction, labels)
 
@@ -140,21 +147,25 @@ def main_loop(which, val_test_on):
     elif val_test_on == 'bg':
         model_number = 60
     else:
-        print('val_test_on is not correct')
-        model_number = None
+        model_number = 149
 
     if which == 'val':
-        saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
-        which_trait = 'O'
-        # which_trait = 'C'
-        # which_trait = 'E'
-        # which_trait = 'A'
-        # which_trait = 'S'
-        models_to_load = ['epoch_%d_%d_%s' % (saved_epochs[i], model_number, which_trait) for i in range(len(saved_epochs))]
+        if model_number in [59, 60]:
+            saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
+            which_trait = 'O'
+            # which_trait = 'C'
+            # which_trait = 'E'
+            # which_trait = 'A'
+            # which_trait = 'S'
+            models_to_load = ['epoch_%d_%d_%s' % (saved_epochs[i], model_number, which_trait) for i in range(len(saved_epochs))]
+        else:
+            saved_epochs = [4, 9, 14, 19, 24, 29, 34, 39, 44, 49, 54, 59, 64, 69, 74, 79, 84, 89, 94, 99]
+            models_to_load = ['epoch_%d_%d' % (saved_epochs[i], model_number) for i in range(len(saved_epochs))]
+            which_trait = None
     else:
         # TODO: for test change here!!!!!!!!!!!!
-        which_trait = 'S'
-        models_to_load = ['epoch_19_59_S']
+        which_trait = None
+        models_to_load = ['epoch_54_149']
 
     for i, model_name in enumerate(models_to_load):
         my_model, my_optimizer, epochs, labels, steps, loss, pred_diff, id_frames = initialize(which, model_name)
@@ -171,7 +182,7 @@ def main_loop(which, val_test_on):
                 trait=which_trait, record_loss=True, record_predictions=True)
 
 
-main_loop('test', 'bg')
+main_loop('test', 'all')
 
 '''
 RESULTS

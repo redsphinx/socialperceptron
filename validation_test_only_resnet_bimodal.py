@@ -8,7 +8,7 @@ import deepimpression2.constants as C
 import deepimpression2.paths as P
 import deepimpression2.chalearn30.data_utils as D
 import deepimpression2.util as U
-from deepimpression2.model_resnet18 import ResNet18_LastLayers
+from deepimpression2.model_resnet18 import ResNet18_LastLayers, hackyResNet18
 
 from torchvision.models import resnet18
 import torch
@@ -16,7 +16,7 @@ from torch import nn
 from torch.nn import L1Loss
 
 
-def initialize(which, model_name):
+def initialize(which, model_name, pretrain, model_number, hacky_models):
     num_traits = 5
     load_model = True
 
@@ -26,15 +26,23 @@ def initialize(which, model_name):
         _dev = 'cpu'
     device = torch.device(_dev)
 
-    face_model = resnet18()
-    face_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
-    p = os.path.join(P.MODELS, 'epoch_99_101')
+    if model_number in hacky_models:
+        face_model = hackyResNet18(num_traits, pretrain)
+    else:
+        face_model = resnet18()
+        face_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
+
+    p = os.path.join(P.MODELS, 'epoch_4_130')
     face_model.load_state_dict(torch.load(p))
     face_model.fc = nn.Sequential()
 
-    bg_model = resnet18()
-    bg_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
-    p = os.path.join(P.MODELS, 'epoch_99_102')
+    if model_number in hacky_models:
+        bg_model = hackyResNet18(num_traits, pretrain)
+    else:
+        bg_model = resnet18()
+        bg_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
+
+    p = os.path.join(P.MODELS, 'epoch_14_131')
     bg_model.load_state_dict(torch.load(p))
     bg_model.fc = nn.Sequential()
 
@@ -99,10 +107,10 @@ def run(which, steps, which_labels, frames, model, face_model, bg_model, pred_di
 
         labels_bg, bg_data, frame_num = D.load_data(labels_selected, which_labels, frames, which_data='bg',
                                                     ordered=True, is_resnet18=is_resnet18, same_frame=True,
-                                                    resize=False, resnet18_pretrain=resnet18_pretrain)
+                                                    resize=True, resnet18_pretrain=resnet18_pretrain)
         labels_face, face_data, _ = D.load_data(labels_selected, which_labels, frames, which_data='face',
                                                 ordered=True, is_resnet18=is_resnet18, same_frame=True,
-                                                frame_num=frame_num, resize=False, resnet18_pretrain=resnet18_pretrain)
+                                                frame_num=frame_num, resize=True, resnet18_pretrain=resnet18_pretrain)
 
         if C.ON_GPU:
             bg_data = torch.from_numpy(bg_data)
@@ -149,19 +157,24 @@ def run(which, steps, which_labels, frames, model, face_model, bg_model, pred_di
 
 def main_loop(which):
     which_trait = None
-    PRETRAIN = True
+    PRETRAIN = False
 
-    model_number = 113
+    hacky_models = [146]
+
+    model_number = 146
 
     if which == 'val':
-        saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
+        if model_number in hacky_models:
+            saved_epochs = [4, 9, 14, 19, 24, 29, 34, 39, 44, 49, 54, 59, 64, 69, 74, 79, 84, 89, 94, 99]
+        else:
+            saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
         models_to_load = ['epoch_%d_%d' % (saved_epochs[i], model_number) for i in range(len(saved_epochs))]
     else:
-        models_to_load = ['epoch_99_113']
+        models_to_load = ['epoch_59_146']
 
     for i, model_name in enumerate(models_to_load):
         my_model, face_model, bg_model, labels, steps, loss, pred_diff, id_frames, loss_function, device, num_traits = \
-            initialize(which, model_name)
+            initialize(which, model_name, PRETRAIN, model_number, hacky_models)
 
         if which == 'val':
             run(which=which, steps=steps, which_labels=labels, frames=id_frames, model=my_model, bg_model=bg_model,

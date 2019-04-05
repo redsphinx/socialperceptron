@@ -67,8 +67,8 @@ def run(which, steps, which_labels, frames, model, pred_diff, loss_saving, which
         save_all_results, record_predictions, record_loss, is_resnet18, num_traits, device, loss_function,
         resnet18_pretrain):
     print('steps: ', steps)
-    assert (which in ['test', 'val'])
-    assert (which_data in ['bg', 'face'])
+    # assert (which in ['test', 'val'])
+    # assert (which_data in ['bg', 'face'])
     if trait is not None:
         assert (trait in ['O', 'C', 'E', 'A', 'S'])
 
@@ -88,8 +88,10 @@ def run(which, steps, which_labels, frames, model, pred_diff, loss_saving, which
         labels_selected = _labs[s * which_batch_size:(s + 1) * which_batch_size]
         assert (len(labels_selected) == which_batch_size)
 
+        # labels, data, _ = D.load_data(labels_selected, which_labels, frames, which_data, ordered=ordered,
+        #                               is_resnet18=is_resnet18, resnet18_pretrain=resnet18_pretrain, resize=True)
         labels, data, _ = D.load_data(labels_selected, which_labels, frames, which_data, ordered=ordered,
-                                      is_resnet18=is_resnet18, resnet18_pretrain=resnet18_pretrain, resize=True)
+                                      is_resnet18=is_resnet18, resnet18_pretrain=resnet18_pretrain, resize=False)
 
         if C.ON_GPU:
             data = torch.from_numpy(data)
@@ -129,10 +131,10 @@ def run(which, steps, which_labels, frames, model, pred_diff, loss_saving, which
 def main_loop(which, val_test_on):
     which_trait = None
     # for normalization of images
-    PRETRAIN = True
-    hacky_models = [131, 130, 129, 128]
+    PRETRAIN = False
+    hacky_models = [131, 130, 129, 128, 151]
 
-    model_number = 128
+    model_number = 151
 
     # if val_test_on == 'face':
     #     model_number = 101
@@ -149,7 +151,7 @@ def main_loop(which, val_test_on):
             saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
         models_to_load = ['epoch_%d_%d' % (saved_epochs[i], model_number) for i in range(len(saved_epochs))]
     else:
-        models_to_load = ['epoch_14_128']
+        models_to_load = ['epoch_14_151']
 
     for i, model_name in enumerate(models_to_load):
         my_model, labels, steps, loss, pred_diff, id_frames, loss_function, device, num_traits = \
@@ -168,7 +170,7 @@ def main_loop(which, val_test_on):
                 num_traits=num_traits, device=device, loss_function=loss_function, resnet18_pretrain=PRETRAIN)
 
 
-main_loop('test', 'face')
+main_loop('test', 'all')
 
 '''
 RESULTS

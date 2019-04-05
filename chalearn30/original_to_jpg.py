@@ -1,3 +1,4 @@
+import time
 import os
 import numpy as np
 import h5py
@@ -310,33 +311,122 @@ def controleren(b, e):
 # convert missing
 # parallel_convert_missing(convert)
 
+def fix_optface(optface):
+    if optface[3] > C2.H:
+        optface[3] = C2.H
+    if optface[2] > C2.W:
+        optface[2] = C2.W
+    if optface[1] < 0:
+        optface[1] = 0
+    if optface[0] < 0:
+        optface[0] = 0
 
-def convert_h5_to_jpg():
-    which = ['face', 'bg', 'full_frame']
+    return optface
+
+
+def convert_h5_to_jpg(b, e):
+    print('b=%d, e=%d' % (b, e))
 
     src_face = P.CHALEARN_ALL_DATA_20_2
     src_else = P.CHALEARN30_ALL_DATA
 
     dest = [P.CHALEARN_JPG_FACE, P.CHALEARN_JPG_BG, P.CHALEARN_JPG_FULL_FRAME]
 
-    for i, w in enumerate(which):
+    for i in range(1,2):
         if i == 0:
+            print('extracting face')
             src_files = os.listdir(src_face)
-            for j, v in enumerate(src_files):
-                # TODO: mkdir(v) as folder and add to the filepath of dest
-                if j < 50:
-                    p_src = os.path.join(src_face, v)
-                    src_h5 = h5py.File(p_src, 'r')
-                    for frame in src_h5.keys():
+            src_files.sort()
+            for j in tqdm(range(b, e)):
+                v = src_files[j]
+                d_path = os.path.join(dest[i], v.split('.h5')[0])
+                if not os.path.exists(d_path):
+                    os.mkdir(d_path)
+
+                p_src = os.path.join(src_face, v)
+                src_h5 = h5py.File(p_src, 'r')
+
+                for frame in src_h5.keys():
+                    image = src_h5[frame][:]
+                    image = np.transpose(image, (1, 2, 0))
+                    img = Image.fromarray(image, mode='RGB')
+                    img = img.resize((C2.RESIDE, C2.RESIDE))
+                    name = os.path.join(d_path, frame+'.jpg')
+                    img.save(name)
+        else:
+            print('extracting full frame and bg')
+            src_files = os.listdir(src_else)
+            src_files.sort()
+            for j in tqdm(range(b, e)):
+                v = src_files[j]
+                d_path_bg = os.path.join(dest[1], v.split('.h5')[0])
+                d_path_ff = os.path.join(dest[2], v.split('.h5')[0])
+
+                if not os.path.exists(d_path_bg):
+                    os.mkdir(d_path_bg)
+                if not os.path.exists(d_path_ff):
+                    os.mkdir(d_path_ff)
+
+                p_src = os.path.join(src_else, v)
+                src_h5 = h5py.File(p_src, 'r')
+
+                for frame in src_h5.keys():
+                    if frame != 'faces':
                         image = src_h5[frame][:]
-                        image = np.transpose(image, (1, 2, 0))
+                        image = image[0]
+                        try:
+                            image = np.transpose(image, (1, 2, 0))
+                        except ValueError:
+                            print('hereh')
                         img = Image.fromarray(image, mode='RGB')
-                        img = img.resize((C2.RESIDE, C2.RESIDE))
-                        name = os.path.join(dest[i], frame+'.jpg')
-                        img.save(name)
+
+                        # save full frame
+                        name_ff = os.path.join(d_path_ff, frame+'.jpg')
+                        img.save(name_ff)
+
+                        # take out face, crop bg
+                        optface = src_h5['faces'][int(frame)]
+                        optface = fix_optface(optface)
+
+                        image = src_h5[frame][:]
+                        px_mean = np.mean(image, 2)
+                        px_mean = np.mean(px_mean, 2)
+
+                        for ii in range(optface[0], optface[2]):
+                            for jj in range(optface[1], optface[3]):
+                                try:
+                                    image[:, :, jj, ii] = px_mean
+                                except IndexError:
+                                    print(2, IndexError, jj, ii)
+
+                        image = image.astype(np.uint8)
+
+                        if optface[0] > (456 - optface[2]):
+                            left = 0
+                            right = 256
+                        else:
+                            left = 200
+                            right = 456
+
+                        image = np.transpose(image[0], (1, 2, 0))
+                        img = Image.fromarray(image, mode='RGB')
+                        img = img.crop((left, 0, right, 256))  # left, upper, right, and lower
+
+                        # save bg
+                        name_bg = os.path.join(d_path_bg, frame + '.jpg')
+                        img.save(name_bg)
 
 
-                print('eee')
-
-
-convert_h5_to_jpg()
+# first 1000
+s = time.time()
+# convert_h5_to_jpg(0, 100)
+convert_h5_to_jpg(100, 200)
+# convert_h5_to_jpg(200, 300)
+# convert_h5_to_jpg(300, 400)
+# convert_h5_to_jpg(400, 500)
+# convert_h5_to_jpg(500, 600)
+# convert_h5_to_jpg(600, 700)
+# convert_h5_to_jpg(700, 800)
+# convert_h5_to_jpg(800, 900)
+# convert_h5_to_jpg(900, 1000)
+print('%f min' % ((time.time()-s)/60))
