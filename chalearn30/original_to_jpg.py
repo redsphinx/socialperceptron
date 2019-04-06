@@ -332,7 +332,7 @@ def convert_h5_to_jpg(b, e):
 
     dest = [P.CHALEARN_JPG_FACE, P.CHALEARN_JPG_BG, P.CHALEARN_JPG_FULL_FRAME]
 
-    for i in range(0, 1):
+    for i in range(1, 2):
         if i == 0:
             print('extracting face')
             src_files = os.listdir(src_face)

@@ -32,7 +32,7 @@ def initialize(which, model_name, pretrain, model_number, hacky_models):
         face_model = resnet18()
         face_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
 
-    p = os.path.join(P.MODELS, 'epoch_4_130')
+    p = os.path.join(P.MODELS, 'epoch_14_128')
     face_model.load_state_dict(torch.load(p))
     face_model.fc = nn.Sequential()
 
@@ -42,7 +42,7 @@ def initialize(which, model_name, pretrain, model_number, hacky_models):
         bg_model = resnet18()
         bg_model.fc = nn.Linear(in_features=512, out_features=num_traits, bias=True)
 
-    p = os.path.join(P.MODELS, 'epoch_14_131')
+    p = os.path.join(P.MODELS, 'epoch_49_129')
     bg_model.load_state_dict(torch.load(p))
     bg_model.fc = nn.Sequential()
 
@@ -157,20 +157,21 @@ def run(which, steps, which_labels, frames, model, face_model, bg_model, pred_di
 
 def main_loop(which):
     which_trait = None
-    PRETRAIN = False
+    PRETRAIN = True
 
-    hacky_models = [146]
+    hacky_models = [146, 145]
 
-    model_number = 146
+    model_number = 145
 
     if which == 'val':
         if model_number in hacky_models:
-            saved_epochs = [4, 9, 14, 19, 24, 29, 34, 39, 44, 49, 54, 59, 64, 69, 74, 79, 84, 89, 94, 99]
+            # saved_epochs = [4, 9, 14, 19, 24, 29, 34, 39, 44, 49, 54, 59, 64, 69, 74, 79, 84, 89, 94, 99]
+            saved_epochs = [29, 34, 39, 44, 49, 54, 59, 64, 69, 74, 79, 84, 89, 94, 99]
         else:
             saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
         models_to_load = ['epoch_%d_%d' % (saved_epochs[i], model_number) for i in range(len(saved_epochs))]
     else:
-        models_to_load = ['epoch_59_146']
+        models_to_load = ['epoch_19_145']
 
     for i, model_name in enumerate(models_to_load):
         my_model, face_model, bg_model, labels, steps, loss, pred_diff, id_frames, loss_function, device, num_traits = \
