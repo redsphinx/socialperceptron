@@ -13,3 +13,4 @@ SEED = 6
 # for use in relative-baseline project
 OMG_EMPATHY_FRAME_RATE = 25
 SMOOTH_ANNOTATIONS_PATH= 'AnnotationsSmooth_75_3'
+

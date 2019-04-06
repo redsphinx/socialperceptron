@@ -8,8 +8,12 @@ import time
 import chainer
 from chainer.backends.cuda import to_gpu, to_cpu
 
+import torch
+from torch import nn
+
 from deepimpression2.model_59 import Deepimpression
 from deepimpression2.model_59 import LastLayers
+from deepimpression2.model_resnet18 import ResNet18_LastLayers, hackyResNet18
 import deepimpression2.paths as P
 import deepimpression2.chalearn20.constants as C2
 
@@ -44,6 +48,43 @@ def load_models(model_type, gpu, dev):
                         my_model = my_model.to_gpu(device=dev)
                     tmp.append(my_model)
                 all_models.append(tmp)
+
+    # TODO: add resnet option, PT and NP
+    elif model_type == 'resnet18':
+
+        model_names = [['epoch_14_128',	'epoch_4_130'],  # face
+                       ['epoch_49_129',	'epoch_14_131'],  # bg
+                       ['epoch_19_145',	'epoch_59_146']]  # f+b
+
+        face_models = []
+        bg_models = []
+        fb_models = []
+
+        for i, names in enumerate(model_names):
+            if i < 2:
+                for j, name in enumerate(names):
+                    if j == 0:
+                        for b in range(2):
+
+                            m1 = hackyResNet18(5, ((b+1) % 2))
+                            p = os.path.join(P.MODELS, name)
+                            m1.load_state_dict(torch.load(p))
+                            if gpu:
+                                m1 = m1.cuda(dev)
+                            face_models.append(m1)
+
+                            m2 = hackyResNet18(5, True)
+                            p = os.path.join(P.MODELS, name)
+                            m2.load_state_dict(torch.load(p))
+                            m2.fc = nn.Sequential()
+                            if gpu:
+                                m2 = m2.cuda(dev)
+                            face_models.append(m2)
+
+
+
+
+
 
     return all_models
 
@@ -175,33 +216,41 @@ def run(all_models, id_frames, labels, dev, batch_size, gpu):
             BOSS_ARRAY[1] = np.mean(worker_array[1], axis=-1)
             BOSS_ARRAY[2] = np.mean(worker_array[2], axis=-1)
 
+            # TODO: change filenames
+
             file_names_face = ['pred_132_O', 'pred_132_C', 'pred_132_E', 'pred_132_A', 'pred_132_S']
             file_names_bg = ['pred_133_O', 'pred_133_C', 'pred_133_E', 'pred_133_A', 'pred_133_S']
             file_names_all = ['pred_134_O', 'pred_134_C', 'pred_134_E', 'pred_134_A', 'pred_134_S']
 
-            # all_files = [file_names_face, file_names_bg, file_names_all]
-            # for i, mode in enumerate(all_files):
-            #     for j, f in enumerate(mode):
-            #         f = f + '.txt'
-            #         path = os.path.join(P.LOG_BASE, f)
-            #         line = '%f\n' % BOSS_ARRAY[i][j]
-            #         with open(path, 'a') as my_file:
-            #             my_file.write(line)
+            all_files = [file_names_face, file_names_bg, file_names_all]
+            for i, mode in enumerate(all_files):
+                for j, f in enumerate(mode):
+                    f = f + '.txt'
+                    path = os.path.join(P.LOG_BASE, f)
+                    line = '%f\n' % BOSS_ARRAY[i][j]
+                    with open(path, 'a') as my_file:
+                        my_file.write(line)
 
 
 def main_loop():
     start = time.time()
     print('s\n t\n  a\n   r\n    t')
-    model_type = 'deepimpression'
+    # model_type = 'deepimpression'
+    model_type = 'resnet18'
+    if model_type == 'resnet18':
+        pretrain = True
+    else:
+        pretrain = None
+
     use_gpu = True
     device = 1
     batch = 32
 
-    all_models = [] #load_models(model_type, use_gpu, device)
+    all_models = load_models(model_type, use_gpu, device, pretrain)
     labels = h5.File(P.CHALEARN_TEST_LABELS_20, 'r')
     id_frames = h5.File(P.NUM_FRAMES, 'r')
 
-    run(all_models, id_frames, labels, dev=device, batch_size=batch, gpu=use_gpu)
+    run(all_models, id_frames, labels, device, batch, use_gpu)
 
     print('total time: %d minutes' % ((time.time()-start)/60))
     print('d\n o\n  n\n   e')
