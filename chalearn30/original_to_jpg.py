@@ -332,7 +332,7 @@ def convert_h5_to_jpg(b, e):
 
     dest = [P.CHALEARN_JPG_FACE, P.CHALEARN_JPG_BG, P.CHALEARN_JPG_FULL_FRAME]
 
-    for i in range(1,2):
+    for i in range(0, 1):
         if i == 0:
             print('extracting face')
             src_files = os.listdir(src_face)
@@ -418,15 +418,15 @@ def convert_h5_to_jpg(b, e):
 
 
 # first 1000
+# rest 9000
 s = time.time()
-# convert_h5_to_jpg(0, 100)
-convert_h5_to_jpg(100, 200)
-# convert_h5_to_jpg(200, 300)
-# convert_h5_to_jpg(300, 400)
-# convert_h5_to_jpg(400, 500)
-# convert_h5_to_jpg(500, 600)
-# convert_h5_to_jpg(600, 700)
-# convert_h5_to_jpg(700, 800)
-# convert_h5_to_jpg(800, 900)
-# convert_h5_to_jpg(900, 1000)
+# convert_h5_to_jpg(1000, 2000)
+# convert_h5_to_jpg(2000, 3000)
+# convert_h5_to_jpg(3000, 4000)
+# convert_h5_to_jpg(4000, 5000)
+# convert_h5_to_jpg(5000, 6000)
+# convert_h5_to_jpg(6000, 7000)
+# convert_h5_to_jpg(7000, 8000)
+# convert_h5_to_jpg(8000, 9000)
+convert_h5_to_jpg(9000, 10000)
 print('%f min' % ((time.time()-s)/60))

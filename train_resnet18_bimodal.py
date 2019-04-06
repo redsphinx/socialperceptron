@@ -21,7 +21,7 @@ import deepimpression2.util as U
 import deepimpression2.chalearn30.data_utils as D
 from deepimpression2.model_resnet18 import ResNet18_LastLayers, hackyResNet18, hackyResNet18_extractor
 
-PRETRAIN = False
+PRETRAIN = True
 num_traits = 5
 # mode in ['finetune'] or ['extractor']
 mode = 'hacky'
@@ -58,16 +58,16 @@ elif mode == 'extractor':
     bg_model.fc = nn.Sequential()
 
 elif mode == 'hacky':
-    face_model = hackyResNet18_extractor(num_traits, PRETRAIN)
-    p = os.path.join(P.MODELS, 'epoch_4_130')
-    face_model.load_state_dict(torch.load(p))
+    face_model = resnet18(pretrained=True)
     face_model.fc = nn.Sequential()
+    for p in face_model.parameters():
+        p.requires_grad = False
 
-    bg_model = hackyResNet18_extractor(num_traits, PRETRAIN)
-    p = os.path.join(P.MODELS, 'epoch_14_131')
-    bg_model.load_state_dict(torch.load(p))
+    bg_model = resnet18(pretrained=True)
     bg_model.fc = nn.Sequential()
-
+    for p in bg_model.parameters():
+        p.requires_grad = False
+    
 else:
     print('mode is not good', mode)
     face_model = None
@@ -96,7 +96,7 @@ loss_function = L1Loss()
 learning_rate = 0.001
 momentum = 0.9
 
-my_optimizer = SGD(my_model.parameters(), lr=learning_rate, momentum=momentum)
+my_optimizer = SGD(my_model.fc.parameters(), lr=learning_rate, momentum=momentum)
 # Decay LR by a factor of 0.1 every 7 epochs
 # exp_lr_scheduler = lr_scheduler.StepLR(my_optimizer, step_size=7, gamma=0.1)
 
@@ -211,5 +211,5 @@ for e in range(0, epochs):
 
     # save model
     if ((e + 1) % 5) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_146' % e)
+        name = os.path.join(P.MODELS, 'epoch_%d_163' % e)
         torch.save(my_model.state_dict(), name)

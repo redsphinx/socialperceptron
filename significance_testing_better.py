@@ -107,7 +107,7 @@ def corr_face_resnet():
 def corr_bg_resnet():
     traits = ['O', 'C', 'E', 'A', 'S']
     for i in range(5):
-        correlations_resnet_ground_truth(traits[i], 'pred_157.txt')
+        correlations_resnet_ground_truth(traits[i], 'pred_159.txt')
 
 
 corr_bg_resnet()

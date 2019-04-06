@@ -131,10 +131,10 @@ def run(which, steps, which_labels, frames, model, pred_diff, loss_saving, which
 def main_loop(which, val_test_on):
     which_trait = None
     # for normalization of images
-    PRETRAIN = False
-    hacky_models = [131, 130, 129, 128, 151]
+    PRETRAIN = True
+    hacky_models = [131, 130, 129, 128, 151, 150]
 
-    model_number = 151
+    model_number = 150
 
     # if val_test_on == 'face':
     #     model_number = 101
@@ -151,7 +151,7 @@ def main_loop(which, val_test_on):
             saved_epochs = [9, 19, 29, 39, 49, 59, 69, 79, 89, 99]
         models_to_load = ['epoch_%d_%d' % (saved_epochs[i], model_number) for i in range(len(saved_epochs))]
     else:
-        models_to_load = ['epoch_14_151']
+        models_to_load = ['epoch_9_150']
 
     for i, model_name in enumerate(models_to_load):
         my_model, labels, steps, loss, pred_diff, id_frames, loss_function, device, num_traits = \

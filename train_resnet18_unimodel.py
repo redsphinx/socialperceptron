@@ -19,13 +19,13 @@ import deepimpression2.constants as C
 import deepimpression2.chalearn20.constants as C2
 import deepimpression2.util as U
 import deepimpression2.chalearn30.data_utils as D
-from deepimpression2.model_resnet18 import hackyResNet18
+from deepimpression2.model_resnet18 import hackyResNet18, hackyResNet18_extractor
 
 
 # settings
 # TODO !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-PRETRAIN = False
-mode = 'finetune'  # or extractor
+PRETRAIN = True
+mode = 'extractor'  # or extractor
 num_traits = 5
 load_model = False
 
@@ -64,10 +64,14 @@ device = torch.device(_dev)
 
 # ------------------------------------------------------------------------------
 # EXPERIMENTAL
-my_model = hackyResNet18(num_traits, PRETRAIN)
+# my_model = hackyResNet18(num_traits, PRETRAIN)
+# my_model = my_model.to(device)
+# EXPERIMENTAL EXTRACTOR
+my_model = hackyResNet18_extractor(num_traits)
+for p in my_model.real_resnet18.parameters():
+    p.requires_grad = False
 my_model = my_model.to(device)
 # ------------------------------------------------------------------------------
-
 
 which_opt = 'sgd'
 # which_opt = 'adam'
@@ -108,7 +112,7 @@ train_labels = h5.File(P.CHALEARN_TRAIN_LABELS_20, 'r')
 train_loss = []
 pred_diff_train = np.zeros((epochs, num_traits), float)
 training_steps = len(train_labels) // C.TRAIN_BATCH_SIZE
-# training_steps = 100
+# training_steps = 1
 
 id_frames = h5.File(P.NUM_FRAMES, 'r')
 
@@ -197,5 +201,5 @@ for e in range(0, epochs):
 
     # save model
     if ((e + 1) % 5) == 0:
-        name = os.path.join(P.MODELS, 'epoch_%d_151' % e)
+        name = os.path.join(P.MODELS, 'epoch_%d_162' % e)
         torch.save(my_model.state_dict(), name)
