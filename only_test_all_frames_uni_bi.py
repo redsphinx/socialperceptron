@@ -77,7 +77,7 @@ def load_models(model_type, gpu, dev, pretrain):
                     m_s = m_s.cuda(dev)
                 tmp.append(m_s)
 
-            elif i == 3:
+            elif i == 2:
                 my_model = ResNet18_LastLayers(5)
                 p = os.path.join(P.MODELS, name)
                 my_model.load_state_dict(torch.load(p))
@@ -123,7 +123,6 @@ def fix_optface(optface):
 
 
 def do_the_normalize(im):
-    # TODO: check the image shapes
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     totensor = transforms.ToTensor()
 
@@ -224,8 +223,13 @@ def run(all_models, id_frames, labels, dev, batch_size, gpu, isresnet, pretrain)
                     data[cnt] = face, bg
                     cnt += 1
 
-                if gpu:
-                    data = to_gpu(data, device=dev)
+                if isresnet:
+                    if gpu:
+                        data = torch.from_numpy(data)
+                        data = data.cuda(dev)
+                else:
+                    if gpu:
+                        data = to_gpu(data, device=dev)
 
                 if isresnet:
                     face_model_fc = all_models[0][0]
@@ -247,9 +251,14 @@ def run(all_models, id_frames, labels, dev, batch_size, gpu, isresnet, pretrain)
                         bg_features = bg_model_s(data[:, 1])
                         all_pred = my_model(bg_features, face_features)
 
-                    worker_array[0][:][start:end] = to_cpu(face_pred.data).flatten()
-                    worker_array[1][:][start:end] = to_cpu(bg_pred.data).flatten()
-                    worker_array[2][:][start:end] = to_cpu(all_pred.data).flatten()
+                    face_pred = np.array(face_pred.cpu().data)
+                    bg_pred = np.array(bg_pred.cpu().data)
+                    all_pred = np.array(all_pred.cpu().data)
+
+                    for i in range(5):
+                        worker_array[0][i][start:end] = face_pred[:, i].flatten()
+                        worker_array[1][i][start:end] = bg_pred[:, i].flatten()
+                        worker_array[2][i][start:end] = all_pred[:, i].flatten()
 
                 else:
                     # for trait in traits
@@ -286,8 +295,8 @@ def run(all_models, id_frames, labels, dev, batch_size, gpu, isresnet, pretrain)
                     f = f + '.txt'
                     path = os.path.join(P.LOG_BASE, f)
                     line = arr_to_str(BOSS_ARRAY[i]) + '\n'
-                    with open(path, 'a') as my_file:
-                        my_file.write(line)
+                    # with open(path, 'a') as my_file:
+                    #     my_file.write(line)
 
             else:
                 file_names_face = ['pred_132_O', 'pred_132_C', 'pred_132_E', 'pred_132_A', 'pred_132_S']
@@ -300,8 +309,8 @@ def run(all_models, id_frames, labels, dev, batch_size, gpu, isresnet, pretrain)
                         f = f + '.txt'
                         path = os.path.join(P.LOG_BASE, f)
                         line = '%f\n' % BOSS_ARRAY[i][j]
-                        with open(path, 'a') as my_file:
-                            my_file.write(line)
+                        # with open(path, 'a') as my_file:
+                        #     my_file.write(line)
 
 
 def main_loop():
