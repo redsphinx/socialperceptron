@@ -295,8 +295,8 @@ def run(all_models, id_frames, labels, dev, batch_size, gpu, isresnet, pretrain)
                     f = f + '.txt'
                     path = os.path.join(P.LOG_BASE, f)
                     line = arr_to_str(BOSS_ARRAY[i]) + '\n'
-                    # with open(path, 'a') as my_file:
-                    #     my_file.write(line)
+                    with open(path, 'a') as my_file:
+                        my_file.write(line)
 
             else:
                 file_names_face = ['pred_132_O', 'pred_132_C', 'pred_132_E', 'pred_132_A', 'pred_132_S']
@@ -309,8 +309,8 @@ def run(all_models, id_frames, labels, dev, batch_size, gpu, isresnet, pretrain)
                         f = f + '.txt'
                         path = os.path.join(P.LOG_BASE, f)
                         line = '%f\n' % BOSS_ARRAY[i][j]
-                        # with open(path, 'a') as my_file:
-                        #     my_file.write(line)
+                        with open(path, 'a') as my_file:
+                            my_file.write(line)
 
 
 def main_loop():
@@ -319,7 +319,7 @@ def main_loop():
     # model_type = 'deepimpression'
     model_type = 'resnet18'
     # TODO: set value for pretrain
-    pretrain = True
+    pretrain = False
 
     if model_type == 'resnet18':
         isresnet = True
