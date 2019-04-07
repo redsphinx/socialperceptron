@@ -88,6 +88,7 @@ def correlations_resnet_ground_truth(trait, name):
     index = traits_all.index(trait)
     target = D.basic_load_personality_labels('test')
     target = target[:, index]
+    target = fix_labels(target)
 
     path = os.path.join(P.LOG_BASE, name)
     predictions = np.genfromtxt(path, delimiter=',', dtype=float)
@@ -104,13 +105,19 @@ def corr_face_resnet():
         correlations_resnet_ground_truth(traits[i], 'pred_114.txt')
 
 
-def corr_bg_resnet():
+def corr_bg_resnet(num):
     traits = ['O', 'C', 'E', 'A', 'S']
     for i in range(5):
-        correlations_resnet_ground_truth(traits[i], 'pred_165.txt')
+        correlations_resnet_ground_truth(traits[i], 'pred_%d.txt' % num)
 
 
-corr_bg_resnet()
+corr_bg_resnet(171)
+
+
+'''
+171
+
+'''
 
 
 def how_many_frames():
