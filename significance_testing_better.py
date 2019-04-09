@@ -111,13 +111,8 @@ def corr_bg_resnet(num):
         correlations_resnet_ground_truth(traits[i], 'pred_%d.txt' % num)
 
 
-corr_bg_resnet(171)
+# corr_bg_resnet(171)
 
-
-'''
-171
-
-'''
 
 
 def how_many_frames():
@@ -147,4 +142,219 @@ def how_many_frames():
 
 
 # how_many_frames()
+
+
+def make_avg_preds():
+    # -----------------------------------------------------------------------------
+    # deepimpression
+    face = ['pred_132_O', 'pred_132_C', 'pred_132_E', 'pred_132_A', 'pred_132_S']
+    bg = ['pred_133_O', 'pred_133_C', 'pred_133_E', 'pred_133_A', 'pred_133_S']
+    f_bg = ['pred_134_O', 'pred_134_C', 'pred_134_E', 'pred_134_A', 'pred_134_S']
+    ff = 'pred_172'
+
+    mean_face = 'pred_175'
+    mean_bg = 'pred_176'
+    mean_f_bg = 'pred_177'
+    mean_ff = 'pred_178'
+    
+    # FACE
+    mean_f_arr = np.zeros(1675)
+    for i in face:
+        p = os.path.join(P.LOG_BASE, i + '.txt')
+        tmp = np.genfromtxt(p, delimiter=',', dtype=float)
+        mean_f_arr += tmp
+    
+    mean_f_arr /= 5
+    p = os.path.join(P.LOG_BASE, mean_face + '.txt')
+    with open(p, 'a') as my_file:
+        for i in mean_f_arr:
+            line = '%f,\n' % i
+            my_file.write(line)
+    
+    # BACKGROUND
+    mean_bg_arr = np.zeros(1675)
+    for i in bg:
+        p = os.path.join(P.LOG_BASE, i + '.txt')
+        tmp = np.genfromtxt(p, delimiter=',', dtype=float)
+        mean_bg_arr += tmp
+
+    mean_bg_arr /= 5
+    p = os.path.join(P.LOG_BASE, mean_bg + '.txt')
+    with open(p, 'a') as my_file:
+        for i in mean_bg_arr:
+            line = '%f,\n' % i
+            my_file.write(line)
+    
+    # FACE + BACKGROUND
+    mean_fbg_arr = np.zeros(1675)
+    for i in f_bg:
+        p = os.path.join(P.LOG_BASE, i + '.txt')
+        tmp = np.genfromtxt(p, delimiter=',', dtype=float)
+        mean_fbg_arr += tmp
+
+    mean_fbg_arr /= 5
+    p = os.path.join(P.LOG_BASE, mean_f_bg + '.txt')
+    with open(p, 'a') as my_file:
+        for i in mean_fbg_arr:
+            line = '%f,\n' % i
+            my_file.write(line)
+    
+    # FULL FRAME
+    p = os.path.join(P.LOG_BASE, ff + '.txt')
+    tmp = np.genfromtxt(p, delimiter=',', dtype=float)
+    mean_ff_arr = np.mean(tmp, axis=1)
+
+    p = os.path.join(P.LOG_BASE, mean_ff + '.txt')
+    with open(p, 'a') as my_file:
+        for i in mean_ff_arr:
+            line = '%f,\n' % i
+            my_file.write(line)
+    # -----------------------------------------------------------------------------
+    # resnet18, NP
+    face = 'pred_169'
+    bg = 'pred_170'
+    f_bg = 'pred_171'
+    ff = 'pred_174'
+
+    mean_face = 'pred_183'
+    mean_bg = 'pred_184'
+    mean_f_bg = 'pred_185'
+    mean_ff = 'pred_186'
+
+    # FACE
+    p = os.path.join(P.LOG_BASE, face + '.txt')
+    tmp = np.genfromtxt(p, delimiter=',', dtype=float)
+    mean_arr = np.mean(tmp, axis=1)
+
+    p = os.path.join(P.LOG_BASE, mean_face + '.txt')
+    with open(p, 'a') as my_file:
+        for i in mean_arr:
+            line = '%f,\n' % i
+            my_file.write(line)
+
+    # BG
+    p = os.path.join(P.LOG_BASE, bg + '.txt')
+    tmp = np.genfromtxt(p, delimiter=',', dtype=float)
+    mean_arr = np.mean(tmp, axis=1)
+
+    p = os.path.join(P.LOG_BASE, mean_bg + '.txt')
+    with open(p, 'a') as my_file:
+        for i in mean_arr:
+            line = '%f,\n' % i
+            my_file.write(line)
+
+    # FACE + BG
+    p = os.path.join(P.LOG_BASE, f_bg + '.txt')
+    tmp = np.genfromtxt(p, delimiter=',', dtype=float)
+    mean_arr = np.mean(tmp, axis=1)
+
+    p = os.path.join(P.LOG_BASE, mean_f_bg + '.txt')
+    with open(p, 'a') as my_file:
+        for i in mean_arr:
+            line = '%f,\n' % i
+            my_file.write(line)
+
+    # FULL FRAMES
+    p = os.path.join(P.LOG_BASE, ff + '.txt')
+    tmp = np.genfromtxt(p, delimiter=',', dtype=float)
+    mean_arr = np.mean(tmp, axis=1)
+
+    p = os.path.join(P.LOG_BASE, mean_ff + '.txt')
+    with open(p, 'a') as my_file:
+        for i in mean_arr:
+            line = '%f,\n' % i
+            my_file.write(line)
+    # -----------------------------------------------------------------------------
+    # rn18, pt
+    face = 'pred_166'
+    bg = 'pred_167'
+    f_bg = 'pred_168'
+    ff = 'pred_173'
+
+    mean_face = 'pred_179'
+    mean_bg = 'pred_180'
+    mean_f_bg = 'pred_181'
+    mean_ff = 'pred_182'
+
+    # FACE
+    p = os.path.join(P.LOG_BASE, face + '.txt')
+    tmp = np.genfromtxt(p, delimiter=',', dtype=float)
+    mean_arr = np.mean(tmp, axis=1)
+
+    p = os.path.join(P.LOG_BASE, mean_face + '.txt')
+    with open(p, 'a') as my_file:
+        for i in mean_arr:
+            line = '%f,\n' % i
+            my_file.write(line)
+
+    # BG
+    p = os.path.join(P.LOG_BASE, bg + '.txt')
+    tmp = np.genfromtxt(p, delimiter=',', dtype=float)
+    mean_arr = np.mean(tmp, axis=1)
+
+    p = os.path.join(P.LOG_BASE, mean_bg + '.txt')
+    with open(p, 'a') as my_file:
+        for i in mean_arr:
+            line = '%f,\n' % i
+            my_file.write(line)
+
+    # FACE + BG
+    p = os.path.join(P.LOG_BASE, f_bg + '.txt')
+    tmp = np.genfromtxt(p, delimiter=',', dtype=float)
+    mean_arr = np.mean(tmp, axis=1)
+
+    p = os.path.join(P.LOG_BASE, mean_f_bg + '.txt')
+    with open(p, 'a') as my_file:
+        for i in mean_arr:
+            line = '%f,\n' % i
+            my_file.write(line)
+
+    # FULL FRAMES
+    p = os.path.join(P.LOG_BASE, ff + '.txt')
+    tmp = np.genfromtxt(p, delimiter=',', dtype=float)
+    mean_arr = np.mean(tmp, axis=1)
+
+    p = os.path.join(P.LOG_BASE, mean_ff + '.txt')
+    with open(p, 'a') as my_file:
+        for i in mean_arr:
+            line = '%f,\n' % i
+            my_file.write(line)
+
+
+# make_avg_preds()
+
+def get_corr(name, target):
+    path = os.path.join(P.LOG_BASE, name)
+    predictions = np.genfromtxt(path, delimiter=',', dtype=float)
+    predictions = predictions[:, 0]
+    r, p = stats.pearsonr(predictions, target)
+
+    print(name, 'r: ', r, 'p: ', p)
+
+
+def correlation_avg_preds(num):
+    target = D.basic_load_personality_labels('test')
+    target = np.mean(target, axis=1)
+    target = fix_labels(target)
+
+    nname = 'pred_%d.txt' % num
+
+    get_corr(nname, target)
+
+
+correlation_avg_preds(182)
+
+'''
+
+
+179
+180
+181
+182
+
+'''
+
+
+
+
 
