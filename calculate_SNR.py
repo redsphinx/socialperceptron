@@ -39,6 +39,16 @@ ff_frame_30_test_split = np.zeros((len(unique_labels_names_test), 3, 256, 456))
 ff_frame_30_train_split = np.zeros((len(unique_labels_names_train), 3, 256, 456))
 
 
+def snr_per_image(image): # 3, h, w
+    pixel_mean = image.mean()
+    pixel_std = image.std()
+    snr = pixel_mean / pixel_std
+    if np.isnan(snr):
+        return 0
+    else:
+        return snr
+
+
 def grab_20_different_faces():
     
     random_images = np.random.randint(len(unique_labels_names_train), size=20)
@@ -120,6 +130,56 @@ def snr_ff_test():
     name = os.path.join(save_location_images, 'snr_ff_test.jpg')
     snr_face_test.save(name)
 
+# test
+def snr_ff_test_2():
+    div_by = len(unique_labels_names_test)
+    # num = 100
+    num = len(unique_labels_names_test)
+    snr_total = 0
+    for i in tqdm(range(num)):
+        name = unique_labels_names_test[i]
+        h5_path = os.path.join(entire_frame_location, name)
+        h5_file = h5.File(h5_path, 'r')
+        num_frames = len(h5_file.keys()) - 1
+        if num_frames > 31:
+            frame_30 = h5_file['30'][:]
+        else:
+            frame_30 = h5_file[str(num_frames-1)][:]
+
+        snr_image = snr_per_image(frame_30)
+        if snr_image is not 0:
+            snr_total += snr_image
+        else:
+            div_by -= 1
+
+    snr_total /= div_by
+    print('SNR Entire Frame Test: %s' % str(snr_total))
+
+def snr_ff_train_2():
+    div_by = len(unique_labels_names_train)
+    # num = 100
+    num = len(unique_labels_names_train)
+    snr_total = 0
+    for i in tqdm(range(num)):
+        name = unique_labels_names_train[i]
+        h5_path = os.path.join(entire_frame_location, name)
+        h5_file = h5.File(h5_path, 'r')
+        num_frames = len(h5_file.keys()) - 1
+        if num_frames > 31:
+            frame_30 = h5_file['30'][:]
+        else:
+            frame_30 = h5_file[str(num_frames-1)][:]
+
+        snr_image = snr_per_image(frame_30)
+        if snr_image is not 0:
+            snr_total += snr_image
+        else:
+            div_by -= 1
+
+    snr_total /= div_by
+    print('SNR Entire Frame Train: %s' % str(snr_total))
+
+
 def snr_ff_train():
     for i in tqdm(range(len(unique_labels_names_train))):
     # for i in tqdm(range(100)):
@@ -164,7 +224,7 @@ def snr_ff_train():
 
 
 # test
-def snr_face_test():
+def snr_face_test_():
     for i in tqdm(range(len(unique_labels_names_test))):
     # for i in range(100):
         name = unique_labels_names_test[i]
@@ -179,7 +239,7 @@ def snr_face_test():
         face_frame_30_test_split[i] = frame_30
 
     # avg over images: now we have the average face
-    avg_face_test = face_frame_30_test_split.mean(0)
+    avg_face_test = face_frame_30_test_split.mean(0)  # (1600, 3, h, w)
     # std
     std_face_test_per_channel = face_frame_30_test_split.std(0)
     # SNR = mean / std
@@ -206,8 +266,58 @@ def snr_face_test():
     name = os.path.join(save_location_images, 'snr_face_test.jpg')
     snr_face_test.save(name)
 
+# test
+def snr_face_test_2():
+    div_by = len(unique_labels_names_test)
+    # num = 100
+    num = len(unique_labels_names_test)
+    snr_total = 0
+    for i in tqdm(range(num)):
+        name = unique_labels_names_test[i]
+        h5_path = os.path.join(faces_location, name)
+        h5_file = h5.File(h5_path, 'r')
+        num_frames = len(h5_file.keys()) - 1
+        if num_frames > 31:
+            frame_30 = h5_file['30'][:]
+        else:
+            frame_30 = h5_file[str(num_frames-1)][:]
+
+        snr_image = snr_per_image(frame_30)
+        if snr_image is not 0:
+            snr_total += snr_image
+        else:
+            div_by -= 1
+
+    snr_total /= div_by
+    print('SNR Faces Test: %s' % str(snr_total))
+
 # train
-def snr_face_train():
+def snr_face_train_2():
+    div_by = len(unique_labels_names_train)
+    # num = 100
+    num = len(unique_labels_names_train)
+    snr_total = 0
+    for i in tqdm(range(num)):
+        name = unique_labels_names_train[i]
+        h5_path = os.path.join(faces_location, name)
+        h5_file = h5.File(h5_path, 'r')
+        num_frames = len(h5_file.keys()) - 1
+        if num_frames > 31:
+            frame_30 = h5_file['30'][:]
+        else:
+            frame_30 = h5_file[str(num_frames-1)][:]
+
+        snr_image = snr_per_image(frame_30)
+        if snr_image is not 0:
+            snr_total += snr_image
+        else:
+            div_by -= 1
+
+    snr_total /= div_by
+    print('SNR Faces Train: %s' % str(snr_total))
+
+# train
+def snr_face_train_():
     for i in tqdm(range(len(unique_labels_names_train))):
     # for i in range(100):
         name = unique_labels_names_train[i]
@@ -250,6 +360,11 @@ def snr_face_train():
     snr_face_train.save(name)
 
 
-
-# snr_ff_test()
-# snr_ff_train()
+# snr_face_test_2()
+# SNR Faces Test: 2.1899221201644634
+# snr_face_train_2()
+# SNR Faces Train: 2.2027206054816344
+# snr_ff_test_2()
+# SNR Entire Frame Test: 1.860420864901887
+# snr_ff_train_2()
+# SNR Entire Frame Train: 1.834831198354324
