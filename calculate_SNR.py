@@ -38,6 +38,45 @@ ff_frame_30_test_split = np.zeros((len(unique_labels_names_test), 3, 256, 456))
 # ff_frame_30_test_split = np.zeros((100, 3, 256, 456))
 ff_frame_30_train_split = np.zeros((len(unique_labels_names_train), 3, 256, 456))
 
+
+def grab_20_different_faces():
+    
+    random_images = np.random.randint(len(unique_labels_names_train), size=20)
+    for i in tqdm(random_images):
+        
+        name = unique_labels_names_train[i]
+        h5_path = os.path.join(faces_location, name)
+        h5_file = h5.File(h5_path, 'r')
+        num_frames = len(h5_file.keys()) - 1
+        if num_frames > 31:
+            frame_30 = h5_file['30'][:]
+        else:
+            frame_30 = h5_file[str(num_frames-1)][:]
+
+        frame_30 = Image.fromarray(np.transpose(frame_30.astype(np.uint8), (1, 2, 0)), mode='RGB')
+        name = os.path.join(save_location_images, 'random_face_train_%d.jpg' % i)
+        frame_30.save(name)
+
+
+def grab_20_different_ff():
+    random_images = np.random.randint(len(unique_labels_names_train), size=20)
+    for i in tqdm(random_images):
+
+        name = unique_labels_names_train[i]
+        h5_path = os.path.join(entire_frame_location, name)
+        h5_file = h5.File(h5_path, 'r')
+        num_frames = len(h5_file.keys()) - 1
+        if num_frames > 31:
+            frame_30 = h5_file['30'][:]
+        else:
+            frame_30 = h5_file[str(num_frames - 1)][:]
+
+        frame_30 = Image.fromarray(np.transpose(frame_30.astype(np.uint8)[0], (1, 2, 0)), mode='RGB')
+        name = os.path.join(save_location_images, 'random_ff_train_%d.jpg' % i)
+        frame_30.save(name)
+
+# grab_20_different_ff()
+
 # test
 def snr_ff_test():
     for i in tqdm(range(len(unique_labels_names_test))):
@@ -212,5 +251,5 @@ def snr_face_train():
 
 
 
-snr_ff_test()
+# snr_ff_test()
 # snr_ff_train()
